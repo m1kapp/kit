@@ -1,9 +1,6 @@
 // ui
 export * from "./ui";
 
-// og
-export * from "./og";
-
 // pwa
 export * from "./pwa";
 
