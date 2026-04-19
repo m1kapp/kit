@@ -1,6 +1,6 @@
 {
   "name": "@m1kapp/kit",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "UI, SEO, and PWA utilities for side projects",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -15,6 +15,11 @@
       "types": "./dist/server.d.ts",
       "import": "./dist/server.mjs",
       "require": "./dist/server.js"
+    },
+    "./ogimage": {
+      "types": "./dist/ogimage.d.ts",
+      "import": "./dist/ogimage.mjs",
+      "require": "./dist/ogimage.js"
     }
   },
   "files": [
