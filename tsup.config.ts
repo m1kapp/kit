@@ -27,4 +27,15 @@ export default defineConfig([
     entry: { ogimage: "src/og/index.ts" },
     external: ["react", "react-dom", "@vercel/og", "next"],
   },
+  // PWA utils — server-safe (no "use client"), for manifest.ts / viewport exports
+  {
+    ...common,
+    entry: { pwa: "src/pwa/index.ts" },
+    external: ["next"],
+  },
+  // Pure utils — server-safe (no "use client"), cn / formatNumber / relativeTime etc.
+  {
+    ...common,
+    entry: { utils: "src/utils/index.ts" },
+  },
 ]);
