@@ -22,9 +22,17 @@
       "require": "./dist/ogimage.js"
     }
   },
+  "bin": {
+    "m1kkit": "bin/favicon.mjs"
+  },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
+  "dependencies": {
+    "@vercel/og": "^0.11.1",
+    "png-to-ico": "^3.0.1"
+  },
   "scripts": {
     "build": "rm -rf dist && mkdir -p .tmp && npx @tailwindcss/cli -i src/ui/styles.css -o .tmp/styles.css --minify && node scripts/embed-css.mjs && tsup",
     "dev": "tsup --watch",
@@ -46,7 +54,9 @@
     "@tailwindcss/cli": "^4.2.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@vercel/og": "^0.11.1",
     "next": "^16.2.4",
+    "png-to-ico": "^3.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.0",

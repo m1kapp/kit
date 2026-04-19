@@ -1,4 +1,5 @@
-export { OGImage } from "./og";
+export { OGImage, createFaviconElement } from "./og";
+export type { FaviconElementOptions } from "./og";
 export type {
   OGConfig,
   OGTemplate,

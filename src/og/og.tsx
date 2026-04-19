@@ -654,6 +654,69 @@ function ProductLayout({ title, tagline, features, badge, color = "#007B5F", bg 
 /* ═══════════════════════════════════════
    단일 진입점
 ═══════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   createFaviconElement
+   Node.js 스크립트에서 favicon PNG/ICO 생성용.
+   ImageResponse에 직접 전달하세요.
+
+   @example
+   import { createFaviconElement } from "@m1kapp/kit/ogimage";
+   import { ImageResponse } from "@vercel/og";
+
+   const res = new ImageResponse(
+     createFaviconElement({ appName: "my app", color: "#007B5F", size: 512 }),
+     { width: 512, height: 512 }
+   );
+   const buf = Buffer.from(await res.arrayBuffer());
+═══════════════════════════════════════ */
+export interface FaviconElementOptions {
+  /** 표시할 텍스트 (기본: appName 첫 글자) */
+  text?: string;
+  /** 앱 이름 — text 미지정 시 첫 글자 사용 */
+  appName?: string;
+  /** 배경색 (hex, 기본: #0f0f1a) */
+  color?: string;
+  /** 이미지 크기 px (기본: 512) */
+  size?: number;
+}
+
+export function createFaviconElement({
+  text,
+  appName = "app",
+  color = "#0f0f1a",
+  size = 512,
+}: FaviconElementOptions = {}): React.ReactElement {
+  const label = text ?? appName;
+  const fontSize = size * (label.length === 1 ? 0.6 : label.length <= 3 ? 0.42 : 0.3);
+
+  return (
+    <div style={{
+      width: size, height: size,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      background: color,
+    }}>
+      <div style={{
+        display: "flex",
+        flexDirection: "row",
+        gap: `${size * 0.02}px`,
+        alignItems: "center",
+      }}>
+        {label.split("").map((char, i) => (
+          <span key={i} style={{
+            fontSize,
+            fontWeight: 900,
+            color: "#ffffff",
+            fontFamily: "system-ui, sans-serif",
+            lineHeight: 1,
+          }}>
+            {char}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function OGImage(props: OGProps) {
   const { appName, color, domain, bg, logoUrl } = props;
   const type = props.type ?? "default";
