@@ -5,8 +5,15 @@ export interface UseFormSubmitOptions<T> {
   onError?: (err: Error) => void;
 }
 
+/**
+ * Submit function type:
+ * - When V is `void` (fn takes no arguments) → `submit()` needs no args
+ * - Otherwise → `submit(vars: V)` requires the arg
+ */
+export type SubmitFn<V> = V extends void ? () => Promise<void> : (vars: V) => Promise<void>;
+
 export interface UseFormSubmitResult<T, V> {
-  submit: (vars: V) => Promise<void>;
+  submit: SubmitFn<V>;
   loading: boolean;
   error: Error | null;
   data: T | undefined;
@@ -18,16 +25,21 @@ export interface UseFormSubmitResult<T, V> {
  * Eliminates the try/catch/finally + setState boilerplate from every form.
  *
  * @example
+ * // With args
  * const { submit, loading, error } = useFormSubmit(async (url: string) => {
  *   return api.post<Site>("/api/sites", { url });
  * }, {
- *   onSuccess: () => router.push("/dashboard"),
+ *   onSuccess: (site) => router.push(`/${site.slug}`),
  * });
+ * <button onClick={() => submit(inputValue)}>등록</button>
  *
- * <form onSubmit={e => { e.preventDefault(); submit(input); }}>
- *   <Button loading={loading}>등록</Button>
- *   {error && <p>{error.message}</p>}
- * </form>
+ * @example
+ * // No args (fire-and-forget style)
+ * const { submit: save, loading } = useFormSubmit(
+ *   () => api.put("/api/sites/settings", config),
+ *   { onSuccess: () => setSaved(true) }
+ * );
+ * <button onClick={save}>저장</button>
  */
 export function useFormSubmit<T, V = void>(
   fn: (vars: V) => Promise<T>,
@@ -43,11 +55,11 @@ export function useFormSubmit<T, V = void>(
   fnRef.current = fn;
   optionsRef.current = options;
 
-  const submit = useCallback(async (vars: V) => {
+  const submit = useCallback(async (vars?: V) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await fnRef.current(vars);
+      const result = await fnRef.current(vars as V);
       setData(result);
       optionsRef.current.onSuccess?.(result);
     } catch (e) {
@@ -64,5 +76,5 @@ export function useFormSubmit<T, V = void>(
     setData(undefined);
   }, []);
 
-  return { submit, loading, error, data, reset };
+  return { submit: submit as SubmitFn<V>, loading, error, data, reset };
 }

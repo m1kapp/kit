@@ -22,6 +22,8 @@ export interface UsePollingResult<T> {
   isRunning: boolean;
   stop: () => void;
   start: () => void;
+  /** Immediately trigger a fetch without waiting for the next interval */
+  refetch: () => void;
 }
 
 /* ─────────────────────────────────────────
@@ -46,9 +48,11 @@ export function usePolling<T>(
 
   const mounted = useRef(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intervalRef = useRef(interval);
   const fetcherRef = useRef(fetcher);
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
+  intervalRef.current = interval;
   fetcherRef.current = fetcher;
   onSuccessRef.current = onSuccess;
   onErrorRef.current = onError;
@@ -86,15 +90,29 @@ export function usePolling<T>(
 
   const startTimer = useCallback(() => {
     stopTimer();
-    run();
-    timerRef.current = setInterval(run, interval);
-  }, [run, stopTimer, interval]);
+    // Read interval from ref so changing `interval` prop doesn't
+    // recreate startTimer → avoids triggering an immediate refetch
+    timerRef.current = setInterval(run, intervalRef.current);
+  }, [run, stopTimer]);
 
+  // Separate effect: run immediately when polling becomes active,
+  // then hand off to the interval set by startTimer
   useEffect(() => {
     if (!active) { stopTimer(); return; }
+    run();
     startTimer();
     return stopTimer;
-  }, [active, startTimer, stopTimer]);
+  }, [active, run, startTimer, stopTimer]);
+
+  // When interval changes while active, restart the timer without an extra run()
+  useEffect(() => {
+    if (!active) return;
+    stopTimer();
+    timerRef.current = setInterval(run, intervalRef.current);
+    return stopTimer;
+  // run/stopTimer excluded — stable useCallback([]) refs that never change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interval]);
 
   useEffect(() => {
     if (!pauseOnHidden) return;
@@ -103,19 +121,21 @@ export function usePolling<T>(
       if (document.visibilityState === "hidden") {
         stopTimer();
       } else {
+        run();
         startTimer();
       }
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
-  }, [active, pauseOnHidden, startTimer, stopTimer]);
+  }, [active, pauseOnHidden, run, startTimer, stopTimer]);
 
   return {
     data,
     loading,
     error,
     isRunning: active,
-    stop:  () => setActive(false),
-    start: () => setActive(true),
+    stop:    () => setActive(false),
+    start:   () => setActive(true),
+    refetch: run,
   };
 }

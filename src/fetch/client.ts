@@ -8,7 +8,7 @@ export interface ApiClientOptions {
   headers?: Record<string, string>;
   /** Called before every request — mutate or replace the Request */
   onRequest?: (req: Request) => Request | void;
-  /** Called on every non-2xx response */
+  /** Called on every non-2xx response — includes url and method for debugging */
   onError?: (err: ApiError) => void;
 }
 
@@ -22,7 +22,7 @@ type RequestOptions = {
 /* ─────────────────────────────────────────
    Helpers
 ───────────────────────────────────────── */
-async function parseBody(res: Response): Promise<unknown> {
+export async function parseBody(res: Response): Promise<unknown> {
   const ct = res.headers.get("content-type") ?? "";
   if (ct.includes("application/json")) return res.json();
   return res.text();
@@ -62,7 +62,7 @@ export function createApiClient(baseUrl: string, defaults: ApiClientOptions = {}
 
     if (!res.ok) {
       const errBody = await parseBody(res).catch(() => null);
-      const err = new ApiError(res.status, res.statusText, errBody);
+      const err = new ApiError(res.status, res.statusText, errBody, url, method);
       defaults.onError?.(err);
       throw err;
     }

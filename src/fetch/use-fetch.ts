@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ApiError } from "./errors";
+import { parseBody } from "./client";
 
 /* ─────────────────────────────────────────
    Module-level cache & dedup store
@@ -9,6 +10,7 @@ interface CacheEntry<T> {
   ts: number;
 }
 
+const CACHE_MAX = 500;
 const _cache = new Map<string, CacheEntry<unknown>>();
 const _inflight = new Map<string, Promise<unknown>>();
 
@@ -18,18 +20,24 @@ export function clearFetchCache(url?: string) {
   else _cache.clear();
 }
 
+function cacheSet(url: string, entry: CacheEntry<unknown>) {
+  if (_cache.size >= CACHE_MAX) {
+    // Map preserves insertion order — delete the oldest entry
+    _cache.delete(_cache.keys().next().value!);
+  }
+  _cache.set(url, entry);
+}
+
 /* ─────────────────────────────────────────
    Default fetcher
 ───────────────────────────────────────── */
 async function defaultFetcher<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new ApiError(res.status, res.statusText, body);
+    const body = await parseBody(res).catch(() => null);
+    throw new ApiError(res.status, res.statusText, body, url, "GET");
   }
-  const ct = res.headers.get("content-type") ?? "";
-  if (ct.includes("application/json")) return res.json() as Promise<T>;
-  return res.text() as unknown as Promise<T>;
+  return parseBody(res) as Promise<T>;
 }
 
 /* ─────────────────────────────────────────
@@ -55,6 +63,8 @@ async function withRetry<T>(fn: () => Promise<T>, retries: number, baseDelay: nu
 /* ─────────────────────────────────────────
    Types
 ───────────────────────────────────────── */
+export type FetchStatus = "idle" | "loading" | "success" | "error";
+
 export interface UseFetchOptions<T> {
   /** Skip fetching when false (default: true) */
   enabled?: boolean;
@@ -76,6 +86,14 @@ export interface UseFetchResult<T> {
   data: T | undefined;
   loading: boolean;
   error: Error | undefined;
+  /**
+   * Lifecycle status:
+   * - `"idle"` — url is null/undefined or `enabled: false`
+   * - `"loading"` — fetch in progress
+   * - `"success"` — data loaded (note: data may be null if the API returned null)
+   * - `"error"` — last fetch failed
+   */
+  status: FetchStatus;
   /** Manually trigger a refetch (ignores cache) */
   refetch: () => void;
 }
@@ -104,41 +122,49 @@ export function useFetch<T>(
     if (hit && Date.now() - hit.ts < staleTime) return hit.data as T;
     return undefined;
   });
-  const [loading, setLoading] = useState<boolean>(() => {
-    if (!url || !enabled) return false;
+  const [status, setStatus] = useState<FetchStatus>(() => {
+    if (!url || !enabled) return "idle";
     if (staleTime > 0) {
       const hit = _cache.get(url);
-      if (hit && Date.now() - hit.ts < staleTime) return false;
+      if (hit && Date.now() - hit.ts < staleTime) return "success";
     }
-    return true;
+    return "loading";
   });
   const [error, setError] = useState<Error | undefined>(undefined);
+
   const mounted = useRef(true);
+  const fetcherRef = useRef(fetcher);
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
+  fetcherRef.current = fetcher;
   onSuccessRef.current = onSuccess;
   onErrorRef.current = onError;
 
   const load = useCallback(
     async (force = false) => {
-      if (!url || !enabled) return;
+      if (!url || !enabled) {
+        // Only update if not already idle — avoids redundant renders
+        setStatus((s) => s === "idle" ? s : "idle");
+        return;
+      }
 
       if (!force && staleTime > 0) {
         const hit = _cache.get(url);
         if (hit && Date.now() - hit.ts < staleTime) {
           setData(hit.data as T);
+          setStatus("success");
           return;
         }
       }
 
-      setLoading(true);
+      setStatus("loading");
       setError(undefined);
 
       try {
         // Deduplicate in-flight requests for the same URL
         let promise = _inflight.get(url) as Promise<T> | undefined;
         if (!promise) {
-          promise = withRetry(() => fetcher(url), retry, retryDelay);
+          promise = withRetry(() => fetcherRef.current(url), retry, retryDelay);
           _inflight.set(url, promise);
           promise.finally(() => _inflight.delete(url));
         }
@@ -146,21 +172,25 @@ export function useFetch<T>(
         const result = await promise;
         if (!mounted.current) return;
 
-        _cache.set(url, { data: result, ts: Date.now() });
+        cacheSet(url, { data: result, ts: Date.now() });
         setData(result);
+        setStatus("success");
         onSuccessRef.current?.(result);
       } catch (e) {
         if (!mounted.current) return;
         const err = e as Error;
         setError(err);
+        setStatus("error");
         onErrorRef.current?.(err);
-      } finally {
-        if (mounted.current) setLoading(false);
       }
     },
+    // fetcher excluded — stored in fetcherRef to avoid re-fetching when caller
+    // passes an inline function reference that changes every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [url, enabled, staleTime, retry, retryDelay, fetcher]
+    [url, enabled, staleTime, retry, retryDelay]
   );
+
+  const refetch = useCallback(() => load(true), [load]);
 
   useEffect(() => {
     mounted.current = true;
@@ -181,5 +211,5 @@ export function useFetch<T>(
     };
   }, [load, revalidateOnFocus]);
 
-  return { data, loading, error, refetch: () => load(true) };
+  return { data, loading: status === "loading", error, status, refetch };
 }
