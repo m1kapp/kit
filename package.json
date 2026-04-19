@@ -1,6 +1,6 @@
 {
   "name": "@m1kapp/kit",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "UI, SEO, and PWA utilities for side projects",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -31,7 +31,9 @@
   ],
   "dependencies": {
     "@vercel/og": ">=0.6",
-    "png-to-ico": "^3.0.1"
+    "clsx": "^2.1.1",
+    "png-to-ico": "^3.0.1",
+    "tailwind-merge": "^3.5.0"
   },
   "scripts": {
     "build": "rm -rf dist && mkdir -p .tmp && npx @tailwindcss/cli -i src/ui/styles.css -o .tmp/styles.css --minify && node scripts/embed-css.mjs && tsup",

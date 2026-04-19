@@ -52,10 +52,11 @@ export function formatPrice(
 }
 
 /* ─────────────────────────────────────────
-   cn — conditional class names
-   Filters falsy values, joins with space.
-   For Tailwind conflict resolution install tailwind-merge separately.
+   cn — conditional class names with Tailwind conflict resolution
 ───────────────────────────────────────── */
-export function cn(...classes: (string | undefined | null | false | 0)[]): string {
-  return classes.filter(Boolean).join(" ");
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
 }

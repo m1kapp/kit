@@ -343,7 +343,7 @@ export default createManifest({
 
 ### Viewport — 핀치 줌 차단
 
-iOS 10+에서 핀치 줌과 인풋 자동 확대를 막습니다.
+iOS 10+에서 핀치 줌과 인풋 자동 확대를 막습니다. `viewportFit: "cover"`로 노치 / Dynamic Island 기기에서 safe area inset도 지원합니다.
 
 ```ts
 // app/layout.tsx
@@ -559,9 +559,11 @@ formatNumber(150_000_000)                  // "1.5억"
 formatPrice(9_900)                         // "₩9,900"
 formatPrice(9.99, "USD")                   // "$9.99"
 
-// 조건부 클래스
+// 조건부 클래스 — Tailwind 충돌 자동 해결 (clsx + tailwind-merge 내장)
 cn("base", isActive && "active", err && "border-red-500")
 // → "base active"
+cn("px-2 py-1", "px-4")                   // → "py-1 px-4"  (충돌 해결)
+cn({ "opacity-50": disabled })             // 객체 문법 지원
 ```
 
 ## Hooks

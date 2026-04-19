@@ -18,6 +18,7 @@ export const mobileViewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 /**

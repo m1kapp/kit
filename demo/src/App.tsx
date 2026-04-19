@@ -464,7 +464,7 @@ function UtilsDemo() {
     <ComponentCard
       name="relativeTime · formatNumber · formatPrice · cn"
       desc="순수 유틸 — 어디서나 import"
-      code={`relativeTime(date)      // "3분 전"\nformatNumber(15_000)   // "1.5만"\nformatNumber(1_500_000)// "150만"\nformatPrice(9900)      // "₩9,900"\ncn("base", isOn && "active", err && "error")`}
+      code={`relativeTime(date)      // "3분 전"\nformatNumber(15_000)   // "1.5만"\nformatNumber(1_500_000)// "150만"\nformatPrice(9900)      // "₩9,900"\ncn("base", isOn && "active", err && "error")\ncn("px-2", "px-4")     // → "px-4" (Tailwind 충돌 해결)`}
     >
       <div className="space-y-2">
         <div className="rounded-lg overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -1432,6 +1432,7 @@ function PWADetail({ themeColor }: { themeColor: string }) {
             { label: "핀치 줌 차단", desc: "CSS touch-action: pan-x pan-y (iOS 10+ 포함)" },
             { label: "인풋 자동 확대 방지", desc: "font-size: max(16px, 1em) 자동 적용" },
             { label: "Android / 구형 iOS", desc: "maximumScale=1, userScalable=false" },
+            { label: "Safe Area Inset", desc: "viewportFit=cover — 노치 / Dynamic Island 기기 대응" },
           ].map(({ label, desc }) => (
             <div key={label} className="flex items-start gap-2 p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400 mt-0.5 flex-shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
