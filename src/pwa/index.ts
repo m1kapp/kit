@@ -1,4 +1,24 @@
+import React from "react";
 import type { Viewport, MetadataRoute } from "next";
+import { COMPILED_CSS } from "../ui/_compiled-styles";
+
+/**
+ * Drop into <head> in your root layout to pre-load kit styles and
+ * prevent the JS injection from re-running (eliminates FOUC).
+ *
+ * Usage:
+ *   // app/layout.tsx
+ *   import { KitStyles } from "@m1kapp/kit/pwa";
+ *   <head>
+ *     <KitStyles />
+ *   </head>
+ */
+export function KitStyles() {
+  return React.createElement("style", {
+    "data-m1kapp-ui": "",
+    dangerouslySetInnerHTML: { __html: COMPILED_CSS },
+  });
+}
 
 export { usePWAInstall } from "./use-pwa-install";
 export type { UsePWAInstallReturn, PWAInstallState } from "./use-pwa-install";

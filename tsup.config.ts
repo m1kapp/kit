@@ -31,7 +31,7 @@ export default defineConfig([
   {
     ...common,
     entry: { pwa: "src/pwa/index.ts" },
-    external: ["next"],
+    external: ["react", "react-dom", "next"],
   },
   // Pure utils — server-safe (no "use client"), cn / formatNumber / relativeTime etc.
   {

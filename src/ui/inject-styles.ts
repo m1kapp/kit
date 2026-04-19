@@ -4,7 +4,7 @@ let injected = false;
 
 export function injectStyles() {
   if (injected || typeof document === "undefined") return;
-  if (document.querySelector("[data-m1kapp-ui]")) { injected = true; return; }
+  if (document.querySelector("[data-m1kapp-ui], style[data-href='m1kapp-kit']")) { injected = true; return; }
   injected = true;
   const el = document.createElement("style");
   el.setAttribute("data-m1kapp-ui", "");
