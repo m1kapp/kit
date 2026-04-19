@@ -1650,7 +1650,12 @@ export default function App() {
             <span className="text-lg font-black text-zinc-900 dark:text-white tracking-tight">
               @m1kapp/kit
             </span>
-            <ThemeButton color={themeColor} dark={dark} onClick={() => setThemeOpen(true)} />
+            <div className="flex items-center gap-2">
+              <a href="https://m1k.app/gh" target="_blank" rel="noopener noreferrer">
+                <img alt="Hits" src="https://m1k.app/badge/gh.svg" />
+              </a>
+              <ThemeButton color={themeColor} dark={dark} onClick={() => setThemeOpen(true)} />
+            </div>
           </AppShellHeader>
 
           <AppShellContent key={tab}>
