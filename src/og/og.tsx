@@ -253,7 +253,7 @@ function Shell({
     <div style={{
       width: "100%", height: "100%", display: "flex", flexDirection: "column",
       backgroundColor: isBlend ? pastelify(color, 0.55) : isGrad ? "#06060a" : "#0a0a0c",
-      background: (!isGrad && !isBlend) ? "linear-gradient(180deg, #1a1a1f 0%, #0a0a0c 100%)" : undefined,
+      ...(!isGrad && !isBlend ? { background: "linear-gradient(180deg, #1a1a1f 0%, #0a0a0c 100%)" } : {}),
       padding: "72px 80px",
       fontFamily: "Pretendard, system-ui, sans-serif",
       position: "relative", overflow: "hidden",
@@ -515,7 +515,7 @@ function IconLayout({
       <span style={{
         fontSize: 240, fontWeight: 900, color: isBlend ? "#ffffff" : "#ffffff",
         letterSpacing: "-6px", lineHeight: 1.0, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center",
-        textShadow: isBlend ? "0 2px 8px rgba(0,0,0,0.3)" : undefined,
+        ...(isBlend ? { textShadow: "0 2px 8px rgba(0,0,0,0.3)" } : {}),
       }}>
         {char}
       </span>
