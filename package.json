@@ -1,0 +1,66 @@
+{
+  "name": "@m1kapp/kit",
+  "version": "0.0.1",
+  "description": "UI, SEO, and PWA utilities for side projects",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && mkdir -p .tmp && npx @tailwindcss/cli -i src/ui/styles.css -o .tmp/styles.css --minify && node scripts/embed-css.mjs && tsup",
+    "dev": "tsup --watch",
+    "lint": "tsc --noEmit",
+    "demo": "npm run build && cd demo && npm run dev",
+    "demo:dev": "cd demo && npm run dev"
+  },
+  "peerDependencies": {
+    "@vercel/og": ">=0.6",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "@vercel/og": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "next": "^16.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "seo",
+    "pwa",
+    "mobile",
+    "side-project",
+    "m1k"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m1kapp/kit.git"
+  },
+  "homepage": "https://m1k.app"
+}
