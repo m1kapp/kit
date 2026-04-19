@@ -66,12 +66,12 @@ export function svgIcon(
 }
 
 /**
- * Generates a Next.js web app manifest (app/manifest.ts).
+ * Generates a Next.js web app manifest function (app/manifest.ts).
  * Icons are auto-generated as inline SVGs — no image files needed.
  *
  * Usage:
  *   // app/manifest.ts
- *   import { createManifest } from "@m1kapp/kit";
+ *   import { createManifest } from "@m1kapp/kit/pwa";
  *   export default createManifest({
  *     name: "m1k",
  *     shortName: "m1k",
@@ -93,7 +93,7 @@ export function createManifest(options: {
     color?: string;
     radius?: number;
   };
-}): MetadataRoute.Manifest {
+}): () => MetadataRoute.Manifest {
   const {
     name,
     shortName = name,
@@ -119,7 +119,7 @@ export function createManifest(options: {
       ]
     : [];
 
-  return {
+  const manifest: MetadataRoute.Manifest = {
     name,
     short_name: shortName,
     ...(description && { description }),
@@ -130,4 +130,6 @@ export function createManifest(options: {
     theme_color: themeColor,
     icons,
   };
+
+  return () => manifest;
 }
