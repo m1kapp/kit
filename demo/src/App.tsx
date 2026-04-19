@@ -1658,6 +1658,19 @@ export default function App() {
               @m1kapp/kit
             </span>
             <div className="flex items-center gap-2">
+              <a
+                href="https://www.npmjs.com/package/@m1kapp/kit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 ring-1 ring-red-200 dark:ring-red-900 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="#cc3534" role="img" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M0 0v24h24V0H0zm6.672 19.992H4.008V8.004h2.664v11.988zm8.004 0h-2.664v-9.33h-2.664v9.33H6.684V4.008h13.32v15.984h-5.328zm5.328-13.32h-2.664V4.008h2.664v2.664z"/>
+                </svg>
+                <span className="text-[11px] font-bold text-red-600 dark:text-red-400 font-mono">
+                  v{__PKG_VERSION__}
+                </span>
+              </a>
               <a href="https://m1k.app/gh" target="_blank" rel="noopener noreferrer">
                 <img alt="Hits" src="https://m1k.app/badge/gh.svg" />
               </a>
