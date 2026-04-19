@@ -12,23 +12,16 @@ import React, {
 ───────────────────────────────────────── */
 export type ToastVariant = "default" | "success" | "error" | "info";
 
-export interface ToastAction {
-  label: string;
-  onClick: () => void;
-}
-
 interface ToastItem {
   id: string;
   message: string;
   variant: ToastVariant;
   duration: number;
-  action?: ToastAction;
 }
 
 export interface ToastOptions {
   variant?: ToastVariant;
   duration?: number;
-  action?: ToastAction;
 }
 
 type ToastFn = (message: string, options?: ToastOptions) => void;
@@ -49,7 +42,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     const duration = options?.duration ?? 2500;
     setToasts((prev) => [
       ...prev,
-      { id, message, variant: options?.variant ?? "default", duration, action: options?.action },
+      { id, message, variant: options?.variant ?? "default", duration },
     ]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -93,19 +86,11 @@ function ToastBubble({ item }: { item: ToastItem }) {
   return (
     <div
       role="status"
-      className={`pointer-events-auto w-full max-w-[390px] px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl transition-all duration-300 ${
+      className={`pointer-events-auto w-full max-w-[390px] px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl text-center transition-all duration-300 ${
         variantStyles[item.variant]
-      } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} ${item.action ? "flex items-center justify-between gap-3" : "text-center"}`}
+      } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
     >
-      <span>{item.message}</span>
-      {item.action && (
-        <button
-          onClick={item.action.onClick}
-          className="shrink-0 underline underline-offset-2 opacity-90 hover:opacity-100 transition-opacity"
-        >
-          {item.action.label}
-        </button>
-      )}
+      {item.message}
     </div>
   );
 }
