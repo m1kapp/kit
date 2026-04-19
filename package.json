@@ -1,6 +1,6 @@
 {
   "name": "@m1kapp/kit",
-  "version": "0.0.11",
+  "version": "0.0.13",
   "description": "UI, SEO, and PWA utilities for side projects",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -30,7 +30,8 @@
       "types": "./dist/utils.d.ts",
       "import": "./dist/utils.mjs",
       "require": "./dist/utils.js"
-    }
+    },
+    "./styles.css": "./dist/styles.css"
   },
   "bin": {
     "m1kkit": "bin/favicon.mjs"
