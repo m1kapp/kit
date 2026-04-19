@@ -48,6 +48,8 @@ export interface OGIconTemplate {
   letter?: string;
   /** 아이콘 모서리 둥글기 (기본: 96) */
   radius?: number;
+  /** 글자 크기 (기본: 240, 작은 아이콘은 줄여서 사용) */
+  fontSize?: number;
 }
 
 export interface OGArticleTemplate {
@@ -474,6 +476,7 @@ function IconLayout({
   appName = "m1k",
   color = "#007B5F",
   bg = "dark",
+  fontSize = 240,
 }: OGIconTemplate & OGConfig) {
   const name = appName || "m1k";
   const char = letter ?? name[0].toUpperCase();
@@ -513,8 +516,8 @@ function IconLayout({
         </>
       )}
       <span style={{
-        fontSize: 240, fontWeight: 900, color: isBlend ? "#ffffff" : "#ffffff",
-        letterSpacing: "-6px", lineHeight: 1.0, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize, fontWeight: 900, color: isBlend ? "#ffffff" : "#ffffff",
+        letterSpacing: `${(-fontSize * 0.025).toFixed(1)}px`, lineHeight: 1.0, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center",
         ...(isBlend ? { textShadow: "0 2px 8px rgba(0,0,0,0.3)" } : {}),
       }}>
         {char}
