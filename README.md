@@ -2,6 +2,8 @@
 
 사이드 프로젝트를 위한 UI · OG · PWA · Fetch · Utils 올인원 킷.
 
+[![npm](https://img.shields.io/npm/v/@m1kapp/kit)](https://www.npmjs.com/package/@m1kapp/kit) <a href="https://m1k.app/gh"><img alt="Hits" src="https://m1k.app/badge/gh.svg"/></a>
+
 ```bash
 npm install @m1kapp/kit
 ```
