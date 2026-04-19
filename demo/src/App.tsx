@@ -14,11 +14,11 @@ import {
   Skeleton, Dialog,
   mobileViewport, svgIcon, createManifest,
   PWAInstallButton, IOSInstallSheet, usePWAInstall,
-  OGImage,
   useFetch, usePolling,
   relativeTime, formatNumber, formatPrice, cn,
 } from "@m1kapp/kit";
-import type { OGProps } from "@m1kapp/kit";
+import { OGImage } from "@m1kapp/kit/ogimage";
+import type { OGProps } from "@m1kapp/kit/ogimage";
 
 /* ══════════════════════════════════════════════
    Types
