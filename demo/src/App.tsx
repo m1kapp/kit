@@ -1567,90 +1567,153 @@ function PWADetail({ themeColor }: { themeColor: string }) {
 ══════════════════════════════════════════════ */
 function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLibraries: () => void }) {
   const [copied, setCopied] = useState(false);
+
   return (
     <>
-      <Section className="pt-5">
-        <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">@m1kapp/kit</h1>
-          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+      {/* ── Hero ── */}
+      <Section className="pt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: themeColor }}>
             v{__PKG_VERSION__}
           </span>
+          <span className="text-[10px] font-semibold text-zinc-400">zero dependencies</span>
         </div>
-        <p className="text-lg mt-3 min-h-7">
+
+        <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight leading-tight">
+          사이드 프로젝트를<br />
+          <span style={{ color: themeColor }}>빠르게 완성</span>하는<br />
+          UI 킷
+        </h1>
+
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-3 leading-relaxed">
+          AppShell부터 OG 이미지, PWA, SEO까지.<br />
+          패키지 하나로 전부 해결합니다.
+        </p>
+
+        <p className="text-base mt-4 min-h-6 font-semibold">
           <Typewriter
-            words={["바이브코딩으로 만든 앱", "주말에 만든 토이 프로젝트", "해커톤에서 만든 서비스", "your side project"]}
+            words={["바이브코딩 프로젝트", "주말 토이 프로젝트", "해커톤 서비스", "1인 스타트업"]}
             color={themeColor}
           />
-        </p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 leading-relaxed">
-          사이드 프로젝트를 위한 UI · OG · PWA 유틸리티 모음.
-          <br />
-          하나만 설치하면 다 됩니다.
+          <span className="text-zinc-400 dark:text-zinc-500 font-normal">에 최적화</span>
         </p>
       </Section>
 
-      <Section className="mt-4">
-        <div className="flex gap-2 mb-2">
+      {/* ── Install ── */}
+      <Section className="mt-2">
+        <button
+          onClick={() => { navigator.clipboard.writeText("npm install @m1kapp/kit"); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+          className="w-full py-3.5 rounded-2xl text-sm font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors ring-1 ring-zinc-200 dark:ring-white/10 flex items-center justify-between px-4 mb-2"
+        >
+          <span><span className="text-zinc-400">$</span> npm install @m1kapp/kit</span>
+          {copied ? (
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500"><polyline points="20 6 9 17 4 12"/></svg>
+          ) : (
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          )}
+        </button>
+        <div className="flex gap-2">
           <a
             href="https://github.com/m1kapp/kit"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 py-2.5 rounded-xl bg-zinc-900 dark:bg-zinc-800 text-sm font-semibold text-white hover:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors ring-1 ring-white/10 flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 rounded-2xl bg-zinc-900 dark:bg-zinc-800 text-xs font-semibold text-white hover:opacity-80 transition-opacity ring-1 ring-white/10 flex items-center justify-center gap-1.5"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
             GitHub
           </a>
           <a
             href="https://www.npmjs.com/package/@m1kapp/kit"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 rounded-2xl text-xs font-semibold text-white hover:opacity-80 transition-opacity flex items-center justify-center gap-1.5"
             style={{ backgroundColor: themeColor }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true">
-              <path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z"/>
-            </svg>
-            <span className="text-sm font-semibold">v{__PKG_VERSION__}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z"/></svg>
+            npm
           </a>
         </div>
-        <button
-          onClick={() => { navigator.clipboard.writeText("npm install @m1kapp/kit"); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-          className="w-full py-3 rounded-xl text-sm font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors ring-1 ring-zinc-200 dark:ring-white/10 flex items-center justify-between px-4"
-        >
-          <span>npm install @m1kapp/kit</span>
-          {copied ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500"><polyline points="20 6 9 17 4 12"/></svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          )}
-        </button>
       </Section>
 
       <Divider />
 
+      {/* ── Why ── */}
       <Section>
-        <SectionHeader>구성</SectionHeader>
+        <SectionHeader>왜 @m1kapp/kit?</SectionHeader>
         <div className="space-y-2">
           {[
-            { icon: "🧩", label: "UI", desc: "AppShell, TabBar, Avatar, Badge, Toast 등 24개 컴포넌트" },
-            { icon: "🖼", label: "OG Image", desc: "OG 이미지 생성, 폰트·이모지 로더" },
-            { icon: "📱", label: "PWA", desc: "manifest, viewport, 앱 설치 유도 버튼" },
-            { icon: "🌐", label: "Fetch", desc: "캐싱·중복제거·재시도 내장 fetch — useFetch, usePolling, createApiClient" },
-            { icon: "🛠", label: "Utils", desc: "relativeTime, formatNumber, formatPrice, cn + 훅 모음" },
-          ].map(({ icon, label, desc }) => (
+            {
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              ),
+              title: "의존성 0",
+              desc: "React 외엔 아무것도 없어요. node_modules 지옥 없이 그냥 씁니다.",
+            },
+            {
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              ),
+              title: "모바일 퍼스트 AppShell",
+              desc: "네이티브 앱처럼 보이는 AppShell + TabBar. PWA에 최적화.",
+            },
+            {
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              ),
+              title: "하나로 다 됩니다",
+              desc: "UI · OG · PWA · SEO · Fetch · Utils. 패키지 하나면 충분.",
+            },
+            {
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
+              ),
+              title: "SSR 완벽 지원",
+              desc: "Next.js App Router에서 그대로 import. 서버 컴포넌트와 충돌 없음.",
+            },
+          ].map(({ icon, title, desc }) => (
+            <div key={title} className="flex items-start gap-3 p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-zinc-600 dark:text-zinc-400" style={{ backgroundColor: `${themeColor}18` }}>
+                <span style={{ color: themeColor }}>{icon}</span>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200">{title}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">{desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Divider />
+
+      {/* ── Modules ── */}
+      <Section>
+        <div className="flex items-center justify-between mb-3">
+          <SectionHeader className="mb-0">포함된 모듈</SectionHeader>
+          <button
+            onClick={onGoToLibraries}
+            className="text-xs font-semibold transition-opacity hover:opacity-70"
+            style={{ color: themeColor }}
+          >
+            전체 보기 →
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { icon: "🧩", label: "UI",       count: "24 컴포넌트", desc: "AppShell · TabBar · Toast" },
+            { icon: "🖼",  label: "OG Image", count: "7 템플릿",   desc: "Next.js OG 이미지 생성기" },
+            { icon: "📱",  label: "PWA",      count: "5 유틸",     desc: "manifest · 설치 유도" },
+            { icon: "🛠",  label: "Utils",    count: "7 훅·유틸",  desc: "fetch · format · cn" },
+          ].map(({ icon, label, count, desc }) => (
             <button
               key={label}
               onClick={onGoToLibraries}
-              className="w-full cursor-pointer flex items-start gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left"
+              className="text-left p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors active:scale-[0.98]"
             >
               <span className="text-xl">{icon}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{label}</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{desc}</p>
-              </div>
-              <svg className="mt-0.5 shrink-0 text-zinc-300 dark:text-zinc-600" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-200 mt-2">{label}</p>
+              <p className="text-[10px] font-semibold mt-0.5" style={{ color: themeColor }}>{count}</p>
+              <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">{desc}</p>
             </button>
           ))}
         </div>
@@ -1658,12 +1721,102 @@ function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLi
 
       <Divider />
 
+      {/* ── Quick start ── */}
       <Section>
-        <SectionHeader>한눈에 보기</SectionHeader>
-        <div className="flex gap-3">
-          <StatChip label="컴포넌트" value={24} />
-          <StatChip label="유틸·훅" value={12} />
-          <StatChip label="의존성" value={0} />
+        <SectionHeader>5분 안에 시작하기</SectionHeader>
+        <div className="rounded-2xl bg-zinc-950 dark:bg-zinc-900 overflow-hidden ring-1 ring-white/10">
+          <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/10">
+            {["bg-red-500", "bg-yellow-500", "bg-green-500"].map((c) => (
+              <span key={c} className={`w-2.5 h-2.5 rounded-full ${c} opacity-70`} />
+            ))}
+            <span className="ml-2 text-[10px] font-mono text-zinc-500">App.tsx</span>
+          </div>
+          <pre className="px-4 py-3 text-[11px] leading-relaxed overflow-x-auto scrollbar-hide">
+            <code>
+              <span className="text-zinc-500">{"import"}</span>
+              <span className="text-zinc-100">{" { AppShell, AppShellHeader,"}</span>{"\n"}
+              <span className="text-zinc-100">{"  AppShellContent, TabBar } "}</span>
+              <span className="text-zinc-500">{"from"}</span>
+              <span className="text-emerald-400">{" \"@m1kapp/kit\""}</span>{"\n\n"}
+              <span className="text-zinc-500">{"export default function"}</span>
+              <span className="text-sky-400">{" App"}</span>
+              <span className="text-zinc-100">{"() {"}</span>{"\n"}
+              <span className="text-zinc-100">{"  return ("}</span>{"\n"}
+              <span className="text-zinc-100">{"    "}</span>
+              <span className="text-amber-400">{"<AppShell>"}</span>{"\n"}
+              <span className="text-zinc-100">{"      "}</span>
+              <span className="text-amber-400">{"<AppShellHeader>"}</span>
+              <span className="text-zinc-100">{"내 앱"}</span>
+              <span className="text-amber-400">{"</AppShellHeader>"}</span>{"\n"}
+              <span className="text-zinc-100">{"      "}</span>
+              <span className="text-amber-400">{"<AppShellContent>"}</span>{"\n"}
+              <span className="text-zinc-500">{"        {/* 내용 */}"}</span>{"\n"}
+              <span className="text-zinc-100">{"      "}</span>
+              <span className="text-amber-400">{"</AppShellContent>"}</span>{"\n"}
+              <span className="text-zinc-100">{"      "}</span>
+              <span className="text-amber-400">{"<TabBar />"}</span>{"\n"}
+              <span className="text-zinc-100">{"    "}</span>
+              <span className="text-amber-400">{"</AppShell>"}</span>{"\n"}
+              <span className="text-zinc-100">{"  )"}</span>{"\n"}
+              <span className="text-zinc-100">{"}"}</span>
+            </code>
+          </pre>
+        </div>
+      </Section>
+
+      {/* ── Claude Skills ── */}
+      <Section>
+        <SectionHeader>Claude Code 스킬</SectionHeader>
+        <div className="rounded-2xl overflow-hidden ring-1 ring-zinc-200 dark:ring-zinc-800">
+          <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              설치 후 Claude Code 프로젝트에 스킬을 바로 추가할 수 있어요.
+            </p>
+            <div className="mt-2 flex items-center justify-between rounded-xl bg-white dark:bg-zinc-950 px-3 py-2 ring-1 ring-zinc-200 dark:ring-zinc-800">
+              <span className="text-xs font-mono text-zinc-500">
+                <span className="text-zinc-400">$</span> npx m1kkit skills
+              </span>
+              <button
+                onClick={() => { navigator.clipboard.writeText("npx m1kkit skills"); }}
+                className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+              >
+                복사
+              </button>
+            </div>
+          </div>
+          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {[
+              { cmd: "/m1kapp-init", desc: "프로젝트 초기 설정 스캐폴딩" },
+              { cmd: "/m1kapp-seo",  desc: "SEO 감사 및 자동 적용" },
+              { cmd: "/m1kapp-pwa",  desc: "PWA 설정 점검 및 적용" },
+            ].map(({ cmd, desc }) => (
+              <div key={cmd} className="flex items-center justify-between px-4 py-2.5">
+                <div>
+                  <span className="text-xs font-mono font-semibold text-zinc-800 dark:text-zinc-200">{cmd}</span>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">{desc}</p>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${themeColor}18`, color: themeColor }}>
+                  스킬
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ── Stats ── */}
+      <Section>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { value: "24+", label: "컴포넌트" },
+            { value: "12+", label: "훅·유틸" },
+            { value: "0",   label: "의존성" },
+          ].map(({ value, label }) => (
+            <div key={label} className="flex flex-col items-center justify-center py-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900">
+              <span className="text-2xl font-black text-zinc-900 dark:text-white" style={value === "0" ? { color: themeColor } : {}}>{value}</span>
+              <span className="text-[10px] text-zinc-400 mt-0.5">{label}</span>
+            </div>
+          ))}
         </div>
       </Section>
 
