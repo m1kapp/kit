@@ -31,10 +31,15 @@
       "import": "./dist/utils.mjs",
       "require": "./dist/utils.js"
     },
+    "./seo": {
+      "types": "./dist/seo.d.ts",
+      "import": "./dist/seo.mjs",
+      "require": "./dist/seo.js"
+    },
     "./styles.css": "./dist/styles.css"
   },
   "bin": {
-    "m1kkit": "bin/favicon.mjs"
+    "m1kkit": "bin/m1kkit.mjs"
   },
   "files": [
     "dist",
@@ -47,6 +52,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "scripts": {
+    "postinstall": "node bin/postinstall.mjs",
     "build": "rm -rf dist && mkdir -p .tmp && npx @tailwindcss/cli -i src/ui/styles.css -o .tmp/styles.css --minify && node scripts/embed-css.mjs && tsup",
     "dev": "tsup --watch",
     "lint": "tsc --noEmit",

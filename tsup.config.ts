@@ -38,4 +38,9 @@ export default defineConfig([
     ...common,
     entry: { utils: "src/utils/index.ts" },
   },
+  // SEO utils — server-safe, metadata / jsonLd / sitemap / robots
+  {
+    ...common,
+    entry: { seo: "src/seo/index.ts" },
+  },
 ]);
