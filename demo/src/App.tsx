@@ -6,7 +6,7 @@ import {
   Watermark, AppShell, AppShellHeader, AppShellContent,
   TabBar, Tab, Section, SectionHeader, Divider,
   StatChip, EmptyState, Button, colors,
-  ThemeButton, ThemeDialog, EmojiButton, EmojiPicker,
+  ThemeButton, EmojiButton, EmojiPicker,
   Tooltip, Typewriter, GrassMap,
   Avatar, Badge, ShareButton, useShare,
   ToastProvider, useToast,
@@ -591,9 +591,11 @@ function UtilsDemo() {
   );
 }
 
-function UIDetail({ themeColor, dark, onThemeSelect }: {
-  themeColor: string; dark: boolean; onThemeSelect: (c: string) => void;
+function UIDetail({ themeColor }: {
+  themeColor: string;
 }) {
+  const [, onThemeSelect] = useState(themeColor); // local demo only
+  const dark = true;
   const [demoTab, setDemoTab] = useState("home");
   const navItems = [
     { key: "home", label: "Home", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
@@ -1689,7 +1691,7 @@ function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLi
       {/* ── Modules ── */}
       <Section>
         <div className="flex items-center justify-between mb-3">
-          <SectionHeader className="mb-0">포함된 모듈</SectionHeader>
+          <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">포함된 모듈</p>
           <button
             onClick={onGoToLibraries}
             className="text-xs font-semibold transition-opacity hover:opacity-70"
@@ -1828,8 +1830,8 @@ function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLi
 /* ══════════════════════════════════════════════
    Libraries Tab (list + detail)
 ══════════════════════════════════════════════ */
-function LibrariesTab({ themeColor, dark, onThemeSelect }: {
-  themeColor: string; dark: boolean; onThemeSelect: (c: string) => void;
+function LibrariesTab({ themeColor }: {
+  themeColor: string;
 }) {
   const [detail, setDetail] = useState<"ui" | "og" | "pwa" | "fetch" | "utils" | null>(null);
 
@@ -1852,7 +1854,7 @@ function LibrariesTab({ themeColor, dark, onThemeSelect }: {
 
       <div key={detail ?? "list"}>
         {!detail && <LibraryList onSelect={setDetail} />}
-        {detail === "ui"    && <UIDetail themeColor={themeColor} dark={dark} onThemeSelect={onThemeSelect} />}
+        {detail === "ui"    && <UIDetail themeColor={themeColor} />}
         {detail === "og"    && <OGDetail themeColor={themeColor} />}
         {detail === "pwa"   && <PWADetail themeColor={themeColor} />}
         {detail === "fetch" && <FetchDetail themeColor={themeColor} />}
@@ -1866,29 +1868,45 @@ function LibrariesTab({ themeColor, dark, onThemeSelect }: {
 /* ══════════════════════════════════════════════
    Main App
 ══════════════════════════════════════════════ */
+const THEME_COLOR = colors.cyan;
+
+const SHARE_URL =
+  typeof window !== "undefined"
+    ? `${window.location.origin}${window.location.pathname}?utm_source=share&utm_medium=button&utm_campaign=m1kapp_kit`
+    : "https://github.com/m1kapp/kit";
+
+function HeaderShareButton() {
+  const { share, copied } = useShare({
+    url: SHARE_URL,
+    title: "@m1kapp/kit",
+    text: "사이드 프로젝트를 빠르게 완성하는 React UI 킷",
+  });
+  return (
+    <button
+      onClick={() => share()}
+      className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white active:scale-95 transition-all"
+    >
+      {copied ? (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-400"><polyline points="20 6 9 17 4 12"/></svg>
+      ) : (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      )}
+      {copied ? "복사됨" : "공유"}
+    </button>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState<"home" | "libraries">("home");
-  const [themeColor, setThemeColor] = useState<string>(colors.blue);
-  const [themeOpen, setThemeOpen] = useState(false);
-  const [dark, setDark] = useState(() =>
-    typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (e: MediaQueryListEvent) => setDark(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+    document.documentElement.classList.add("dark");
   }, []);
 
   return (
     <ToastProvider>
       <Watermark
-        color={themeColor}
+        color={THEME_COLOR}
         text="kit"
         sponsor={{ name: "@m1kapp/kit", url: "https://github.com/m1kapp/kit" }}
       >
@@ -1899,15 +1917,15 @@ export default function App() {
             </span>
             <div className="flex items-center gap-2">
               <a href="https://m1k.app/gh" target="_blank" rel="noopener noreferrer">
-                <img alt="Hits" src={dark ? "https://m1k.app/badge/gh-dark.svg" : "https://m1k.app/badge/gh.svg"} />
+                <img alt="Hits" src="https://m1k.app/badge/gh-dark.svg" />
               </a>
-              <ThemeButton color={themeColor} dark={dark} onClick={() => setThemeOpen(true)} />
+              <HeaderShareButton />
             </div>
           </AppShellHeader>
 
           <AppShellContent key={tab}>
-            {tab === "home"      && <HomeTab themeColor={themeColor} onGoToLibraries={() => setTab("libraries")} />}
-            {tab === "libraries" && <LibrariesTab themeColor={themeColor} dark={dark} onThemeSelect={setThemeColor} />}
+            {tab === "home"      && <HomeTab themeColor={THEME_COLOR} onGoToLibraries={() => setTab("libraries")} />}
+            {tab === "libraries" && <LibrariesTab themeColor={THEME_COLOR} />}
           </AppShellContent>
 
           <TabBar>
@@ -1915,28 +1933,20 @@ export default function App() {
               active={tab === "home"}
               onClick={() => setTab("home")}
               label="홈"
-              activeColor={themeColor}
+              activeColor={THEME_COLOR}
               icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>}
             />
             <Tab
               active={tab === "libraries"}
               onClick={() => setTab("libraries")}
               label="라이브러리"
-              activeColor={themeColor}
+              activeColor={THEME_COLOR}
               icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>}
             />
           </TabBar>
         </AppShell>
       </Watermark>
 
-      <ThemeDialog
-        open={themeOpen}
-        onClose={() => setThemeOpen(false)}
-        current={themeColor}
-        onSelect={setThemeColor}
-        dark={dark}
-        onDarkToggle={() => setDark((v) => !v)}
-      />
     </ToastProvider>
   );
 }
