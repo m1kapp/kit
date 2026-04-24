@@ -11,7 +11,7 @@ import {
   Avatar, Badge, ShareButton, useShare,
   ToastProvider, useToast,
   useLocalStorage, useDebounce, useFormSubmit, useInView,
-  Skeleton, Dialog,
+  Skeleton, Dialog, InAppSheet,
   mobileViewport, svgIcon, createManifest,
   PWAInstallButton, IOSInstallSheet, usePWAInstall,
   useFetch, usePolling,
@@ -369,6 +369,101 @@ function DialogDemo({ themeColor }: { themeColor: string }) {
   );
 }
 
+function InAppSheetDemo({ themeColor }: { themeColor: string }) {
+  const [openType, setOpenType] = useState<"default" | "full" | null>(null);
+
+  const sheetContent = (onClose: () => void, full?: boolean) => (
+    <div className={`rounded-t-[28px] border border-zinc-200 bg-white px-4 pb-5 pt-3 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 ${full ? "h-full flex flex-col" : ""}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">신규 기능 안내</p>
+          <p className="mt-1 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+            앱을 벗어나지 않고도 공지, 프로모션, 빠른 액션을 시트 형태로 노출할 수 있어요.
+          </p>
+        </div>
+        <div
+          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl text-lg font-bold text-white"
+          style={{ backgroundColor: themeColor }}
+        >
+          K
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        {[
+          { label: "공지", value: "in-app" },
+          { label: "액션", value: "sheet" },
+          { label: "영역", value: "scoped" },
+        ].map((item) => (
+          <div key={item.label} className="rounded-2xl bg-zinc-50 px-3 py-2 dark:bg-zinc-900">
+            <p className="text-[10px] text-zinc-400">{item.label}</p>
+            <p className="mt-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300">{item.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className={`mt-4 flex gap-2 ${full ? "mt-auto" : ""}`}>
+        <button
+          onClick={onClose}
+          className="flex-1 cursor-pointer rounded-2xl bg-zinc-100 py-3 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          닫기
+        </button>
+        <button
+          onClick={onClose}
+          className="flex-1 cursor-pointer rounded-2xl py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: themeColor }}
+        >
+          확인
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <ComponentCard
+      name="InAppSheet"
+      desc="AppShell 내부에 붙는 인앱 바텀 시트 — fullHeight로 높이 제어"
+      code={`<InAppSheet open={open} onClose={() => setOpen(false)}>
+  {/* fullHeight 추가하면 전체 높이 */}
+</InAppSheet>`}
+    >
+      <div className="space-y-2">
+        <div className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2.5 dark:bg-zinc-900">
+          <div>
+            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">기본</p>
+            <p className="text-[11px] text-zinc-400">콘텐츠 높이만큼</p>
+          </div>
+          <button
+            onClick={() => setOpenType("default")}
+            className="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: themeColor }}
+          >
+            열기
+          </button>
+        </div>
+        <div className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2.5 dark:bg-zinc-900">
+          <div>
+            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">전체 높이</p>
+            <p className="text-[11px] text-zinc-400">fullHeight</p>
+          </div>
+          <button
+            onClick={() => setOpenType("full")}
+            className="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+          >
+            열기
+          </button>
+        </div>
+      </div>
+
+      <InAppSheet open={openType === "default"} onClose={() => setOpenType(null)}>
+        {sheetContent(() => setOpenType(null))}
+      </InAppSheet>
+      <InAppSheet fullHeight open={openType === "full"} onClose={() => setOpenType(null)}>
+        {sheetContent(() => setOpenType(null), true)}
+      </InAppSheet>
+    </ComponentCard>
+  );
+}
+
 function DebounceDemo({ themeColor }: { themeColor: string }) {
   const [input, setInput] = useState("");
   const debounced = useDebounce(input, 400);
@@ -663,6 +758,7 @@ function UIDetail({ themeColor, dark, onThemeSelect }: {
           <LocalStorageDemo />
           <SkeletonDemo />
           <DialogDemo themeColor={themeColor} />
+          <InAppSheetDemo themeColor={themeColor} />
           <DebounceDemo themeColor={themeColor} />
           <FormSubmitDemo themeColor={themeColor} />
           <UtilsDemo />
@@ -1469,7 +1565,7 @@ function PWADetail({ themeColor }: { themeColor: string }) {
 /* ══════════════════════════════════════════════
    Home Tab
 ══════════════════════════════════════════════ */
-function HomeTab({ themeColor }: { themeColor: string }) {
+function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLibraries: () => void }) {
   const [copied, setCopied] = useState(false);
   return (
     <>
@@ -1544,13 +1640,18 @@ function HomeTab({ themeColor }: { themeColor: string }) {
             { icon: "🌐", label: "Fetch", desc: "캐싱·중복제거·재시도 내장 fetch — useFetch, usePolling, createApiClient" },
             { icon: "🛠", label: "Utils", desc: "relativeTime, formatNumber, formatPrice, cn + 훅 모음" },
           ].map(({ icon, label, desc }) => (
-            <div key={label} className="flex items-start gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900">
+            <button
+              key={label}
+              onClick={onGoToLibraries}
+              className="w-full cursor-pointer flex items-start gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left"
+            >
               <span className="text-xl">{icon}</span>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{label}</p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{desc}</p>
               </div>
-            </div>
+              <svg className="mt-0.5 shrink-0 text-zinc-300 dark:text-zinc-600" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
           ))}
         </div>
       </Section>
@@ -1608,6 +1709,7 @@ function LibrariesTab({ themeColor, dark, onThemeSelect }: {
   );
 }
 
+
 /* ══════════════════════════════════════════════
    Main App
 ══════════════════════════════════════════════ */
@@ -1651,7 +1753,7 @@ export default function App() {
           </AppShellHeader>
 
           <AppShellContent key={tab}>
-            {tab === "home"      && <HomeTab themeColor={themeColor} />}
+            {tab === "home"      && <HomeTab themeColor={themeColor} onGoToLibraries={() => setTab("libraries")} />}
             {tab === "libraries" && <LibrariesTab themeColor={themeColor} dark={dark} onThemeSelect={setThemeColor} />}
           </AppShellContent>
 
