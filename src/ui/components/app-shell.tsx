@@ -24,7 +24,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div
-      className={`w-full h-full flex flex-col bg-white dark:bg-zinc-950 shadow-2xl ring-1 ring-black/10 dark:ring-zinc-700 sm:rounded-2xl overflow-hidden ${className}`}
+      className={`app-shell-root relative w-full h-full flex flex-col bg-white dark:bg-zinc-950 shadow-2xl ring-1 ring-black/10 dark:ring-zinc-700 sm:rounded-2xl overflow-hidden ${className}`}
       style={{ maxWidth, maxHeight, ...style }}
     >
       {/* React 19 hoists this to <head> and deduplicates by href — eliminates FOUC without manual <KitStyles /> */}
@@ -62,8 +62,10 @@ export interface AppShellContentProps {
  */
 export function AppShellContent({ children, className = "" }: AppShellContentProps) {
   return (
-    <div className={`flex-1 overflow-y-auto scrollbar-hide ${className}`}>
-      {children}
+    <div className="in-app-sheet-content-portal relative flex-1 overflow-hidden">
+      <div className={`tab-scroll h-full overflow-y-auto scrollbar-hide ${className}`}>
+        {children}
+      </div>
     </div>
   );
 }

@@ -30,7 +30,8 @@ export function Tooltip({ label, children, placement = "top" }: TooltipProps) {
       ? rect.top + window.scrollY - 36
       : rect.bottom + window.scrollY + 8
     : 0;
-  const left = rect ? rect.left + window.scrollX + rect.width / 2 : 0;
+  const rawLeft = rect ? rect.left + window.scrollX + rect.width / 2 : 0;
+  const left = rect ? Math.max(100, Math.min(rawLeft, window.innerWidth - 100)) : 0;
 
   return (
     <>
@@ -50,7 +51,7 @@ export function Tooltip({ label, children, placement = "top" }: TooltipProps) {
             className="fixed z-[9999] pointer-events-none"
             style={{ top, left, transform: "translateX(-50%)" }}
           >
-            <div className="px-3 py-1.5 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold whitespace-nowrap shadow-lg animate-in fade-in zoom-in-95 duration-100">
+            <div className="px-3 py-1.5 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold shadow-lg animate-in fade-in zoom-in-95 duration-100 max-w-[200px] text-center break-words">
               {label}
             </div>
           </div>,

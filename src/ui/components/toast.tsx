@@ -90,7 +90,7 @@ function ToastBubble({ item }: { item: ToastItem }) {
         variantStyles[item.variant]
       } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
     >
-      {item.message}
+      <span className="break-words line-clamp-3">{item.message}</span>
     </div>
   );
 }
