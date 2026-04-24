@@ -1736,8 +1736,10 @@ function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLi
           <pre className="px-4 py-3 text-[11px] leading-relaxed overflow-x-auto scrollbar-hide">
             <code>
               <span className="text-zinc-500">{"import"}</span>
-              <span className="text-zinc-100">{" { AppShell, AppShellHeader,"}</span>{"\n"}
-              <span className="text-zinc-100">{"  AppShellContent, TabBar } "}</span>
+              <span className="text-zinc-100">{" {"}</span>{"\n"}
+              <span className="text-zinc-100">{"  AppShell, AppShellHeader,"}</span>{"\n"}
+              <span className="text-zinc-100">{"  AppShellContent, TabBar,"}</span>{"\n"}
+              <span className="text-zinc-100">{"} "}</span>
               <span className="text-zinc-500">{"from"}</span>
               <span className="text-emerald-400">{" \"@m1kapp/kit\""}</span>{"\n\n"}
               <span className="text-zinc-500">{"export default function"}</span>
