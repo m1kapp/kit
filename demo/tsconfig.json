@@ -6,15 +6,7 @@
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "paths": {
-      "@m1kapp/kit": ["../src/index.ts"],
-      "@m1kapp/kit/seo": ["../src/seo/index.ts"],
-      "@m1kapp/kit/ogimage": ["../src/og/index.ts"],
-      "@m1kapp/kit/pwa": ["../src/pwa/index.ts"],
-      "@m1kapp/kit/server": ["../src/server/index.ts"],
-      "@m1kapp/kit/utils": ["../src/utils/index.ts"]
-    }
+    "skipLibCheck": true
   },
   "include": ["src", "vite.config.ts"]
 }
