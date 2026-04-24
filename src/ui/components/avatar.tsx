@@ -43,7 +43,14 @@ export function Avatar({
     );
   }
 
-  const initials = fallback.trim().slice(0, 2).toUpperCase();
+  const trimmed = fallback.trim();
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  const initials = trimmed.length === 0
+    ? "?"
+    : (words.length >= 2
+        ? words[0][0] + words[1][0]
+        : trimmed.slice(0, 2)
+      ).toUpperCase();
 
   return (
     <div

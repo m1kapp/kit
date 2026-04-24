@@ -7,12 +7,23 @@ export interface GrassMapData {
   count: number;
 }
 
+export interface GrassMapLabels {
+  firstRecord?: string;
+  noRecord?: string;
+  today?: string;
+  less?: string;
+  more?: string;
+  first?: string;
+}
+
 export interface GrassMapProps {
   data: GrassMapData[];
   accent: string;
   isDark?: boolean;
   /** Unit label appended to count in tooltip. e.g. "명", "commits". Default: "" */
   unit?: string;
+  /** Override default Korean labels for i18n */
+  labels?: GrassMapLabels;
 }
 
 function formatTooltipDate(dateStr: string): string {
@@ -60,7 +71,16 @@ function grassColor(count: number, max: number, isDark: boolean, accent: string)
   return `rgb(${Math.round(r + (255 - r) * m)}, ${Math.round(g + (255 - g) * m)}, ${Math.round(b + (255 - b) * m)})`;
 }
 
-export function GrassMap({ data, accent, isDark = false, unit = "" }: GrassMapProps) {
+export function GrassMap({ data, accent, isDark = false, unit = "", labels: _labels }: GrassMapProps) {
+  const labels = {
+    firstRecord: "첫 기록",
+    noRecord: "기록 없음",
+    today: "오늘",
+    less: "Less",
+    more: "More",
+    first: "1st",
+    ..._labels,
+  };
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const outerRef = useRef<HTMLDivElement>(null);
 
@@ -69,19 +89,25 @@ export function GrassMap({ data, accent, isDark = false, unit = "" }: GrassMapPr
     const currentYear = new Date().getFullYear();
     years.add(currentYear);
     for (const d of data) {
-      years.add(new Date(d.date).getFullYear());
+      const parsed = new Date(d.date);
+      if (!isNaN(parsed.getTime())) years.add(parsed.getFullYear());
     }
     return Array.from(years).sort((a, b) => b - a);
   }, [data]);
 
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
-  const countMap = useMemo(
-    () => new Map(data.map((d) => [d.date, d.count])),
+  const validData = useMemo(
+    () => data.filter((d) => !isNaN(new Date(d.date).getTime())),
     [data]
   );
 
-  const firstDay = data.length > 0 ? data[0].date : null;
+  const countMap = useMemo(
+    () => new Map(validData.map((d) => [d.date, d.count])),
+    [validData]
+  );
+
+  const firstDay = validData.length > 0 ? validData[0].date : null;
   const firstDayFormatted = firstDay
     ? new Date(firstDay).toLocaleDateString("ko-KR", {
         year: "numeric",
@@ -152,7 +178,7 @@ export function GrassMap({ data, accent, isDark = false, unit = "" }: GrassMapPr
         </div>
         {firstDayFormatted && (
           <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
-            첫 기록 <span className="font-medium text-zinc-600 dark:text-zinc-400">{firstDayFormatted}</span>
+            {labels.firstRecord} <span className="font-medium text-zinc-600 dark:text-zinc-400">{firstDayFormatted}</span>
           </p>
         )}
       </div>
@@ -248,14 +274,14 @@ export function GrassMap({ data, accent, isDark = false, unit = "" }: GrassMapPr
             <span className="font-medium">{formatTooltipDate(tooltip.date)}</span>
             {!tooltip.isFuture && (
               <span className="ml-1.5 tabular-nums">
-                {tooltip.count > 0 ? `${tooltip.count.toLocaleString()}${unit}` : "기록 없음"}
+                {tooltip.count > 0 ? `${tooltip.count.toLocaleString()}${unit}` : labels.noRecord}
               </span>
             )}
             {tooltip.isFirst && (
-              <span className="ml-1.5 text-[10px] opacity-70">🌱 첫 기록</span>
+              <span className="ml-1.5 text-[10px] opacity-70">🌱 {labels.firstRecord}</span>
             )}
             {tooltip.isToday && !tooltip.isFirst && (
-              <span className="ml-1.5 text-[10px] opacity-70">오늘</span>
+              <span className="ml-1.5 text-[10px] opacity-70">{labels.today}</span>
             )}
           </div>
           <div className="mx-auto w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-zinc-900 dark:border-t-zinc-100" />
@@ -263,7 +289,7 @@ export function GrassMap({ data, accent, isDark = false, unit = "" }: GrassMapPr
       )}
 
       <div className="flex items-center justify-end gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
-        <span>Less</span>
+        <span>{labels.less}</span>
         {[0, 0.15, 0.35, 0.6, 0.85].map((ratio, i) => (
           <div
             key={i}
@@ -271,9 +297,9 @@ export function GrassMap({ data, accent, isDark = false, unit = "" }: GrassMapPr
             style={{ backgroundColor: ratio === 0 ? (isDark ? "rgb(39, 39, 42)" : "rgb(244, 244, 245)") : grassColor(Math.ceil(ratio * 10), 10, isDark, accent) }}
           />
         ))}
-        <span>More</span>
+        <span>{labels.more}</span>
         <div className="ml-2 w-3 h-3 rounded-xs" style={{ backgroundColor: accent, opacity: 0.6 }} />
-        <span>1st</span>
+        <span>{labels.first}</span>
       </div>
     </div>
   );

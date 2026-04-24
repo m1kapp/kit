@@ -94,10 +94,20 @@ export function Watermark({
 
   const tileW = 180;
   const tileH = 100;
+  const maxTileTextW = tileW * 0.9; // 90% of tile width as max text width
   const textFontSize = Math.max(14, Math.min(28, Math.floor(160 / text.length)));
   const sponsorFontSize = sponsor
     ? Math.max(14, Math.min(28, Math.floor(160 / sponsor.name.length)))
     : textFontSize;
+
+  // Estimate if sponsor text overflows tile and needs textLength constraint
+  const sponsorTextW = sponsor
+    ? sponsor.name.length * sponsorFontSize * 0.6
+    : 0;
+  const sponsorNeedsClamp = sponsorTextW > maxTileTextW;
+  const sponsorLengthAttrs = sponsorNeedsClamp
+    ? { textLength: maxTileTextW, lengthAdjust: "spacingAndGlyphs" as const }
+    : {};
 
   const textStyle: React.CSSProperties = {
     fill: "rgba(255,255,255,0.12)",
@@ -164,7 +174,7 @@ export function Watermark({
                 className="wm-link"
                 style={{ pointerEvents: "auto" }}
               >
-                <text x={tileW * 1.5} y={tileH * 0.5} fontSize={sponsorFontSize} {...textAttrs}>
+                <text x={tileW * 1.5} y={tileH * 0.5} fontSize={sponsorFontSize} {...textAttrs} {...sponsorLengthAttrs}>
                   {sponsor.name}
                 </text>
               </a>
@@ -183,7 +193,7 @@ export function Watermark({
                 className="wm-link"
                 style={{ pointerEvents: "auto" }}
               >
-                <text x={tileW * 0.5} y={tileH * 1.5} fontSize={sponsorFontSize} {...textAttrs}>
+                <text x={tileW * 0.5} y={tileH * 1.5} fontSize={sponsorFontSize} {...textAttrs} {...sponsorLengthAttrs}>
                   {sponsor.name}
                 </text>
               </a>

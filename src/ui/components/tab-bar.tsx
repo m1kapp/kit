@@ -35,13 +35,14 @@ export function Tab({ active, onClick, icon, label, activeColor }: TabProps) {
   return (
     <button
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
       className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors ${
         !active ? "text-zinc-300 dark:text-zinc-600" : ""
       }`}
       style={active ? { color: activeColor } : undefined}
     >
       {icon}
-      <span className="text-[10px] font-medium">{label}</span>
+      <span className="text-[10px] font-medium max-w-full truncate px-1">{label}</span>
     </button>
   );
 }

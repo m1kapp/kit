@@ -33,7 +33,7 @@ export function Badge({
 }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center font-semibold rounded-full leading-none ${variants[variant]} ${sizeStyles[size]} ${className}`}
+      className={`inline-flex items-center font-semibold rounded-full leading-none max-w-full truncate ${variants[variant]} ${sizeStyles[size]} ${className}`}
     >
       {children}
     </span>

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { colors } from "./colors";
+import { useFocusTrap } from "../hooks/use-focus-trap";
 
 // Reads from cookie (set by server) so there's no flash on SSR.
 // Falls back to dark mode if no cookie is found.
@@ -106,6 +107,13 @@ export function ThemeButton({ color, dark: darkProp, onClick, className = "" }: 
   );
 }
 
+export interface ThemeDialogLabels {
+  title?: string;
+  light?: string;
+  dark?: string;
+  close?: string;
+}
+
 export interface ThemeDialogProps {
   open: boolean;
   onClose: () => void;
@@ -115,6 +123,8 @@ export interface ThemeDialogProps {
   onDarkToggle?: () => void;
   /** Override the color palette. Defaults to built-in colors. */
   palette?: Record<string, string>;
+  /** Override default Korean labels for i18n */
+  labels?: ThemeDialogLabels;
 }
 
 /**
@@ -129,8 +139,34 @@ export function ThemeDialog({
   dark: darkProp,
   onDarkToggle,
   palette = colors,
+  labels: _labels,
 }: ThemeDialogProps) {
+  const l = { title: "테마", light: "라이트", dark: "다크", close: "닫기", ..._labels };
   const [dark, toggleDark] = useDarkMode(darkProp);
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  const [target, setTarget] = useState<HTMLElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const trapRef = useFocusTrap<HTMLDivElement>(visible);
+
+  useEffect(() => {
+    const el =
+      anchorRef.current?.closest<HTMLElement>(".app-shell-root") ??
+      document.querySelector<HTMLElement>(".app-shell-root");
+    setTarget(el ?? document.body);
+  }, []);
+
+  // Mount → animate in / out
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
+    } else {
+      setVisible(false);
+      const t = setTimeout(() => setMounted(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [open]);
 
   function handleDarkToggle() {
     if (onDarkToggle) onDarkToggle();
@@ -146,24 +182,32 @@ export function ThemeDialog({
     return () => window.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
-  if (!open || typeof document === "undefined") return null;
+  if (!mounted || typeof document === "undefined" || !target) return (
+    <span ref={anchorRef} aria-hidden="true" className="hidden" />
+  );
 
   const entries = Object.entries(palette);
 
-  return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-end justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+  return (
+    <>
+      <span ref={anchorRef} aria-hidden="true" className="hidden" />
+      {createPortal(
+    <div className="absolute inset-0 z-[200] flex items-end justify-center" onClick={onClose}>
+      <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`} />
       <div
-        className="relative z-10 w-full max-w-[430px] mb-3 mx-3 rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden"
+        ref={trapRef}
+        className={`relative z-10 w-full max-w-[430px] mb-3 mx-3 rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden transition-all duration-300 ease-out ${
+          visible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-4 pt-4 pb-3">
-          <p className="text-sm font-bold text-zinc-900 dark:text-white mb-3">테마</p>
+          <p className="text-sm font-bold text-zinc-900 dark:text-white mb-3">{l.title}</p>
 
           <div className="flex gap-2 mb-4">
               {[
-                { label: "라이트", isDark: false },
-                { label: "다크", isDark: true },
+                { label: l.light, isDark: false },
+                { label: l.dark, isDark: true },
               ].map((mode) => {
                 const active = dark === mode.isDark;
                 return (
@@ -200,13 +244,14 @@ export function ThemeDialog({
         </div>
 
         <div className="px-4 pb-3 grid grid-cols-5 gap-3 justify-items-center">
-          {entries.map(([, value]) => (
+          {entries.map(([name, value]) => (
             <button
               key={value}
               onClick={() => {
                 onSelect(value);
                 onClose();
               }}
+              aria-label={name}
               className="relative w-11 h-11 rounded-full transition-all hover:scale-110"
               style={{
                 backgroundColor: value,
@@ -231,11 +276,13 @@ export function ThemeDialog({
             onClick={onClose}
             className="w-full py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
           >
-            Close
+            {l.close}
           </button>
         </div>
       </div>
     </div>,
-    document.body
+    target,
+  )}
+    </>
   );
 }

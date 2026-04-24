@@ -1,5 +1,20 @@
 import { useState, useEffect } from "react";
 
+const CHAR_POP_KEYFRAMES = `
+@keyframes m1k-char-pop {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}`;
+
+let charPopInjected = false;
+function injectCharPop() {
+  if (charPopInjected || typeof document === "undefined") return;
+  const el = document.createElement("style");
+  el.textContent = CHAR_POP_KEYFRAMES;
+  document.head.appendChild(el);
+  charPopInjected = true;
+}
+
 export interface TypewriterProps {
   /** Words to cycle through */
   words: string[];
@@ -32,6 +47,7 @@ export function Typewriter({
   cursorColor,
   className = "",
 }: TypewriterProps) {
+  injectCharPop();
   const [wordIndex, setWordIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [deleting, setDeleting] = useState(false);
@@ -98,12 +114,6 @@ export function Typewriter({
           transition: "opacity 0.1s",
         }}
       />
-      <style>{`
-        @keyframes m1k-char-pop {
-          0% { opacity: 0; transform: translateY(4px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </span>
   );
 }

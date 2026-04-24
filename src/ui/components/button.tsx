@@ -76,7 +76,7 @@ export function Button({
 
   const { onClick, disabled } = props as ButtonAsButton;
   return (
-    <button onClick={onClick} disabled={disabled} className={base}>
+    <button onClick={onClick} disabled={disabled} className={`${base} ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}>
       {children}
     </button>
   );
