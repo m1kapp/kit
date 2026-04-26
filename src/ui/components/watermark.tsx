@@ -72,6 +72,52 @@ function appendUtm(url: string): string {
   }
 }
 
+/** Estimate rendered width of a string. CJK chars ≈ 1.0×, Latin ≈ 0.62× font size. */
+function estimateWidth(text: string, fontSize: number): number {
+  return [...text].reduce((w, c) => {
+    const code = c.charCodeAt(0);
+    const isCJK =
+      (code >= 0x1100 && code <= 0x11FF) || // Hangul Jamo
+      (code >= 0x3000 && code <= 0x9FFF) || // CJK, Kana
+      (code >= 0xAC00 && code <= 0xD7AF) || // Hangul Syllables
+      (code >= 0xF900 && code <= 0xFAFF) || // CJK Compat
+      (code >= 0xFF00 && code <= 0xFFEF);   // Fullwidth
+    return w + fontSize * (isCJK ? 1.0 : 0.62);
+  }, 0);
+}
+
+/**
+ * Split text into up to `maxLines` lines that each fit within `maxWidth`.
+ * Prefers breaking at whitespace; falls back to character-level breaks.
+ */
+function splitLines(text: string, fontSize: number, maxWidth: number, maxLines: number): string[] {
+  if (estimateWidth(text, fontSize) <= maxWidth) return [text];
+
+  const lines: string[] = [];
+  let remaining = text.trim();
+
+  while (remaining.length > 0 && lines.length < maxLines - 1) {
+    let cutAt = 0;
+    for (let i = 1; i <= remaining.length; i++) {
+      if (estimateWidth(remaining.slice(0, i), fontSize) > maxWidth) break;
+      cutAt = i;
+    }
+    if (cutAt === 0) cutAt = 1; // at least one char per line
+
+    // Prefer breaking at whitespace — but only when the text doesn't already fully fit
+    if (cutAt < remaining.length) {
+      const lastSpace = remaining.slice(0, cutAt + 1).lastIndexOf(" ");
+      if (lastSpace > 0) cutAt = lastSpace;
+    }
+
+    lines.push(remaining.slice(0, cutAt).trim());
+    remaining = remaining.slice(cutAt).trim();
+  }
+
+  if (remaining.length > 0) lines.push(remaining);
+  return lines.filter(Boolean);
+}
+
 /**
  * Full-screen colored background with repeating animated text watermark pattern.
  *
@@ -94,31 +140,50 @@ export function Watermark({
 
   const tileW = 180;
   const tileH = 100;
-  const maxTileTextW = tileW * 0.9; // 90% of tile width as max text width
+  const maxTileTextW = tileW * 0.88;
   const textFontSize = Math.max(14, Math.min(28, Math.floor(160 / text.length)));
-  const sponsorFontSize = sponsor
+
+  // Font size: start from length-based estimate, then try to fit in ≤3 lines
+  const rawSponsorFontSize = sponsor
     ? Math.max(14, Math.min(28, Math.floor(160 / sponsor.name.length)))
     : textFontSize;
 
-  // Estimate if sponsor text overflows tile and needs textLength constraint
-  const sponsorTextW = sponsor
-    ? sponsor.name.length * sponsorFontSize * 0.6
-    : 0;
-  const sponsorNeedsClamp = sponsorTextW > maxTileTextW;
-  const sponsorLengthAttrs = sponsorNeedsClamp
-    ? { textLength: maxTileTextW, lengthAdjust: "spacingAndGlyphs" as const }
-    : {};
+  const MAX_LINES = 3;
+  const sponsorLines = sponsor
+    ? splitLines(sponsor.name, rawSponsorFontSize, maxTileTextW, MAX_LINES)
+    : [];
+  const sponsorFontSize = rawSponsorFontSize;
+  const lineH = sponsorFontSize * 1.25;
 
   const textStyle: React.CSSProperties = {
     fill: "rgba(255,255,255,0.12)",
     fontWeight: 900,
     userSelect: "none",
+    WebkitFontSmoothing: "antialiased",
+    MozOsxFontSmoothing: "grayscale",
   };
   const textAttrs = {
     textAnchor: "middle" as const,
     dominantBaseline: "central" as const,
+    textRendering: "geometricPrecision" as const,
     style: textStyle,
   };
+
+  /** Render sponsor text as multiline tspans, vertically centered in the tile */
+  function SponsorText({ cx, cy }: { cx: number; cy: number }) {
+    if (!sponsor) return null;
+    const totalH = (sponsorLines.length - 1) * lineH;
+    const startY = cy - totalH / 2;
+    return (
+      <text x={cx} fontSize={sponsorFontSize} {...textAttrs}>
+        {sponsorLines.map((line, i) => (
+          <tspan key={i} x={cx} y={startY + i * lineH}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    );
+  }
 
   return (
     <div
@@ -174,9 +239,7 @@ export function Watermark({
                 className="wm-link"
                 style={{ pointerEvents: "auto" }}
               >
-                <text x={tileW * 1.5} y={tileH * 0.5} fontSize={sponsorFontSize} {...textAttrs} {...sponsorLengthAttrs}>
-                  {sponsor.name}
-                </text>
+                <SponsorText cx={tileW * 1.5} cy={tileH * 0.5} />
               </a>
             ) : (
               <text x={tileW * 1.5} y={tileH * 0.5} fontSize={textFontSize} {...textAttrs}>
@@ -193,9 +256,7 @@ export function Watermark({
                 className="wm-link"
                 style={{ pointerEvents: "auto" }}
               >
-                <text x={tileW * 0.5} y={tileH * 1.5} fontSize={sponsorFontSize} {...textAttrs} {...sponsorLengthAttrs}>
-                  {sponsor.name}
-                </text>
+                <SponsorText cx={tileW * 0.5} cy={tileH * 1.5} />
               </a>
             ) : (
               <text x={tileW * 0.5} y={tileH * 1.5} fontSize={textFontSize} {...textAttrs}>
