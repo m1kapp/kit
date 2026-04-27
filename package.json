@@ -55,6 +55,8 @@
     "postinstall": "node bin/postinstall.mjs",
     "build": "rm -rf dist && mkdir -p .tmp && npx @tailwindcss/cli -i src/ui/styles.css -o .tmp/styles.css --minify && node scripts/embed-css.mjs && tsup",
     "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "tsc --noEmit",
     "demo": "npm run build && cd demo && npm run dev",
     "demo:dev": "cd demo && npm run dev"
@@ -80,7 +82,8 @@
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.5"
   },
   "keywords": [
     "react",
