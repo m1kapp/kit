@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useEscapeKey } from "../hooks/use-escape-key";
+import { useFocusTrap } from "../hooks/use-focus-trap";
+import { useScrollLock } from "../hooks/use-scroll-lock";
 
 export interface InAppSheetProps {
   open: boolean;
@@ -23,7 +26,7 @@ export function InAppSheet({
 }: InAppSheetProps) {
   const [target, setTarget] = useState<HTMLElement | null>(null);
   const anchorRef = useRef<HTMLSpanElement | null>(null);
-  const sheetRef = useRef<HTMLDivElement>(null);
+  const trapRef = useFocusTrap<HTMLDivElement>(open);
 
   // Swipe state
   const dragState = useRef<{ startY: number; currentY: number; dragging: boolean }>({
@@ -40,17 +43,8 @@ export function InAppSheet({
     setTarget(el ?? document.body);
   }, []);
 
-  // Lock background scroll when sheet is open
-  useEffect(() => {
-    if (!open) return;
-    const scrollEl =
-      anchorRef.current?.closest<HTMLElement>(".tab-scroll") ??
-      document.querySelector<HTMLElement>(".tab-scroll");
-    if (!scrollEl) return;
-    const prev = scrollEl.style.overflow;
-    scrollEl.style.overflow = "hidden";
-    return () => { scrollEl.style.overflow = prev; };
-  }, [open]);
+  useScrollLock(open, anchorRef);
+  useEscapeKey(open, onClose);
 
   // Reset drag offset when closed
   useEffect(() => {
@@ -106,7 +100,9 @@ export function InAppSheet({
               />
               {/* sheet */}
               <div
-                ref={sheetRef}
+                ref={trapRef}
+                role="dialog"
+                aria-modal="true"
                 className={`relative z-10 w-full transition-transform duration-300 ease-out ${fullHeight ? "h-full" : ""} ${open && dragOffset === 0 ? "translate-y-0" : !open ? "translate-y-full" : ""} ${className}`}
                 style={sheetStyle}
                 onClick={(e) => e.stopPropagation()}

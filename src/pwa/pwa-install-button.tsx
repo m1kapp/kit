@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useEscapeKey } from "../ui/hooks/use-escape-key";
+import { useFocusTrap } from "../ui/hooks/use-focus-trap";
+import { useScrollLock } from "../ui/hooks/use-scroll-lock";
 import { usePWAInstall } from "./use-pwa-install";
 
 interface PWAInstallButtonProps {
@@ -90,6 +93,10 @@ interface IOSInstallSheetProps {
  * Can also be used standalone if you need custom trigger UI.
  */
 export function IOSInstallSheet({ open, onClose, appName, iconSrc }: IOSInstallSheetProps) {
+  const trapRef = useFocusTrap<HTMLDivElement>(open);
+  useEscapeKey(open, onClose);
+  useScrollLock(open);
+
   if (!open) return null;
 
   const steps = [
@@ -129,7 +136,13 @@ export function IOSInstallSheet({ open, onClose, appName, iconSrc }: IOSInstallS
       />
 
       {/* Sheet */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-[430px] rounded-t-2xl bg-white dark:bg-zinc-900 shadow-2xl">
+      <div
+        ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${appName} 설치하기`}
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-[430px] rounded-t-2xl bg-white dark:bg-zinc-900 shadow-2xl"
+      >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-9 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700" />

@@ -1,6 +1,10 @@
+"use client";
+
 import React, { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useEscapeKey } from "../hooks/use-escape-key";
 import { useFocusTrap } from "../hooks/use-focus-trap";
+import { useScrollLock } from "../hooks/use-scroll-lock";
 
 export interface DialogProps {
   open: boolean;
@@ -59,27 +63,8 @@ export function Dialog({
     setTarget(el ?? document.body);
   }, []);
 
-  // Escape key
-  useEffect(() => {
-    if (!open || persistent) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose, persistent]);
-
-  // Scroll lock (tab-scroll 내부만)
-  useEffect(() => {
-    if (!open) return;
-    const scrollEl =
-      anchorRef.current?.closest<HTMLElement>(".tab-scroll") ??
-      document.querySelector<HTMLElement>(".tab-scroll");
-    if (!scrollEl) return;
-    const prev = scrollEl.style.overflow;
-    scrollEl.style.overflow = "hidden";
-    return () => { scrollEl.style.overflow = prev; };
-  }, [open]);
+  useEscapeKey(open && !persistent, onClose);
+  useScrollLock(open, anchorRef);
 
   if (!mounted || typeof document === "undefined" || !target) return (
     <span ref={anchorRef} aria-hidden="true" className="hidden" />

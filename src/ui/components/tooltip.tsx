@@ -1,5 +1,8 @@
-import { type ReactNode, useState } from "react";
+"use client";
+
+import { type ReactNode, useCallback, useId, useState } from "react";
 import { createPortal } from "react-dom";
+import { useEscapeKey } from "../hooks/use-escape-key";
 
 export interface TooltipProps {
   label: string;
@@ -19,11 +22,14 @@ export interface TooltipProps {
  */
 export function Tooltip({ label, children, placement = "top" }: TooltipProps) {
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const tooltipId = useId();
 
   const show = (e: React.MouseEvent | React.FocusEvent) => {
     setRect((e.currentTarget as HTMLElement).getBoundingClientRect());
   };
-  const hide = () => setRect(null);
+  const hide = useCallback(() => setRect(null), []);
+
+  useEscapeKey(rect !== null, hide);
 
   const top = rect
     ? placement === "top"
@@ -41,6 +47,7 @@ export function Tooltip({ label, children, placement = "top" }: TooltipProps) {
         onMouseLeave={hide}
         onFocus={show}
         onBlur={hide}
+        aria-describedby={rect ? tooltipId : undefined}
       >
         {children}
       </span>
@@ -48,6 +55,8 @@ export function Tooltip({ label, children, placement = "top" }: TooltipProps) {
       {rect &&
         createPortal(
           <div
+            id={tooltipId}
+            role="tooltip"
             className="fixed z-[9999] pointer-events-none"
             style={{ top, left, transform: "translateX(-50%)" }}
           >

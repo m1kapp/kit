@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useCallback, useState, useMemo, useRef } from "react";
+import { useEscapeKey } from "../hooks/use-escape-key";
 
 export interface GrassMapData {
   date: string;  // "YYYY-MM-DD"
@@ -83,6 +84,9 @@ export function GrassMap({ data, accent, isDark = false, unit = "", labels: _lab
   };
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const outerRef = useRef<HTMLDivElement>(null);
+  const dismissTooltip = useCallback(() => setTooltip(null), []);
+
+  useEscapeKey(tooltip !== null, dismissTooltip);
 
   const availableYears = useMemo(() => {
     const years = new Set<number>();
@@ -267,6 +271,7 @@ export function GrassMap({ data, accent, isDark = false, unit = "", labels: _lab
 
       {tooltip && (
         <div
+          role="tooltip"
           className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-full"
           style={{ left: tooltip.x, top: tooltip.y - 6 }}
         >

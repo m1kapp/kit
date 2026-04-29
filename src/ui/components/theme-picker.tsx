@@ -1,7 +1,11 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { colors } from "./colors";
+import { useEscapeKey } from "../hooks/use-escape-key";
 import { useFocusTrap } from "../hooks/use-focus-trap";
+import { useScrollLock } from "../hooks/use-scroll-lock";
 
 // Reads from cookie (set by server) so there's no flash on SSR.
 // Falls back to dark mode if no cookie is found.
@@ -156,6 +160,9 @@ export function ThemeDialog({
     setTarget(el ?? document.body);
   }, []);
 
+  useScrollLock(open, anchorRef);
+  useEscapeKey(open, onClose);
+
   // Mount → animate in / out
   useEffect(() => {
     if (open) {
@@ -173,15 +180,6 @@ export function ThemeDialog({
     else toggleDark();
   }
 
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [open, onClose]);
-
   if (!mounted || typeof document === "undefined" || !target) return (
     <span ref={anchorRef} aria-hidden="true" className="hidden" />
   );
@@ -196,6 +194,9 @@ export function ThemeDialog({
       <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`} />
       <div
         ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={l.title}
         className={`relative z-10 w-full max-w-[430px] mb-3 mx-3 rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden transition-all duration-300 ease-out ${
           visible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
         }`}
