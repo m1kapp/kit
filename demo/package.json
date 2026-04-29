@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@m1kapp/kit": "latest",
+    "@m1kapp/kit": "file:..",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
