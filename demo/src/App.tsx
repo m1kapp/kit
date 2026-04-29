@@ -11,7 +11,7 @@ import {
   Avatar, Badge, ShareButton, useShare,
   ToastProvider, useToast,
   useLocalStorage, useDebounce, useFormSubmit, useInView,
-  Skeleton, Dialog, InAppSheet,
+  Skeleton, Dialog, InAppSheet, Fab,
   mobileViewport, svgIcon, createManifest,
   PWAInstallButton, IOSInstallSheet, usePWAInstall,
   useFetch, usePolling,
@@ -1898,8 +1898,16 @@ function HeaderShareButton() {
   );
 }
 
+const HeartIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+
 export default function App() {
   const [tab, setTab] = useState<"home" | "libraries">("home");
+  const [fabDialogOpen, setFabDialogOpen] = useState(false);
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -1928,6 +1936,25 @@ export default function App() {
           <AppShellContent key={tab}>
             {tab === "home"      && <HomeTab themeColor={THEME_COLOR} onGoToLibraries={() => setTab("libraries")} />}
             {tab === "libraries" && <LibrariesTab themeColor={THEME_COLOR} />}
+            <Fab
+              onClick={() => setFabDialogOpen(true)}
+              icon={<HeartIcon />}
+              color={THEME_COLOR}
+            />
+            <Dialog open={fabDialogOpen} onClose={() => setFabDialogOpen(false)} title={liked ? "감사합니다!" : "@m1kapp/kit"}>
+              <div className="flex flex-col items-center gap-4 py-2">
+                <button
+                  onClick={() => setLiked(!liked)}
+                  className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90"
+                  style={{ backgroundColor: liked ? THEME_COLOR : undefined, color: liked ? "#fff" : "#a1a1aa" }}
+                >
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+                </button>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {liked ? "좋아요를 눌러주셨어요 :)" : "하트를 눌러보세요!"}
+                </p>
+              </div>
+            </Dialog>
           </AppShellContent>
 
           <TabBar>

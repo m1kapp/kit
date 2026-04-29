@@ -13,6 +13,10 @@ export interface InAppSheetProps {
   className?: string;
   /** true면 시트가 AppShell 전체 높이를 채움 */
   fullHeight?: boolean;
+  /** 우상단 X 버튼 숨기기. Default: false (보임) */
+  hideClose?: boolean;
+  /** 닫기 버튼 aria-label. Default: "닫기" */
+  closeLabel?: string;
 }
 
 const DISMISS_THRESHOLD = 80; // px to swipe before closing
@@ -23,6 +27,8 @@ export function InAppSheet({
   children,
   className = "",
   fullHeight = false,
+  hideClose = false,
+  closeLabel = "닫기",
 }: InAppSheetProps) {
   const [target, setTarget] = useState<HTMLElement | null>(null);
   const anchorRef = useRef<HTMLSpanElement | null>(null);
@@ -110,9 +116,21 @@ export function InAppSheet({
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
               >
-                {/* Drag handle */}
-                <div className="flex justify-center pt-2 pb-1 cursor-grab">
+                {/* Drag handle + close */}
+                <div className="relative flex justify-center pt-2 pb-1 cursor-grab">
                   <div className="w-8 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                  {!hideClose && (
+                    <button
+                      onClick={onClose}
+                      aria-label={closeLabel}
+                      className="absolute top-2 right-3 p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
                 {children}
               </div>
