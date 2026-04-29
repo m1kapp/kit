@@ -6,6 +6,9 @@ export type { ButtonProps } from "./components/button";
 export { AppShell, AppShellHeader, AppShellContent } from "./components/app-shell";
 export type { AppShellProps, AppShellHeaderProps, AppShellContentProps } from "./components/app-shell";
 
+export { Fab } from "./components/fab";
+export type { FabProps } from "./components/fab";
+
 export { TabBar, Tab } from "./components/tab-bar";
 export type { TabBarProps, TabProps } from "./components/tab-bar";
 
