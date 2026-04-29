@@ -29,7 +29,7 @@ export type { ColorName } from "./components/colors";
 export { ThemeButton, ThemeDialog, THEME_SCRIPT } from "./components/theme-picker";
 export type { ThemeButtonProps, ThemeDialogProps, ThemeDialogLabels } from "./components/theme-picker";
 
-export { fonts, fontFamily } from "./components/fonts";
+export { fonts, fontFamily, FontLinks } from "./components/fonts";
 export type { FontName } from "./components/fonts";
 
 export { Typewriter } from "./components/typewriter";

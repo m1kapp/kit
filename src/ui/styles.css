@@ -10,6 +10,12 @@
     min-height: 100dvh;
   }
 
+  /* Remove default focus outline on interactive elements */
+  button, a, [role="button"], [tabindex] {
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   /* Prevent iOS auto-zoom on input focus (triggered when font-size < 16px) */
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
   select,
