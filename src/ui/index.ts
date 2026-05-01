@@ -68,6 +68,7 @@ export type { UseInViewOptions, UseInViewResult } from "./hooks/use-in-view";
 export { useFocusTrap } from "./hooks/use-focus-trap";
 export { useEscapeKey } from "./hooks/use-escape-key";
 export { useScrollLock } from "./hooks/use-scroll-lock";
+export { usePortalTarget } from "./hooks/use-portal-target";
 
 export { Skeleton } from "./components/skeleton";
 export type { SkeletonProps } from "./components/skeleton";

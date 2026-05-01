@@ -12,7 +12,11 @@ export function useScrollLock(active: boolean, anchorRef?: RefObject<HTMLElement
       document.querySelector<HTMLElement>(".tab-scroll");
     if (!scrollEl) return;
     const prev = scrollEl.style.overflow;
+    const scrollY = scrollEl.scrollTop;
     scrollEl.style.overflow = "hidden";
-    return () => { scrollEl.style.overflow = prev; };
+    return () => {
+      scrollEl.style.overflow = prev;
+      scrollEl.scrollTop = scrollY;
+    };
   }, [active, anchorRef]);
 }

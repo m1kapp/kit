@@ -50,8 +50,8 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(active: boolea
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      // Restore focus when trap is deactivated
-      previousFocus.current?.focus();
+      // Restore focus when trap is deactivated (only if element is still in DOM)
+      if (previousFocus.current?.isConnected) previousFocus.current.focus();
     };
   }, [active]);
 

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { useEscapeKey } from "../hooks/use-escape-key";
 import { useFocusTrap } from "../hooks/use-focus-trap";
+import { usePortalTarget } from "../hooks/use-portal-target";
 import { useScrollLock } from "../hooks/use-scroll-lock";
 
 export interface DialogProps {
@@ -39,8 +40,7 @@ export function Dialog({
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [target, setTarget] = useState<HTMLElement | null>(null);
-  const anchorRef = useRef<HTMLSpanElement>(null);
+  const [anchorRef, target] = usePortalTarget();
   const trapRef = useFocusTrap<HTMLDivElement>(visible);
 
   // Mount → animate in
@@ -54,14 +54,6 @@ export function Dialog({
       return () => clearTimeout(t);
     }
   }, [open]);
-
-  // Find AppShell portal target
-  useEffect(() => {
-    const el =
-      anchorRef.current?.closest<HTMLElement>(".app-shell-root") ??
-      document.querySelector<HTMLElement>(".app-shell-root");
-    setTarget(el ?? document.body);
-  }, []);
 
   useEscapeKey(open && !persistent, onClose);
   useScrollLock(open, anchorRef);

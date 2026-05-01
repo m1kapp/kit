@@ -1,6 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { usePortalTarget } from "../hooks/use-portal-target";
 
 export interface FabProps {
   onClick: () => void;
@@ -13,6 +15,9 @@ export interface FabProps {
 /**
  * Floating Action Button — positioned absolute bottom-right inside AppShell.
  *
+ * Portals into the nearest `.in-app-sheet-content-portal` (AppShellContent wrapper)
+ * so it stays pinned regardless of scroll content height.
+ *
  * @example
  * <AppShellContent>
  *   {content}
@@ -20,15 +25,24 @@ export interface FabProps {
  * </AppShellContent>
  */
 export function Fab({ onClick, icon, color, className = "" }: FabProps) {
-  return (
+  const [anchorRef, portal] = usePortalTarget([".in-app-sheet-content-portal", ".app-shell-root"]);
+
+  const button = (
     <button
       onClick={onClick}
-      className={`sticky bottom-6 ml-auto mr-6 z-30 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 hover:scale-105 cursor-pointer ${
+      className={`absolute bottom-6 right-6 z-30 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 hover:scale-105 cursor-pointer ${
         color ? "" : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
       } ${className}`}
       style={color ? { backgroundColor: color, color: "#fff" } : undefined}
     >
       {icon}
     </button>
+  );
+
+  return (
+    <>
+      <span ref={anchorRef} className="hidden" />
+      {portal ? createPortal(button, portal) : button}
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { colors } from "./colors";
 import { useEscapeKey } from "../hooks/use-escape-key";
 import { useFocusTrap } from "../hooks/use-focus-trap";
+import { usePortalTarget } from "../hooks/use-portal-target";
 import { useScrollLock } from "../hooks/use-scroll-lock";
 
 // Reads from cookie (set by server) so there's no flash on SSR.
@@ -147,18 +148,10 @@ export function ThemeDialog({
 }: ThemeDialogProps) {
   const l = { title: "테마", light: "라이트", dark: "다크", close: "닫기", ..._labels };
   const [dark, toggleDark] = useDarkMode(darkProp);
-  const anchorRef = useRef<HTMLSpanElement>(null);
-  const [target, setTarget] = useState<HTMLElement | null>(null);
+  const [anchorRef, target] = usePortalTarget();
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const trapRef = useFocusTrap<HTMLDivElement>(visible);
-
-  useEffect(() => {
-    const el =
-      anchorRef.current?.closest<HTMLElement>(".app-shell-root") ??
-      document.querySelector<HTMLElement>(".app-shell-root");
-    setTarget(el ?? document.body);
-  }, []);
 
   useScrollLock(open, anchorRef);
   useEscapeKey(open, onClose);

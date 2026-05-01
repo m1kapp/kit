@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useEffect,
   useId,
+  useRef,
 } from "react";
 
 /* ─────────────────────────────────────────
@@ -38,6 +39,11 @@ const ToastContext = createContext<ToastFn | null>(null);
 ───────────────────────────────────────── */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  useEffect(() => () => {
+    timersRef.current.forEach((t) => clearTimeout(t));
+  }, []);
 
   const toast = useCallback<ToastFn>((message, options) => {
     const id = Math.random().toString(36).slice(2, 9);
@@ -46,9 +52,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       ...prev,
       { id, message, variant: options?.variant ?? "default", duration },
     ]);
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
+      timersRef.current.delete(id);
     }, duration);
+    timersRef.current.set(id, timer);
   }, []);
 
   return (

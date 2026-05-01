@@ -33,10 +33,10 @@ export function Tooltip({ label, children, placement = "top" }: TooltipProps) {
 
   const top = rect
     ? placement === "top"
-      ? rect.top + window.scrollY - 36
-      : rect.bottom + window.scrollY + 8
+      ? rect.top - 36
+      : rect.bottom + 8
     : 0;
-  const rawLeft = rect ? rect.left + window.scrollX + rect.width / 2 : 0;
+  const rawLeft = rect ? rect.left + rect.width / 2 : 0;
   const left = rect ? Math.max(100, Math.min(rawLeft, window.innerWidth - 100)) : 0;
 
   return (

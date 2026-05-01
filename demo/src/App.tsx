@@ -373,21 +373,10 @@ function InAppSheetDemo({ themeColor }: { themeColor: string }) {
   const [openType, setOpenType] = useState<"default" | "full" | null>(null);
 
   const sheetContent = (onClose: () => void, full?: boolean) => (
-    <div className={`rounded-t-[28px] border border-zinc-200 bg-white px-4 pb-5 pt-3 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 ${full ? "h-full flex flex-col" : ""}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">신규 기능 안내</p>
-          <p className="mt-1 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
-            앱을 벗어나지 않고도 공지, 프로모션, 빠른 액션을 시트 형태로 노출할 수 있어요.
-          </p>
-        </div>
-        <div
-          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl text-lg font-bold text-white"
-          style={{ backgroundColor: themeColor }}
-        >
-          K
-        </div>
-      </div>
+    <div className={`px-5 pb-5 ${full ? "flex-1 flex flex-col" : ""}`}>
+      <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+        앱을 벗어나지 않고도 공지, 프로모션, 빠른 액션을 시트 형태로 노출할 수 있어요.
+      </p>
       <div className="mt-4 grid grid-cols-3 gap-2">
         {[
           { label: "공지", value: "in-app" },
@@ -422,7 +411,7 @@ function InAppSheetDemo({ themeColor }: { themeColor: string }) {
     <ComponentCard
       name="InAppSheet"
       desc="AppShell 내부에 붙는 인앱 바텀 시트 — fullHeight로 높이 제어"
-      code={`<InAppSheet open={open} onClose={() => setOpen(false)}>
+      code={`<InAppSheet title="안내" open={open} onClose={() => setOpen(false)}>
   {/* fullHeight 추가하면 전체 높이 */}
 </InAppSheet>`}
     >
@@ -447,17 +436,18 @@ function InAppSheetDemo({ themeColor }: { themeColor: string }) {
           </div>
           <button
             onClick={() => setOpenType("full")}
-            className="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+            className="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: themeColor }}
           >
             열기
           </button>
         </div>
       </div>
 
-      <InAppSheet open={openType === "default"} onClose={() => setOpenType(null)}>
+      <InAppSheet title="신규 기능 안내" open={openType === "default"} onClose={() => setOpenType(null)}>
         {sheetContent(() => setOpenType(null))}
       </InAppSheet>
-      <InAppSheet fullHeight open={openType === "full"} onClose={() => setOpenType(null)}>
+      <InAppSheet title="신규 기능 안내" fullHeight open={openType === "full"} onClose={() => setOpenType(null)}>
         {sheetContent(() => setOpenType(null), true)}
       </InAppSheet>
     </ComponentCard>
@@ -761,6 +751,19 @@ function UIDetail({ themeColor }: {
           <SkeletonDemo />
           <DialogDemo themeColor={themeColor} />
           <InAppSheetDemo themeColor={themeColor} />
+
+          <ComponentCard name="Fab" desc="Floating Action Button — AppShell 기준 absolute bottom-right 고정" code={`<AppShellContent>\n  {content}\n  <Fab onClick={handleAdd} icon={<PlusIcon />} color="#6366f1" />\n</AppShellContent>`}>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-zinc-400">하단의 하트 버튼이 Fab 컴포넌트입니다</p>
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+                style={{ backgroundColor: themeColor, color: "#fff" }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              </div>
+            </div>
+          </ComponentCard>
+
           <DebounceDemo themeColor={themeColor} />
           <FormSubmitDemo themeColor={themeColor} />
           <UtilsDemo />

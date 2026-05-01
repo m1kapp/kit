@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 /* ─────────────────────────────────────────
    useShare
@@ -19,8 +19,11 @@ export interface UseShareReturn {
 
 export function useShare(defaults?: UseShareOptions): UseShareReturn {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const canNativeShare =
     typeof navigator !== "undefined" && typeof navigator.share === "function";
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
 
   const share = useCallback(
     async (options?: UseShareOptions) => {
@@ -40,7 +43,8 @@ export function useShare(defaults?: UseShareOptions): UseShareReturn {
       try {
         await navigator.clipboard.writeText(url);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => setCopied(false), 2000);
       } catch {}
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

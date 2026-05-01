@@ -250,9 +250,12 @@ export function GrassMap({ data, accent, isDark = false, unit = "", labels: _lab
                 style={{ cursor: day.isOutOfRange ? "default" : "pointer" }}
                 onMouseEnter={(e) => {
                   if (day.isOutOfRange) return;
-                  const svg = e.currentTarget.ownerSVGElement!;
+                  const svg = e.currentTarget.ownerSVGElement;
+                  if (!svg) return;
                   const svgRect = svg.getBoundingClientRect();
-                  const outerRect = outerRef.current!.getBoundingClientRect();
+                  const outer = outerRef.current;
+                  if (!outer) return;
+                  const outerRect = outer.getBoundingClientRect();
                   setTooltip({
                     x: cx + svgRect.left - outerRect.left + CELL_SIZE / 2,
                     y: cy + svgRect.top - outerRect.top,
