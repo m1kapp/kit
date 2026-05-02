@@ -369,6 +369,36 @@ function DialogDemo({ themeColor }: { themeColor: string }) {
   );
 }
 
+function GrassMapDemo({ themeColor, dark }: { themeColor: string; dark: boolean }) {
+  const [binary, setBinary] = useState(false);
+
+  return (
+    <ComponentCard
+      name="GrassMap"
+      desc="GitHub-style activity heatmap"
+      code={`<GrassMap\n  data={[{ date: "2025-01-01", count: 42 }, ...]}\n  accent="${themeColor}"\n  isDark={dark}${binary ? "\n  binary" : ""}\n/>`}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <button
+          onClick={() => setBinary(false)}
+          className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${!binary ? "text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"}`}
+          style={!binary ? { backgroundColor: themeColor } : undefined}
+        >
+          그라데이션
+        </button>
+        <button
+          onClick={() => setBinary(true)}
+          className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${binary ? "text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"}`}
+          style={binary ? { backgroundColor: themeColor } : undefined}
+        >
+          바이너리
+        </button>
+      </div>
+      <GrassMap data={GRASS_DATA} accent={themeColor} isDark={dark} binary={binary} />
+    </ComponentCard>
+  );
+}
+
 function InAppSheetDemo({ themeColor }: { themeColor: string }) {
   const [openType, setOpenType] = useState<"default" | "full" | null>(null);
 
@@ -677,9 +707,7 @@ function UIDetail({ themeColor }: {
             <Button onClick={() => {}}>시작하기</Button>
           </ComponentCard>
 
-          <ComponentCard name="GrassMap" desc="GitHub-style activity heatmap" code={`<GrassMap\n  data={[{ date: "2025-01-01", count: 42 }, ...]}\n  accent="${themeColor}"\n  isDark={dark}\n/>`}>
-            <GrassMap data={GRASS_DATA} accent={themeColor} isDark={dark} />
-          </ComponentCard>
+          <GrassMapDemo themeColor={themeColor} dark={dark} />
 
           <ComponentCard name="Typewriter" desc="Animated typing effect" code={`<Typewriter\n  words={["Hello", "World"]}\n  color="${themeColor}"\n/>`}>
             <p className="text-lg font-bold">

@@ -15,6 +15,10 @@ export interface GrassMapLabels {
   less?: string;
   more?: string;
   first?: string;
+  /** binary 모드 범례 라벨. Default: "완료" */
+  done?: string;
+  /** binary 모드 범례 라벨. Default: "미완료" */
+  notDone?: string;
 }
 
 export interface GrassMapProps {
@@ -23,6 +27,8 @@ export interface GrassMapProps {
   isDark?: boolean;
   /** Unit label appended to count in tooltip. e.g. "명", "commits". Default: "" */
   unit?: string;
+  /** true면 count > 0을 모두 동일한 accent 색으로 표시 (했다/안했다 2색) */
+  binary?: boolean;
   /** Override default Korean labels for i18n */
   labels?: GrassMapLabels;
 }
@@ -72,7 +78,7 @@ function grassColor(count: number, max: number, isDark: boolean, accent: string)
   return `rgb(${Math.round(r + (255 - r) * m)}, ${Math.round(g + (255 - g) * m)}, ${Math.round(b + (255 - b) * m)})`;
 }
 
-export function GrassMap({ data, accent, isDark = false, unit = "", labels: _labels }: GrassMapProps) {
+export function GrassMap({ data, accent, isDark = false, unit = "", binary = false, labels: _labels }: GrassMapProps) {
   const labels = {
     firstRecord: "첫 기록",
     noRecord: "기록 없음",
@@ -80,6 +86,8 @@ export function GrassMap({ data, accent, isDark = false, unit = "", labels: _lab
     less: "Less",
     more: "More",
     first: "1st",
+    done: "완료",
+    notDone: "미완료",
     ..._labels,
   };
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -231,22 +239,18 @@ export function GrassMap({ data, accent, isDark = false, unit = "", labels: _lab
                 ? isDark ? "rgb(24, 24, 27)" : "rgb(250, 250, 250)"
                 : isFirst
                   ? accent
-                  : grassColor(day.count, maxCount, isDark, accent);
+                  : binary
+                    ? (day.count > 0 ? accent : (isDark ? "rgb(39, 39, 42)" : "rgb(244, 244, 245)"))
+                    : grassColor(day.count, maxCount, isDark, accent);
 
             const cx = leftPad + day.col * STEP;
             const cy = topPad + day.row * STEP;
 
+            const showCheck = binary && !day.isOutOfRange && !day.isFuture && day.count > 0;
+
             return (
-              <rect
+              <g
                 key={day.date}
-                x={cx}
-                y={cy}
-                width={CELL_SIZE}
-                height={CELL_SIZE}
-                rx={3}
-                fill={cellFill}
-                stroke={isFirst ? accent : "none"}
-                strokeWidth={isFirst ? 1.5 : 0}
                 style={{ cursor: day.isOutOfRange ? "default" : "pointer" }}
                 onMouseEnter={(e) => {
                   if (day.isOutOfRange) return;
@@ -266,7 +270,28 @@ export function GrassMap({ data, accent, isDark = false, unit = "", labels: _lab
                     isFuture: day.isFuture,
                   });
                 }}
-              />
+              >
+                <rect
+                  x={cx}
+                  y={cy}
+                  width={CELL_SIZE}
+                  height={CELL_SIZE}
+                  rx={3}
+                  fill={cellFill}
+                  stroke={isFirst ? accent : "none"}
+                  strokeWidth={isFirst ? 1.5 : 0}
+                />
+                {showCheck && (
+                  <path
+                    d={`M${cx + 3} ${cy + 6.5} l2.5 3.5 l5 -6`}
+                    fill="none"
+                    stroke="#fff"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                )}
+              </g>
             );
           })}
         </svg>
@@ -282,7 +307,9 @@ export function GrassMap({ data, accent, isDark = false, unit = "", labels: _lab
             <span className="font-medium">{formatTooltipDate(tooltip.date)}</span>
             {!tooltip.isFuture && (
               <span className="ml-1.5 tabular-nums">
-                {tooltip.count > 0 ? `${tooltip.count.toLocaleString()}${unit}` : labels.noRecord}
+                {binary
+                  ? (tooltip.count > 0 ? labels.done : labels.notDone)
+                  : (tooltip.count > 0 ? `${tooltip.count.toLocaleString()}${unit}` : labels.noRecord)}
               </span>
             )}
             {tooltip.isFirst && (
@@ -297,15 +324,29 @@ export function GrassMap({ data, accent, isDark = false, unit = "", labels: _lab
       )}
 
       <div className="flex items-center justify-end gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
-        <span>{labels.less}</span>
-        {[0, 0.15, 0.35, 0.6, 0.85].map((ratio, i) => (
-          <div
-            key={i}
-            className="w-3 h-3 rounded-xs"
-            style={{ backgroundColor: ratio === 0 ? (isDark ? "rgb(39, 39, 42)" : "rgb(244, 244, 245)") : grassColor(Math.ceil(ratio * 10), 10, isDark, accent) }}
-          />
-        ))}
-        <span>{labels.more}</span>
+        {binary ? (
+          <>
+            <div className="w-3 h-3 rounded-xs" style={{ backgroundColor: isDark ? "rgb(39, 39, 42)" : "rgb(244, 244, 245)" }} />
+            <span>{labels.notDone}</span>
+            <svg className="ml-1 w-3 h-3" viewBox="0 0 13 13">
+              <rect width="13" height="13" rx="2" fill={accent} />
+              <path d="M3 6.5 l2.5 3.5 l5 -6" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>{labels.done}</span>
+          </>
+        ) : (
+          <>
+            <span>{labels.less}</span>
+            {[0, 0.15, 0.35, 0.6, 0.85].map((ratio, i) => (
+              <div
+                key={i}
+                className="w-3 h-3 rounded-xs"
+                style={{ backgroundColor: ratio === 0 ? (isDark ? "rgb(39, 39, 42)" : "rgb(244, 244, 245)") : grassColor(Math.ceil(ratio * 10), 10, isDark, accent) }}
+              />
+            ))}
+            <span>{labels.more}</span>
+          </>
+        )}
         <div className="ml-2 w-3 h-3 rounded-xs" style={{ backgroundColor: accent, opacity: 0.6 }} />
         <span>{labels.first}</span>
       </div>
