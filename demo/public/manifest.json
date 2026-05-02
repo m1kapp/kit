@@ -1,7 +1,7 @@
 {
-  "name": "logodown",
-  "short_name": "logodown",
-  "description": "Make logos like markdown logo",
+  "name": "@m1kapp/kit",
+  "short_name": "@m1kapp/kit",
+  "description": "사이드 프로젝트를 빠르게 완성하는 UI 킷",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#10b981",

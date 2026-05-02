@@ -1,6 +1,6 @@
-# logodown — SEO/PWA 패키지
+# @m1kapp/kit — SEO/PWA 패키지
 
-**Make logos like markdown logo**
+**사이드 프로젝트를 빠르게 완성하는 UI 킷**
 
 이 ZIP에 들어있는 파일들을 사이트 `public/` (또는 루트)에 복사한 뒤,
 `head.html` 의 마크업을 `<head>` 에 붙여넣으면 끝.
