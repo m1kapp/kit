@@ -1,0 +1,211 @@
+#!/usr/bin/env node
+/**
+ * m1kkit stats — 프로젝트의 코드량과 kit 사용 현황을 분석해서 .kit-stats.json 생성
+ *
+ * Usage:
+ *   m1kkit stats                    # src/ 기준 분석
+ *   m1kkit stats --dir=app          # 특정 디렉토리 기준
+ *   m1kkit stats --out=public       # 출력 위치 지정
+ */
+
+import fs from "fs";
+import path from "path";
+import { createRequire } from "module";
+
+const args = process.argv.slice(2);
+const getFlag = (name) => {
+  const found = args.find((a) => a.startsWith(`--${name}=`));
+  return found ? found.split("=")[1] : undefined;
+};
+
+const srcDir = path.resolve(process.cwd(), getFlag("dir") || "src");
+const outDir = path.resolve(process.cwd(), getFlag("out") || "public");
+
+// kit의 meta.json에서 실제 측정된 LOC 로드
+let KIT_FEATURES = {};
+let kitVersion = "unknown";
+let kitTotalFeatures = { component: 0, hook: 0, util: 0 };
+
+// meta.json 탐색: require.resolve → node_modules 직접 탐색 → 상위 디렉토리
+function findMeta() {
+  // 1. require.resolve
+  try {
+    const require = createRequire(path.resolve(process.cwd(), "package.json"));
+    return require.resolve("@m1kapp/kit/dist/meta.json");
+  } catch {}
+
+  // 2. node_modules에서 직접 탐색
+  let dir = process.cwd();
+  while (dir !== path.dirname(dir)) {
+    const candidate = path.join(dir, "node_modules", "@m1kapp", "kit", "dist", "meta.json");
+    if (fs.existsSync(candidate)) return candidate;
+    dir = path.dirname(dir);
+  }
+
+  // 3. 이 스크립트가 kit 안에 있으면 형제 dist/ 탐색
+  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
+  const siblingMeta = path.join(scriptDir, "..", "dist", "meta.json");
+  if (fs.existsSync(siblingMeta)) return siblingMeta;
+
+  return null;
+}
+
+const metaPath = findMeta();
+if (!metaPath) {
+  console.error("  @m1kapp/kit/dist/meta.json을 찾을 수 없습니다.");
+  console.error("  kit을 먼저 빌드하거나 npm install 후 다시 시도하세요.\n");
+  process.exit(1);
+}
+
+const meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+KIT_FEATURES = meta.features;
+kitVersion = meta.version;
+
+// kit이 제공하는 전체 요소 수 카운트
+for (const f of Object.values(meta.features)) {
+  kitTotalFeatures[f.category] = (kitTotalFeatures[f.category] || 0) + 1;
+}
+
+console.log(`  meta.json 로드 완료 (v${kitVersion}, ${Object.keys(KIT_FEATURES).length}개 요소)\n`);
+
+// 소스 파일 수집
+function collectFiles(dir, exts = [".ts", ".tsx", ".js", ".jsx"]) {
+  const results = [];
+  if (!fs.existsSync(dir)) return results;
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === "node_modules" || entry.name === ".next" || entry.name === "dist") continue;
+      results.push(...collectFiles(fullPath, exts));
+    } else if (exts.some((ext) => entry.name.endsWith(ext))) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+// 줄 수 카운트 (빈 줄, 주석만 있는 줄 제외)
+function countLines(content) {
+  const lines = content.split("\n");
+  let total = 0;
+  let code = 0;
+  for (const line of lines) {
+    total++;
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith("//") && !trimmed.startsWith("*") && !trimmed.startsWith("/*")) {
+      code++;
+    }
+  }
+  return { total, code };
+}
+
+// kit import 감지
+function detectKitImports(content) {
+  const found = new Set();
+  // import { X, Y } from "@m1kapp/kit" 또는 "@m1kapp/kit/..." 패턴
+  const importRegex = /import\s*\{([^}]+)\}\s*from\s*["']@m1kapp\/kit(?:\/[^"']*)?["']/g;
+  let match;
+  while ((match = importRegex.exec(content)) !== null) {
+    const names = match[1].split(",").map((s) => s.trim().split(" as ")[0].trim());
+    for (const name of names) {
+      if (name && !name.startsWith("type ")) {
+        found.add(name);
+      }
+    }
+  }
+  // import type은 제외 — 타입만 쓰는 건 코드 절약 아님
+  return found;
+}
+
+// 실행
+console.log(`\n  분석 중... ${srcDir}\n`);
+
+const files = collectFiles(srcDir);
+if (files.length === 0) {
+  console.error(`  파일을 찾을 수 없습니다: ${srcDir}`);
+  process.exit(1);
+}
+
+let totalLines = 0;
+let codeLines = 0;
+const allImports = new Set();
+
+for (const file of files) {
+  const content = fs.readFileSync(file, "utf-8");
+  const counts = countLines(content);
+  totalLines += counts.total;
+  codeLines += counts.code;
+  const imports = detectKitImports(content);
+  for (const imp of imports) allImports.add(imp);
+}
+
+// 절약량 계산
+// 같은 소스 파일에서 여러 export를 쓰더라도 파일 LOC는 한 번만 카운트
+const usedFeatures = [];
+let savedLines = 0;
+const usedByCategory = { component: 0, hook: 0, util: 0 };
+const countedSources = new Set();
+
+for (const name of allImports) {
+  const meta = KIT_FEATURES[name];
+  if (!meta) continue;
+
+  // 카테고리별 사용 수 (loc 0이어도 카운트 — "Tab"도 사용한 거니까)
+  usedByCategory[meta.category] = (usedByCategory[meta.category] || 0) + 1;
+
+  // LOC 절약은 소스 파일 단위로 1번만
+  if (meta.source && countedSources.has(meta.source)) continue;
+  if (meta.source) countedSources.add(meta.source);
+
+  if (meta.loc > 0) {
+    usedFeatures.push({ name, loc: meta.loc, category: meta.category });
+    savedLines += meta.loc;
+  }
+}
+
+const estimatedKB = Math.round(savedLines * 40 / 1024);
+const estimatedA4 = Math.round(savedLines / 80);
+const savedPercent = codeLines > 0 ? Math.round((savedLines / (codeLines + savedLines)) * 100) : 0;
+
+// 사용률: kit이 제공하는 전체 요소 중 몇 개를 쓰고 있는지
+const usage = {
+  component: { used: usedByCategory.component, total: kitTotalFeatures.component, percent: kitTotalFeatures.component > 0 ? Math.round((usedByCategory.component / kitTotalFeatures.component) * 100) : 0 },
+  hook: { used: usedByCategory.hook, total: kitTotalFeatures.hook, percent: kitTotalFeatures.hook > 0 ? Math.round((usedByCategory.hook / kitTotalFeatures.hook) * 100) : 0 },
+  util: { used: usedByCategory.util, total: kitTotalFeatures.util, percent: kitTotalFeatures.util > 0 ? Math.round((usedByCategory.util / kitTotalFeatures.util) * 100) : 0 },
+};
+
+const stats = {
+  generatedAt: new Date().toISOString(),
+  kitVersion,
+  source: {
+    dir: path.relative(process.cwd(), srcDir),
+    files: files.length,
+    totalLines,
+    codeLines,
+  },
+  kit: {
+    features: usedFeatures.sort((a, b) => b.loc - a.loc),
+    savedLines,
+    savedKB: estimatedKB,
+    savedA4: estimatedA4,
+    savedPercent,
+    usage,
+  },
+};
+
+// 출력
+if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+const outPath = path.join(outDir, "kit-stats.json");
+fs.writeFileSync(outPath, JSON.stringify(stats, null, 2));
+
+console.log(`  파일: ${files.length}개`);
+console.log(`  코드: ${codeLines.toLocaleString()}줄 (전체 ${totalLines.toLocaleString()}줄)`);
+console.log(`  kit 사용: ${usedFeatures.length}개 요소`);
+console.log(`    컴포넌트: ${usage.component.used}/${usage.component.total}개 (${usage.component.percent}%)`);
+console.log(`    훅: ${usage.hook.used}/${usage.hook.total}개 (${usage.hook.percent}%)`);
+console.log(`    유틸리티: ${usage.util.used}/${usage.util.total}개 (${usage.util.percent}%)`);
+console.log(`  절약량: 약 ${savedLines.toLocaleString()}줄, ${estimatedKB}KB (A4 ${estimatedA4}장)`);
+console.log(`  비율: 전체의 약 ${savedPercent}%를 kit이 대신 처리`);
+console.log(`\n  저장됨 → ${path.relative(process.cwd(), outPath)}\n`);

@@ -1,0 +1,175 @@
+{
+  "generatedAt": "2026-05-03T17:01:07.367Z",
+  "kitVersion": "0.0.23",
+  "source": {
+    "dir": "src",
+    "files": 2,
+    "totalLines": 2032,
+    "codeLines": 1856
+  },
+  "kit": {
+    "features": [
+      {
+        "name": "GrassMap",
+        "loc": 314,
+        "category": "component"
+      },
+      {
+        "name": "Watermark",
+        "loc": 228,
+        "category": "component"
+      },
+      {
+        "name": "ThemeButton",
+        "loc": 187,
+        "category": "component"
+      },
+      {
+        "name": "InAppSheet",
+        "loc": 160,
+        "category": "component"
+      },
+      {
+        "name": "EmojiButton",
+        "loc": 107,
+        "category": "component"
+      },
+      {
+        "name": "Typewriter",
+        "loc": 98,
+        "category": "component"
+      },
+      {
+        "name": "ShareButton",
+        "loc": 98,
+        "category": "component"
+      },
+      {
+        "name": "Dialog",
+        "loc": 98,
+        "category": "component"
+      },
+      {
+        "name": "ToastProvider",
+        "loc": 93,
+        "category": "component"
+      },
+      {
+        "name": "Button",
+        "loc": 61,
+        "category": "component"
+      },
+      {
+        "name": "Avatar",
+        "loc": 57,
+        "category": "component"
+      },
+      {
+        "name": "AppShell",
+        "loc": 51,
+        "category": "component"
+      },
+      {
+        "name": "Tooltip",
+        "loc": 50,
+        "category": "component"
+      },
+      {
+        "name": "useFormSubmit",
+        "loc": 43,
+        "category": "hook"
+      },
+      {
+        "name": "TabBar",
+        "loc": 36,
+        "category": "component"
+      },
+      {
+        "name": "Badge",
+        "loc": 35,
+        "category": "component"
+      },
+      {
+        "name": "useLocalStorage",
+        "loc": 33,
+        "category": "hook"
+      },
+      {
+        "name": "useInView",
+        "loc": 33,
+        "category": "hook"
+      },
+      {
+        "name": "Fab",
+        "loc": 27,
+        "category": "component"
+      },
+      {
+        "name": "Skeleton",
+        "loc": 20,
+        "category": "component"
+      },
+      {
+        "name": "EmptyState",
+        "loc": 19,
+        "category": "component"
+      },
+      {
+        "name": "Section",
+        "loc": 17,
+        "category": "component"
+      },
+      {
+        "name": "StatChip",
+        "loc": 17,
+        "category": "component"
+      },
+      {
+        "name": "mobileViewport",
+        "loc": 16,
+        "category": "util"
+      },
+      {
+        "name": "colors",
+        "loc": 12,
+        "category": "util"
+      },
+      {
+        "name": "relativeTime",
+        "loc": 12,
+        "category": "util"
+      },
+      {
+        "name": "useDebounce",
+        "loc": 8,
+        "category": "hook"
+      },
+      {
+        "name": "Divider",
+        "loc": 3,
+        "category": "component"
+      }
+    ],
+    "savedLines": 1933,
+    "savedKB": 76,
+    "savedA4": 24,
+    "savedPercent": 51,
+    "usage": {
+      "component": {
+        "used": 29,
+        "total": 30,
+        "percent": 97
+      },
+      "hook": {
+        "used": 7,
+        "total": 11,
+        "percent": 64
+      },
+      "util": {
+        "used": 8,
+        "total": 12,
+        "percent": 67
+      }
+    }
+  }
+}

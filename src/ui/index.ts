@@ -76,3 +76,6 @@ export { Dialog } from "./components/dialog";
 export type { DialogProps } from "./components/dialog";
 export { InAppSheet } from "./components/in-app-sheet";
 export type { InAppSheetProps } from "./components/in-app-sheet";
+
+export { PoweredByKit } from "./components/powered-by";
+export type { PoweredByKitProps } from "./components/powered-by";

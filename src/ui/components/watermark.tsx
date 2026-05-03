@@ -295,7 +295,7 @@ export function Watermark({
 
       {/* content */}
       <div
-        className="relative z-10 h-full flex items-center justify-center mx-auto sm:p-3"
+        className="relative z-10 h-full flex flex-col items-center justify-center mx-auto sm:p-3"
         style={{ maxWidth }}
       >
         {children}

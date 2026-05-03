@@ -53,7 +53,7 @@
   },
   "scripts": {
     "postinstall": "node bin/postinstall.mjs",
-    "build": "rm -rf dist && mkdir -p .tmp && npx @tailwindcss/cli -i src/ui/styles.css -o .tmp/styles.css --minify && node scripts/embed-css.mjs && tsup",
+    "build": "rm -rf dist && mkdir -p .tmp && npx @tailwindcss/cli -i src/ui/styles.css -o .tmp/styles.css --minify && node scripts/embed-css.mjs && tsup && node scripts/gen-meta.mjs",
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",

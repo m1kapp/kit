@@ -12,6 +12,7 @@ import {
   ToastProvider, useToast,
   useLocalStorage, useDebounce, useFormSubmit, useInView,
   Skeleton, Dialog, InAppSheet, Fab,
+  PoweredByKit,
   mobileViewport, svgIcon, createManifest,
   PWAInstallButton, IOSInstallSheet, usePWAInstall,
   useFetch, usePolling,
@@ -681,6 +682,12 @@ function UIDetail({ themeColor }: {
               <div className="relative z-10 h-full flex items-center justify-center">
                 <div className="bg-white dark:bg-zinc-900 rounded-lg px-6 py-3 shadow-lg text-xs font-medium text-zinc-500">your app here</div>
               </div>
+            </div>
+          </ComponentCard>
+
+          <ComponentCard name="PoweredByKit" desc="Kit credits badge — fetches real code analysis from kit-stats.json" code={`{/* 1. npx m1kkit stats 로 분석 실행 */}\n{/* 2. Watermark 안, AppShell 밖에 배치 */}\n<Watermark>\n  <AppShell>...</AppShell>\n  <PoweredByKit variant="overlay" />\n</Watermark>`}>
+            <div className="rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+              <PoweredByKit />
             </div>
           </ComponentCard>
         </div>
@@ -2005,6 +2012,7 @@ export default function App() {
             />
           </TabBar>
         </AppShell>
+        <PoweredByKit variant="overlay" />
       </Watermark>
 
     </ToastProvider>

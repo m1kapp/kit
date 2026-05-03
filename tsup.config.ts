@@ -1,4 +1,5 @@
 import { defineConfig } from "tsup";
+import pkg from "./package.json";
 
 const common = {
   format: ["cjs", "esm"] as ("cjs" | "esm")[],
@@ -6,6 +7,9 @@ const common = {
   splitting: false,
   sourcemap: false,
   minify: true,
+  define: {
+    "__KIT_VERSION__": JSON.stringify(pkg.version),
+  },
 };
 
 export default defineConfig([

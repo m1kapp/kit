@@ -5,6 +5,7 @@
  * Commands:
  *   m1kkit favicon   — 파비콘 생성
  *   m1kkit skills    — Claude Code 스킬 설치
+ *   m1kkit stats     — 코드 분석 & kit 사용 현황 생성
  */
 
 const [,, command, ...rest] = process.argv;
@@ -16,6 +17,7 @@ m1kkit — @m1kapp/kit CLI
 Commands:
   m1kkit favicon [options]   파비콘 자동 생성
   m1kkit skills [options]    Claude Code 스킬 설치
+  m1kkit stats [options]     코드 분석 & kit 사용 현황 생성
 
 Options:
   --help    도움말 보기
@@ -25,6 +27,7 @@ Examples:
   m1kkit skills
   m1kkit skills --list
   m1kkit skills m1kapp-init
+  m1kkit stats --dir=src --out=public
 `);
   process.exit(0);
 }
@@ -42,6 +45,9 @@ if (command === "favicon") {
 } else if (command === "skills") {
   process.argv = [process.argv[0], process.argv[1], ...rest];
   await import(path.join(__dirname, "skills.mjs"));
+} else if (command === "stats") {
+  process.argv = [process.argv[0], process.argv[1], ...rest];
+  await import(path.join(__dirname, "stats.mjs"));
 } else {
   console.error(`알 수 없는 커맨드: ${command}`);
   console.error("사용법: m1kkit --help");
