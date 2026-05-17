@@ -1,11 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useEscapeKey } from "../hooks/use-escape-key";
-import { useFocusTrap } from "../hooks/use-focus-trap";
-import { usePortalTarget } from "../hooks/use-portal-target";
-import { useScrollLock } from "../hooks/use-scroll-lock";
+import { useState } from "react";
+import { InAppSheet } from "./in-app-sheet";
 
 const EMOJI_CATEGORIES: { label: string; emojis: string[] }[] = [
   {
@@ -76,103 +72,56 @@ export interface EmojiPickerProps {
 export function EmojiPicker({ open, onClose, current, onSelect, labels: _labels }: EmojiPickerProps) {
   const l = { title: "이모지", close: "닫기", ..._labels };
   const [activeCategory, setActiveCategory] = useState(0);
-  const [anchorRef, target] = usePortalTarget();
-  const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const trapRef = useFocusTrap<HTMLDivElement>(visible);
-
-  useScrollLock(open, anchorRef);
-  useEscapeKey(open, onClose);
-
-  useEffect(() => {
-    if (open) {
-      setMounted(true);
-      requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
-    } else {
-      setVisible(false);
-      const t = setTimeout(() => setMounted(false), 300);
-      return () => clearTimeout(t);
-    }
-  }, [open]);
-
-  if (!mounted || !target) return (
-    <span ref={anchorRef} aria-hidden="true" className="hidden" />
-  );
-
-  const { emojis } = EMOJI_CATEGORIES[activeCategory];
 
   return (
-    <>
-      <span ref={anchorRef} aria-hidden="true" className="hidden" />
-      {createPortal(
-    <div className="absolute inset-0 z-[200] flex items-end justify-center" onClick={onClose}>
-      <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`} />
-      <div
-        ref={trapRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={l.title}
-        className={`relative z-10 w-full max-w-101.5 mb-3 mx-3 rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden transition-all duration-300 ease-out ${
-          visible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="px-4 pt-4 pb-3">
-          <p className="text-sm font-bold text-zinc-900 dark:text-white">{l.title}</p>
-        </div>
-
-        {/* Category tabs */}
-        <div className="flex gap-1 px-4 pb-3 overflow-x-auto scrollbar-hide">
-          {EMOJI_CATEGORIES.map((cat, i) => (
-            <button
-              key={cat.label}
-              onClick={() => setActiveCategory(i)}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                activeCategory === i
-                  ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
-                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Emoji grid */}
-        <div className="px-4 pb-3 grid grid-cols-6 gap-2">
-          {emojis.map((em) => (
-            <button
-              key={em}
-              onClick={() => {
-                onSelect(em);
-                onClose();
-              }}
-              aria-label={em}
-              className={`h-11 rounded-xl flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-90 ${
-                current === em
-                  ? "bg-zinc-900 dark:bg-white"
-                  : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-              }`}
-            >
-              {em}
-            </button>
-          ))}
-        </div>
-
-        {/* Close */}
-        <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800">
+    <InAppSheet open={open} onClose={onClose} title={l.title} hideClose>
+      {/* Category tabs */}
+      <div className="flex gap-1 px-4 pb-3 overflow-x-auto scrollbar-hide">
+        {EMOJI_CATEGORIES.map((cat, i) => (
           <button
-            onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            key={cat.label}
+            onClick={() => setActiveCategory(i)}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+              activeCategory === i
+                ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
+                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+            }`}
           >
-            {l.close}
+            {cat.label}
           </button>
-        </div>
+        ))}
       </div>
-    </div>,
-    target,
-  )}
-    </>
+
+      {/* Emoji grid */}
+      <div className="px-4 pb-3 grid grid-cols-6 gap-2">
+        {EMOJI_CATEGORIES[activeCategory].emojis.map((em) => (
+          <button
+            key={em}
+            onClick={() => {
+              onSelect(em);
+              onClose();
+            }}
+            aria-label={em}
+            className={`h-11 rounded-xl flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-90 ${
+              current === em
+                ? "bg-zinc-900 dark:bg-white"
+                : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+            }`}
+          >
+            {em}
+          </button>
+        ))}
+      </div>
+
+      {/* Close */}
+      <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800">
+        <button
+          onClick={onClose}
+          className="w-full py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+        >
+          {l.close}
+        </button>
+      </div>
+    </InAppSheet>
   );
 }

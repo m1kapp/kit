@@ -1,4 +1,5 @@
 import { type ReactNode, useId } from "react";
+import { PoweredByKit } from "./powered-by";
 
 export interface WatermarkSponsor {
   /** Service name displayed in the background as clickable text */
@@ -45,6 +46,11 @@ export interface WatermarkProps {
    * <Watermark speed={60} />  // very slow
    */
   speed?: number;
+  /**
+   * Hide the "powered by @m1kapp/kit" badge at the bottom.
+   * Default: false (badge is shown)
+   */
+  hidePoweredBy?: boolean;
 }
 
 const BASE_STYLE = `
@@ -131,6 +137,7 @@ export function Watermark({
   maxWidth = 430,
   sponsor,
   speed = 40,
+  hidePoweredBy = false,
 }: WatermarkProps) {
   injectStyle();
 
@@ -295,10 +302,11 @@ export function Watermark({
 
       {/* content */}
       <div
-        className="relative z-10 h-full flex flex-col items-center justify-center mx-auto sm:p-3"
+        className="relative z-10 h-full flex flex-col items-center justify-center mx-auto sm:p-3 sm:gap-1"
         style={{ maxWidth }}
       >
         {children}
+        {!hidePoweredBy && <PoweredByKit variant="overlay" />}
       </div>
     </div>
   );

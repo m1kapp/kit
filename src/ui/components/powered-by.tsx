@@ -82,11 +82,12 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
     <>
       <button
         onClick={() => setOpen(true)}
-        className={`w-full py-2 text-[11px] text-center transition-colors cursor-pointer select-none ${
+        className={`w-full text-[11px] text-center transition-colors cursor-pointer select-none ${
           variant === "overlay"
-            ? "text-white/50 hover:text-white/70"
-            : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-500 dark:hover:text-zinc-400"
+            ? "max-sm:py-2.5 max-sm:text-zinc-400 max-sm:dark:text-zinc-500 max-sm:bg-white/95 max-sm:dark:bg-zinc-950/95 max-sm:backdrop-blur-sm max-sm:border-t max-sm:border-zinc-100 max-sm:dark:border-zinc-800 sm:py-1 sm:text-white/50 sm:hover:text-white/70"
+            : "py-2.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-500 dark:hover:text-zinc-400"
         } ${className}`}
+        style={variant === "overlay" ? { paddingBottom: `max(0.75rem, env(safe-area-inset-bottom))` } : undefined}
       >
         v{ver} · powered by @m1kapp/kit
       </button>

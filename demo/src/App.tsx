@@ -685,7 +685,7 @@ function UIDetail({ themeColor }: {
             </div>
           </ComponentCard>
 
-          <ComponentCard name="PoweredByKit" desc="Kit credits badge — fetches real code analysis from kit-stats.json" code={`{/* 1. npx m1kkit stats 로 분석 실행 */}\n{/* 2. Watermark 안, AppShell 밖에 배치 */}\n<Watermark>\n  <AppShell>...</AppShell>\n  <PoweredByKit variant="overlay" />\n</Watermark>`}>
+          <ComponentCard name="PoweredByKit" desc="Watermark에 자동 내장 — 코드 분석 기반 크레딧 시트" code={`{/* Watermark에 자동 포함 */}\n<Watermark>\n  <AppShell>...</AppShell>\n</Watermark>\n\n{/* 끄려면 */}\n<Watermark hidePoweredBy>\n  ...\n</Watermark>`}>
             <div className="rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
               <PoweredByKit />
             </div>
@@ -2012,7 +2012,6 @@ export default function App() {
             />
           </TabBar>
         </AppShell>
-        <PoweredByKit variant="overlay" />
       </Watermark>
 
     </ToastProvider>
