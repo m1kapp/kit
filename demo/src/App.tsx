@@ -1811,6 +1811,7 @@ const CLAUDE_PROMPT = `@m1kapp/kit으로 모바일 웹앱 만들어줘. CSS는 i
 · 테마: ThemeButton/ThemeDialog, 색은 --kit-accent (예: <AppShell accent="#e2603f">)
 · 유틸: cn · relativeTime · formatNumber · formatPrice · formatDuration · groupByDay
 · PWA/SEO/OG: createManifest · mobileViewport · createMetadata · OGImage
+· API 라우트(서버, @m1kapp/kit/server): handler로 감싸고 ok/created/badRequest/unauthorized로 응답 · requireEnv로 env 검증 · 외부 호출은 fetchWithRetry/withRetry · LLM JSON은 recoverJsonFromText · OG는 scrapeOg · 날짜는 todayKST · slug는 idToSlug
 
 먼저 npm i @m1kapp/kit 해줘.`;
 

@@ -750,6 +750,42 @@ export const GET = handler(async () => {
 });
 ```
 
+### 서버 유틸 (의존성 0)
+
+API 라우트에서 자주 손으로 만들던 것들 — 전부 `@m1kapp/kit/server`에 있어요.
+
+```ts
+import {
+  requireEnv, fetchWithRetry, withRetry, recoverJsonFromText,
+  scrapeOg, todayKST, dateInTz, idToSlug, slugToId, appHost,
+} from "@m1kapp/kit/server";
+
+// 필수 env 검증 (없으면 500 throw, 있으면 타입된 객체)
+const { XAI_API_KEY } = requireEnv(["XAI_API_KEY"]);
+
+// fetch + 타임아웃 + 429/5xx 자동 재시도 (마지막 응답 반환)
+const res = await fetchWithRetry(url, { headers: { authorization: `Bearer ${XAI_API_KEY}` } });
+
+// 아무 async나 재시도 (Neon 콜드스타트 등)
+const rows = await withRetry(() => db.query.users.findMany(), {
+  shouldRetry: (e) => String(e).includes("fetch failed"),
+});
+
+// LLM 응답에서 JSON 복구 (```json 펜스·트레일링 콤마·노이즈 제거)
+const data = recoverJsonFromText<{ items: string[] }>(llmReply);
+
+// Open Graph 스크래핑
+const og = await scrapeOg("example.com");   // { title, description, image, siteName, url }
+
+// 타임존 날짜
+todayKST();                                  // "2026-06-04"
+dateInTz(Date.now(), "America/New_York");
+
+// base62 slug + 호스트
+idToSlug(42, 1000);                          // "..."  (slugToId로 역변환)
+const base = `https://${appHost("m1k.app")}`;
+```
+
 ---
 
 ## Utils
