@@ -8,6 +8,12 @@ export interface AppShellProps {
   maxWidth?: number;
   /** Max height of the shell. Default: 932px (iPhone 15 Pro Max) */
   maxHeight?: number;
+  /**
+   * Accent color (any CSS color) propagated to kit components as `--kit-accent`.
+   * Lets you re-skin the whole shell — Switch, SegmentedControl, ChatBubble,
+   * ActionCard, ListRow… — in one place. e.g. accent="#e2603f"
+   */
+  accent?: string;
   style?: CSSProperties;
 }
 
@@ -20,12 +26,14 @@ export function AppShell({
   className = "",
   maxWidth = 430,
   maxHeight = 932,
+  accent,
   style,
 }: AppShellProps) {
+  const accentVar = accent ? ({ "--kit-accent": accent } as CSSProperties) : undefined;
   return (
     <div
       className={`app-shell-root relative w-full h-full flex flex-col bg-white dark:bg-zinc-950 shadow-2xl ring-1 ring-black/10 dark:ring-zinc-700 sm:rounded-2xl overflow-hidden ${className}`}
-      style={{ maxWidth, maxHeight, ...style }}
+      style={{ maxWidth, maxHeight, ...accentVar, ...style }}
     >
       {/* React 19 hoists this to <head> and deduplicates by href — eliminates FOUC without manual <KitStyles /> */}
       <style href="m1kapp-kit" precedence="default">{COMPILED_CSS}</style>

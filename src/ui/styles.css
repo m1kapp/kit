@@ -2,6 +2,14 @@
 @variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  /* Accent color used by kit components (Switch, SegmentedControl, ChatBubble,
+     ActionCard, ListRow…). Override globally via <AppShell accent="#e2603f">,
+     or locally with style={{ "--kit-accent": "#e2603f" }} on any wrapper. */
+  :root {
+    --kit-accent: #3b82f6;
+    --kit-accent-fg: #ffffff;
+  }
+
   html {
     touch-action: pan-x pan-y;
   }
@@ -22,4 +30,10 @@
   textarea {
     font-size: max(16px, 1em);
   }
+}
+
+/* Typing indicator dots (TypingIndicator component) */
+@keyframes kit-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+  30% { transform: translateY(-3px); opacity: 1; }
 }

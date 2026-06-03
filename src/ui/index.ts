@@ -79,3 +79,66 @@ export type { InAppSheetProps } from "./components/in-app-sheet";
 
 export { PoweredByKit } from "./components/powered-by";
 export type { PoweredByKitProps } from "./components/powered-by";
+
+export { Switch } from "./components/switch";
+export type { SwitchProps } from "./components/switch";
+
+export { Field } from "./components/field";
+export type { FieldProps } from "./components/field";
+
+export { SegmentedControl } from "./components/segmented-control";
+export type { SegmentedControlProps, SegmentOption } from "./components/segmented-control";
+
+export { ChatBubble, TypingIndicator, MessageList } from "./components/chat";
+export type {
+  ChatBubbleProps,
+  TypingIndicatorProps,
+  MessageListProps,
+  ChatMessage,
+  ChatRole,
+} from "./components/chat";
+
+export { ActionCard } from "./components/action-card";
+export type { ActionCardProps, ActionCardState, ActionCardLabels } from "./components/action-card";
+
+export { ListRow } from "./components/list-row";
+export type { ListRowProps } from "./components/list-row";
+
+export { LinkifiedText } from "./components/linkified-text";
+export type { LinkifiedTextProps } from "./components/linkified-text";
+
+export { Stepper } from "./components/stepper";
+export type { StepperProps, Step } from "./components/stepper";
+
+export { Collapsible } from "./components/collapsible";
+export type { CollapsibleProps } from "./components/collapsible";
+
+export { useCopy, CopyButton } from "./components/copy";
+export type { CopyButtonProps } from "./components/copy";
+
+export { useImageLoader, Img } from "./components/img";
+export type { ImgProps } from "./components/img";
+
+export { Select } from "./components/select";
+export type { SelectProps, SelectOption } from "./components/select";
+
+export { ColorPicker } from "./components/color-picker";
+export type { ColorPickerProps } from "./components/color-picker";
+
+export { CodeBlock } from "./components/code-block";
+export type { CodeBlockProps } from "./components/code-block";
+
+export { InlineEdit } from "./components/inline-edit";
+export type { InlineEditProps } from "./components/inline-edit";
+
+export { BarList } from "./components/bar-list";
+export type { BarListProps, BarListItem } from "./components/bar-list";
+
+export { ProgressRing } from "./components/progress-ring";
+export type { ProgressRingProps } from "./components/progress-ring";
+
+export { Countdown } from "./components/countdown";
+export type { CountdownProps, CountdownLabels } from "./components/countdown";
+
+export { Carousel } from "./components/carousel";
+export type { CarouselProps } from "./components/carousel";
