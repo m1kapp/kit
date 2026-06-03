@@ -13,13 +13,21 @@ import {
   useLocalStorage, useDebounce, useFormSubmit, useInView,
   Skeleton, Dialog, InAppSheet, Fab,
   PoweredByKit,
+  Switch, Field, SegmentedControl,
+  TypingIndicator, MessageList,
+  ActionCard, ListRow, LinkifiedText,
   mobileViewport, svgIcon, createManifest,
   PWAInstallButton, IOSInstallSheet, usePWAInstall,
   useFetch, usePolling,
   relativeTime, formatNumber, formatPrice, cn,
+  Stepper, Collapsible, CopyButton, Img, Select, ColorPicker,
+  CodeBlock, InlineEdit, BarList, ProgressRing, Countdown, Carousel,
+  formatDuration, groupByDay,
 } from "@m1kapp/kit";
+import type { ActionCardState, ChatMessage } from "@m1kapp/kit";
 import { OGImage } from "@m1kapp/kit/ogimage";
 import type { OGProps } from "@m1kapp/kit/ogimage";
+import { ClaudeLogo, CursorLogo, OpenAILogo } from "./logos";
 
 /* ══════════════════════════════════════════════
    Types
@@ -109,10 +117,10 @@ const LIBRARIES = [
     icon: "🧩",
     name: "UI",
     package: "@m1kapp/kit",
-    desc: "모바일 앱 셸 컴포넌트 모음. AppShell, TabBar, Avatar 등 24개.",
-    stats: [{ label: "컴포넌트", value: 24 }],
+    desc: "모바일 앱 셸 컴포넌트 모음. AppShell, TabBar, Stepper, BarList 등 45개.",
+    stats: [{ label: "컴포넌트", value: 45 }],
     requires: "react, react-dom",
-    tags: ["AppShell", "TabBar", "Avatar", "Badge", "ShareButton", "Toast"],
+    tags: ["AppShell", "TabBar", "Switch", "Stepper", "Collapsible", "Select", "BarList", "Carousel"],
   },
   {
     id: "og" as const,
@@ -612,6 +620,170 @@ function UtilsDemo() {
   );
 }
 
+function NewComponentsDemo({ themeColor }: { themeColor: string }) {
+  const [on, setOn] = useState(true);
+  const [seg, setSeg] = useState<"today" | "week">("today");
+  const [name, setName] = useState("민호");
+  const [planState, setPlanState] = useState<ActionCardState>("pending");
+  const now = Date.now();
+  const msgs: ChatMessage[] = [
+    { role: "user", content: "내일 3시 디자인 리뷰 잡아줘", timestamp: now - 86400_000 },
+    { role: "assistant", content: "네, 잡아드릴게요.", timestamp: now - 86400_000 },
+    { role: "user", content: "오늘 점심 약속도 추가해줘", timestamp: now },
+  ];
+  return (
+    <div className="space-y-3" style={{ ["--kit-accent" as string]: themeColor } as React.CSSProperties}>
+      <ComponentCard name="Switch" desc="on/off 토글 — accent 자동 연동" code={`<Switch checked={on} onChange={setOn} aria-label="알림" />`}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-zinc-600 dark:text-zinc-300">알림 받기</span>
+          <Switch checked={on} onChange={setOn} aria-label="알림" />
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="Field" desc="라벨드 인풋 (stacked / inline / multiline)" code={`<Field label="이름" value={name} onChange={setName} />\n<Field label="이메일" value={email} inline readOnly />`}>
+        <div className="space-y-2">
+          <Field label="이름" value={name} onChange={setName} placeholder="이름" />
+          <Field label="이메일" value="wingedcompany@gmail.com" inline readOnly />
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="SegmentedControl" desc="인라인 세그먼트 토글" code={`<SegmentedControl value={view} onChange={setView}\n  options={[{ value: "today", label: "오늘" }, { value: "week", label: "이번 주" }]} />`}>
+        <SegmentedControl
+          value={seg}
+          onChange={setSeg}
+          options={[{ value: "today", label: "오늘" }, { value: "week", label: "이번 주" }]}
+        />
+      </ComponentCard>
+
+      <ComponentCard name="ChatBubble · MessageList · TypingIndicator" desc="대화 UI 세트 — dayDivider 자동" code={`<MessageList messages={msgs} dayDivider>\n  {pending && <TypingIndicator />}\n</MessageList>`}>
+        <MessageList messages={msgs} dayDivider>
+          <TypingIndicator />
+        </MessageList>
+      </ComponentCard>
+
+      <ComponentCard name="ActionCard" desc="메시지 흐름 내 확인 카드 (propose → confirm)" code={`<ActionCard title="이렇게 기록해둘까요?" state={state}\n  items={["🗓 6/4 15:00 디자인리뷰"]}\n  onConfirm={commit} onCancel={cancel} />`}>
+        <div className="space-y-2">
+          <ActionCard
+            title="이렇게 기록해둘까요?"
+            state={planState}
+            items={["🗓 6/4 15:00 디자인리뷰", "📌 6/4 (종일) 마감일"]}
+            onConfirm={() => setPlanState("done")}
+            onCancel={() => setPlanState("cancelled")}
+          />
+          <button onClick={() => setPlanState("pending")} className="text-[10px] text-zinc-400 hover:text-zinc-600">상태 초기화</button>
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="ListRow" desc="컬러바 + 시간 + 2줄, heightScale 비례 높이" code={`// 일정이면 분/30을 넘기세요\n<ListRow accent="#7fc06a" lead="14:00" title="회의"\n  sub="👥 김상훈" heightScale={60 / 30} onClick={open} />`}>
+        <div className="space-y-1.5">
+          <ListRow accent="#7fc06a" lead="09:00" title="스탠드업" sub="👥 팀 전체" trailing="● 지금" active heightScale={1} onClick={() => {}} />
+          <ListRow accent="#5b9bd5" lead="14:00" leadSub="15:00" title="디자인 리뷰" sub="🎨 피그마 링크" heightScale={2} onClick={() => {}} />
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="LinkifiedText" desc="텍스트 내 URL 자동 링크" code={`<LinkifiedText>회의록 https://docs.google.com/… meet.google.com/abc-def</LinkifiedText>`}>
+        <p className="text-sm text-zinc-600 dark:text-zinc-300">
+          <LinkifiedText>{"회의록: https://docs.google.com/doc/123\n화상: meet.google.com/abc-defg-hij"}</LinkifiedText>
+        </p>
+      </ComponentCard>
+    </div>
+  );
+}
+
+function MoreComponentsDemo({ themeColor }: { themeColor: string }) {
+  const [step, setStep] = useState(1);
+  const [openCard, setOpenCard] = useState<number | null>(1);
+  const [sel, setSel] = useState<string | null>("beginner");
+  const [picked, setPicked] = useState(themeColor);
+  const [editName, setEditName] = useState("내 프로젝트");
+  const [slide, setSlide] = useState(0);
+  const now = Date.now();
+  const logItems = [
+    { id: 1, t: now, text: "오늘 항목 A" },
+    { id: 2, t: now - 3600_000, text: "오늘 항목 B" },
+    { id: 3, t: now - 86400_000, text: "어제 항목" },
+    { id: 4, t: now - 3 * 86400_000, text: "사흘 전 항목" },
+  ];
+  const groups = groupByDay(logItems, (i) => i.t);
+  const slides = ["🎨 디자인", "💻 개발", "🚀 배포"];
+
+  return (
+    <div className="space-y-3" style={{ ["--kit-accent" as string]: themeColor } as React.CSSProperties}>
+      <ComponentCard name="Stepper" desc="다단계 진행 표시 (wonblog + aibook)" code={`<Stepper current={step} onStepClick={setStep} steps={[\n  { label: "분석", icon: "📝" }, { label: "준비", icon: "📸" }, { label: "생성", icon: "✨" },\n]} />`}>
+        <Stepper current={step} onStepClick={setStep} steps={[{ label: "분석", icon: "📝" }, { label: "준비", icon: "📸" }, { label: "생성", icon: "✨" }]} />
+      </ComponentCard>
+
+      <ComponentCard name="Collapsible" desc="접기 카드 (헤더+배지+상태)" code={`<Collapsible leading={1} title="페르소나 분석" subtitle="스타일 파악"\n  open={open} onToggle={toggle} completed>…</Collapsible>`}>
+        <div className="space-y-1.5">
+          {[1, 2, 3].map((n) => (
+            <Collapsible key={n} leading={n} title={`단계 ${n}`} subtitle="탭하여 펼치기" completed={n < (openCard ?? 0)} open={openCard === n} onToggle={() => setOpenCard(openCard === n ? null : n)}>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">단계 {n}의 본문 내용입니다.</p>
+            </Collapsible>
+          ))}
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="CopyButton · CodeBlock" desc="클릭복사 + 피드백 (m1k)" code={`<CopyButton text="npm i @m1kapp/kit">설치 복사</CopyButton>\n<CodeBlock label="install" code="npm i @m1kapp/kit" />`}>
+        <div className="space-y-2">
+          <CopyButton text="npm i @m1kapp/kit">설치 명령 복사</CopyButton>
+          <CodeBlock label="install" code="npm i @m1kapp/kit" />
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="Select" desc="앵커드 드롭다운 + 카운트/비활성 (promptwing)" code={`<Select value={v} onChange={setV} placeholder="난이도"\n  options={[{ value: "a", label: "초급", count: 12 }, { value: "b", label: "고급", count: 0, disabled: true }]} />`}>
+        <Select value={sel} onChange={setSel} placeholder="난이도" options={[{ value: "beginner", label: "초급", count: 12 }, { value: "inter", label: "중급", count: 5 }, { value: "adv", label: "고급", count: 0, disabled: true }]} />
+      </ComponentCard>
+
+      <ComponentCard name="ColorPicker" desc="프리셋 스와치 + 커스텀 hex (m1k)" code={`<ColorPicker value={color} onChange={setColor} />`}>
+        <ColorPicker value={picked} onChange={setPicked} />
+      </ComponentCard>
+
+      <ComponentCard name="InlineEdit" desc="탭하여 편집 (roletodo)" code={`<InlineEdit value={name} onChange={setName} className="text-base font-bold" />`}>
+        <InlineEdit value={editName} onChange={setEditName} className="text-base font-bold text-zinc-800 dark:text-zinc-200" />
+      </ComponentCard>
+
+      <ComponentCard name="BarList" desc="가로 막대 분석 차트 (m1k)" code={`<BarList items={[{ label: "/", value: 120 }, { label: "/about", value: 64 }]} />`}>
+        <BarList items={[{ label: "/", value: 120 }, { label: "/about", value: 64, href: "#" }, { label: "/blog", value: 31 }]} />
+      </ComponentCard>
+
+      <ComponentCard name="ProgressRing · Countdown" desc="원형 진행률 (aibook) · 카운트다운 (modelkombat)" code={`<ProgressRing value={7} max={10}>…</ProgressRing>\n<Countdown to="2026-12-31" />`}>
+        <div className="flex items-center gap-6">
+          <ProgressRing value={7} max={10}><span className="text-2xl font-black text-zinc-900 dark:text-zinc-100">7</span></ProgressRing>
+          <Countdown to="2026-12-31" hideZeroDays />
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="Carousel" desc="스와이프 롤러 + 점 인디케이터 (roletodo)" code={`<Carousel count={items.length} index={i} onChange={setI}>\n  <Slide item={items[i]} />\n</Carousel>`}>
+        <Carousel count={slides.length} index={slide} onChange={setSlide}>
+          <div className="text-center text-lg font-bold text-zinc-800 dark:text-zinc-200">{slides[slide]}</div>
+        </Carousel>
+      </ComponentCard>
+
+      <ComponentCard name="Img" desc="다중 URL 폴백 이미지 (m1k + promptwing)" code={`<Img candidates={[urlA, urlB]} fallback={<div>이미지 없음</div>} />`}>
+        <div className="flex items-center gap-3">
+          <Img candidates={["https://invalid.example/x.png"]} fallback={<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-zinc-100 text-xs text-zinc-400 dark:bg-zinc-800">폴백</div>} className="h-12 w-12 rounded-lg" />
+          <span className="text-xs text-zinc-400">깨진 URL → 폴백 표시</span>
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="formatDuration · groupByDay" desc="유틸 — 소요시간 포맷 / 날짜별 그룹핑" code={`formatDuration(90000)            // "1분 30초"\nformatDuration(3661000, { style: "clock" }) // "1:01:01"\ngroupByDay(items, i => i.timestamp) // [{ label: "오늘", items }, …]`}>
+        <div className="space-y-2">
+          <div className="flex gap-2 text-xs">
+            <span className="rounded bg-zinc-100 px-2 py-1 font-mono dark:bg-zinc-800">{formatDuration(90000)}</span>
+            <span className="rounded bg-zinc-100 px-2 py-1 font-mono dark:bg-zinc-800">{formatDuration(3661000, { style: "clock" })}</span>
+          </div>
+          {groups.map((g) => (
+            <div key={g.date}>
+              <p className="text-[11px] font-bold text-zinc-400">{g.label} · {g.items.length}</p>
+              <p className="text-xs text-zinc-600 dark:text-zinc-300">{g.items.map((i) => i.text).join(", ")}</p>
+            </div>
+          ))}
+        </div>
+      </ComponentCard>
+    </div>
+  );
+}
+
 function UIDetail({ themeColor }: {
   themeColor: string;
 }) {
@@ -691,6 +863,26 @@ function UIDetail({ themeColor }: {
             </div>
           </ComponentCard>
         </div>
+      </Section>
+
+      <Divider />
+
+      <Section>
+        <SectionHeader>신규 (v0.0.25)</SectionHeader>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-3 leading-relaxed">
+          accent는 <code className="font-mono">--kit-accent</code> CSS 변수로 자동 연동돼요. 이 섹션은 현재 테마색을 그대로 따릅니다.
+        </p>
+        <NewComponentsDemo themeColor={themeColor} />
+      </Section>
+
+      <Divider />
+
+      <Section>
+        <SectionHeader>추가 공통 컴포넌트 (v0.0.25)</SectionHeader>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-3 leading-relaxed">
+          다른 m1kapp 서비스에서 발굴해 공통화한 컴포넌트·유틸이에요.
+        </p>
+        <MoreComponentsDemo themeColor={themeColor} />
       </Section>
 
       <Divider />
@@ -1605,8 +1797,43 @@ function PWADetail({ themeColor }: { themeColor: string }) {
 /* ══════════════════════════════════════════════
    Home Tab
 ══════════════════════════════════════════════ */
+const CLAUDE_PROMPT = `@m1kapp/kit으로 모바일 웹앱 만들어줘. CSS는 import만 하면 자동 주입돼.
+
+[원칙] UI는 전부 kit으로. 버튼·입력·시트·토스트·차트·로딩·빈화면 등 kit에 있으면 직접 만들지 말고 무조건 그걸 써. 설치 후 node_modules/@m1kapp/kit의 export(타입 정의)를 한 번 훑어서 있는 컴포넌트를 최대한 적극 활용해.
+
+[카탈로그 — 가능한 한 다 써]
+· 셸/내비: AppShell · AppShellHeader/Content · TabBar · Fab · Section · Divider · Watermark
+· 데이터: useFetch · usePolling · createApiClient / 로딩=Skeleton · 빈화면=EmptyState · BarList · ProgressRing · StatChip · GrassMap
+· 입력/폼: Field · Switch · SegmentedControl · Select · ColorPicker · InlineEdit · Button · EmojiPicker
+· 오버레이/피드백: Dialog · InAppSheet · ToastProvider/useToast · Tooltip
+· 대화/AI: MessageList · ChatBubble · TypingIndicator · ActionCard
+· 콘텐츠: ListRow · Collapsible · Stepper · Carousel · Badge · Avatar · CodeBlock · CopyButton · LinkifiedText · Countdown · Typewriter
+· 테마: ThemeButton/ThemeDialog, 색은 --kit-accent (예: <AppShell accent="#e2603f">)
+· 유틸: cn · relativeTime · formatNumber · formatPrice · formatDuration · groupByDay
+· PWA/SEO/OG: createManifest · mobileViewport · createMetadata · OGImage
+
+먼저 npm i @m1kapp/kit 해줘.`;
+
+// AI 코딩 에이전트 — 실제 브랜드 로고 (./logos)
+const AGENT_LOGOS = [
+  { mark: <ClaudeLogo />, label: "Claude Code" },
+  { mark: <CursorLogo />, label: "Cursor" },
+  { mark: <OpenAILogo />, label: "Codex" },
+];
+
 function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLibraries: () => void }) {
   const [copied, setCopied] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [promptOpen, setPromptOpen] = useState(false);
+  const [weeklyDl, setWeeklyDl] = useState<number | null>(null);
+
+  useEffect(() => {
+    // npm 공개 API — 교차출처 허용. 주간 다운로드 라이브.
+    fetch("https://api.npmjs.org/downloads/point/last-week/@m1kapp/kit")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && typeof d.downloads === "number") setWeeklyDl(d.downloads); })
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -1639,19 +1866,8 @@ function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLi
         </p>
       </Section>
 
-      {/* ── Install ── */}
-      <Section className="mt-2">
-        <button
-          onClick={() => { navigator.clipboard.writeText("npm install @m1kapp/kit"); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-          className="w-full py-3.5 rounded-2xl text-sm font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors ring-1 ring-zinc-200 dark:ring-white/10 flex items-center justify-between px-4 mb-2"
-        >
-          <span><span className="text-zinc-400">$</span> npm install @m1kapp/kit</span>
-          {copied ? (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-500"><polyline points="20 6 9 17 4 12"/></svg>
-          ) : (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          )}
-        </button>
+      {/* ── GitHub / npm (맨 위 퀵 링크) ── */}
+      <Section className="mt-3">
         <div className="flex gap-2">
           <a
             href="https://github.com/m1kapp/kit"
@@ -1675,11 +1891,95 @@ function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLi
         </div>
       </Section>
 
+      {/* ── 빠른 시작 — 2가지 방법 ── */}
+      <Section className="mt-2">
+        <h2 className="mb-3 text-lg font-black tracking-tight text-zinc-900 dark:text-white">빠른 시작</h2>
+
+        {/* 방법 1 — 그냥 복붙 (설치도 AI가) */}
+        <div className="mb-2.5 flex items-center gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-black text-white" style={{ backgroundColor: themeColor }}>1</span>
+          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">그냥 복붙하기</span>
+          <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">설치까지 AI가</span>
+        </div>
+        <button
+          onClick={() => setPromptOpen(true)}
+          className="flex w-full flex-col items-center gap-2.5 rounded-2xl bg-zinc-50 p-5 text-center ring-1 ring-zinc-200 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:bg-zinc-900 dark:ring-white/10 dark:hover:bg-zinc-800"
+        >
+          <span className="flex -space-x-2">
+            {AGENT_LOGOS.map(({ mark, label }) => (
+              <span key={label} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-zinc-700 ring-2 ring-zinc-50 dark:bg-zinc-800 dark:text-zinc-200 dark:ring-zinc-900">
+                {mark}
+              </span>
+            ))}
+          </span>
+          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">AI 에이전트에 프롬프트 복붙</span>
+          <span className="text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500">Claude Code · Cursor · Codex 어디든 · 탭해서 복사</span>
+        </button>
+
+        {/* 또는 */}
+        <div className="my-3.5 flex items-center gap-2">
+          <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+          <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">또는</span>
+          <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+        </div>
+
+        {/* 방법 2 — 설치 + 스킬 */}
+        <div className="mb-2.5 flex items-center gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-black text-white" style={{ backgroundColor: themeColor }}>2</span>
+          <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">설치하고 스킬 쓰기</span>
+        </div>
+        <CodeBlock code="npm install @m1kapp/kit" label="설치" className="mb-2.5" />
+
+        <p className="mb-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">설치 후 Claude Code 프로젝트에 스킬 추가:</p>
+        <CodeBlock code="npx m1kkit skills" label="스킬 추가" className="mb-2.5" />
+        <div className="divide-y divide-zinc-100 dark:divide-zinc-800 overflow-hidden rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-800">
+          {[
+            { cmd: "/m1kapp-init", desc: "프로젝트 초기 설정 스캐폴딩" },
+            { cmd: "/m1kapp-seo",  desc: "SEO 감사 및 자동 적용" },
+            { cmd: "/m1kapp-pwa",  desc: "PWA 설정 점검 및 적용" },
+          ].map(({ cmd, desc }) => (
+            <div key={cmd} className="flex items-center justify-between px-4 py-2.5">
+              <div>
+                <span className="text-xs font-mono font-semibold text-zinc-800 dark:text-zinc-200">{cmd}</span>
+                <p className="text-[10px] text-zinc-400 mt-0.5">{desc}</p>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${themeColor}18`, color: themeColor }}>
+                스킬
+              </span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Dialog open={promptOpen} onClose={() => setPromptOpen(false)} title="AI 에이전트에 복붙 → 앱 완성">
+        <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+          아래 프롬프트를 <span className="font-semibold text-zinc-700 dark:text-zinc-300">Claude Code · Cursor · Codex</span> 등 AI 코딩 에이전트 어디에 붙여넣어도 돼요.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {AGENT_LOGOS.map(({ mark, label }) => (
+            <span key={label} className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+              {mark}{label}
+            </span>
+          ))}
+        </div>
+        <pre className="scrollbar-hide mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap break-words rounded-xl bg-zinc-950 px-4 py-3 font-mono text-[11px] leading-relaxed text-zinc-300 dark:bg-zinc-950">{CLAUDE_PROMPT}</pre>
+        <button
+          onClick={() => { navigator.clipboard.writeText(CLAUDE_PROMPT); setPromptCopied(true); setTimeout(() => setPromptCopied(false), 2000); }}
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: themeColor }}
+        >
+          {promptCopied ? <>✓ 복사됨 — 에이전트에 ⌘V</> : <>이 프롬프트 복사하기</>}
+        </button>
+        <p className="mt-2 text-center text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500">
+          붙여넣으면 <span className="font-semibold text-zinc-500 dark:text-zinc-300">이 데모 같은 모바일 앱</span>이 바로 나와요.
+        </p>
+      </Dialog>
+
       <Divider />
 
       {/* ── Why ── */}
       <Section>
-        <SectionHeader>왜 @m1kapp/kit?</SectionHeader>
+        <h2 className="mb-3 text-lg font-black tracking-tight text-zinc-900 dark:text-white">왜 @m1kapp/kit?</h2>
         <div className="space-y-2">
           {[
             {
@@ -1740,10 +2040,10 @@ function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLi
         </div>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { icon: "🧩", label: "UI",       count: "24 컴포넌트", desc: "AppShell · TabBar · Toast" },
+            { icon: "🧩", label: "UI",       count: "45 컴포넌트", desc: "AppShell · TabBar · Chat" },
             { icon: "🖼",  label: "OG Image", count: "7 템플릿",   desc: "Next.js OG 이미지 생성기" },
             { icon: "📱",  label: "PWA",      count: "5 유틸",     desc: "manifest · 설치 유도" },
-            { icon: "🛠",  label: "Utils",    count: "7 훅·유틸",  desc: "fetch · format · cn" },
+            { icon: "🛠",  label: "Utils",    count: "14 훅·유틸", desc: "fetch · format · cn" },
           ].map(({ icon, label, count, desc }) => (
             <button
               key={label}
@@ -1761,97 +2061,12 @@ function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; onGoToLi
 
       <Divider />
 
-      {/* ── Quick start ── */}
-      <Section>
-        <SectionHeader>5분 안에 시작하기</SectionHeader>
-        <div className="rounded-2xl bg-zinc-950 dark:bg-zinc-900 overflow-hidden ring-1 ring-white/10">
-          <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/10">
-            {["bg-red-500", "bg-yellow-500", "bg-green-500"].map((c) => (
-              <span key={c} className={`w-2.5 h-2.5 rounded-full ${c} opacity-70`} />
-            ))}
-            <span className="ml-2 text-[10px] font-mono text-zinc-500">App.tsx</span>
-          </div>
-          <pre className="px-4 py-3 text-[11px] leading-relaxed overflow-x-auto scrollbar-hide">
-            <code>
-              <span className="text-zinc-500">{"import"}</span>
-              <span className="text-zinc-100">{" {"}</span>{"\n"}
-              <span className="text-zinc-100">{"  AppShell, AppShellHeader,"}</span>{"\n"}
-              <span className="text-zinc-100">{"  AppShellContent, TabBar,"}</span>{"\n"}
-              <span className="text-zinc-100">{"} "}</span>
-              <span className="text-zinc-500">{"from"}</span>
-              <span className="text-emerald-400">{" \"@m1kapp/kit\""}</span>{"\n\n"}
-              <span className="text-zinc-500">{"export default function"}</span>
-              <span className="text-sky-400">{" App"}</span>
-              <span className="text-zinc-100">{"() {"}</span>{"\n"}
-              <span className="text-zinc-100">{"  return ("}</span>{"\n"}
-              <span className="text-zinc-100">{"    "}</span>
-              <span className="text-amber-400">{"<AppShell>"}</span>{"\n"}
-              <span className="text-zinc-100">{"      "}</span>
-              <span className="text-amber-400">{"<AppShellHeader>"}</span>
-              <span className="text-zinc-100">{"내 앱"}</span>
-              <span className="text-amber-400">{"</AppShellHeader>"}</span>{"\n"}
-              <span className="text-zinc-100">{"      "}</span>
-              <span className="text-amber-400">{"<AppShellContent>"}</span>{"\n"}
-              <span className="text-zinc-500">{"        {/* 내용 */}"}</span>{"\n"}
-              <span className="text-zinc-100">{"      "}</span>
-              <span className="text-amber-400">{"</AppShellContent>"}</span>{"\n"}
-              <span className="text-zinc-100">{"      "}</span>
-              <span className="text-amber-400">{"<TabBar />"}</span>{"\n"}
-              <span className="text-zinc-100">{"    "}</span>
-              <span className="text-amber-400">{"</AppShell>"}</span>{"\n"}
-              <span className="text-zinc-100">{"  )"}</span>{"\n"}
-              <span className="text-zinc-100">{"}"}</span>
-            </code>
-          </pre>
-        </div>
-      </Section>
-
-      {/* ── Claude Skills ── */}
-      <Section>
-        <SectionHeader>Claude Code 스킬</SectionHeader>
-        <div className="rounded-2xl overflow-hidden ring-1 ring-zinc-200 dark:ring-zinc-800">
-          <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              설치 후 Claude Code 프로젝트에 스킬을 바로 추가할 수 있어요.
-            </p>
-            <div className="mt-2 flex items-center justify-between rounded-xl bg-white dark:bg-zinc-950 px-3 py-2 ring-1 ring-zinc-200 dark:ring-zinc-800">
-              <span className="text-xs font-mono text-zinc-500">
-                <span className="text-zinc-400">$</span> npx m1kkit skills
-              </span>
-              <button
-                onClick={() => { navigator.clipboard.writeText("npx m1kkit skills"); }}
-                className="text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-              >
-                복사
-              </button>
-            </div>
-          </div>
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {[
-              { cmd: "/m1kapp-init", desc: "프로젝트 초기 설정 스캐폴딩" },
-              { cmd: "/m1kapp-seo",  desc: "SEO 감사 및 자동 적용" },
-              { cmd: "/m1kapp-pwa",  desc: "PWA 설정 점검 및 적용" },
-            ].map(({ cmd, desc }) => (
-              <div key={cmd} className="flex items-center justify-between px-4 py-2.5">
-                <div>
-                  <span className="text-xs font-mono font-semibold text-zinc-800 dark:text-zinc-200">{cmd}</span>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">{desc}</p>
-                </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${themeColor}18`, color: themeColor }}>
-                  스킬
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
       {/* ── Stats ── */}
       <Section>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { value: "24+", label: "컴포넌트" },
-            { value: "12+", label: "훅·유틸" },
+            { value: weeklyDl == null ? "—" : formatNumber(weeklyDl), label: "주간 다운로드" },
+            { value: "45+", label: "컴포넌트" },
             { value: "0",   label: "의존성" },
           ].map(({ value, label }) => (
             <div key={label} className="flex flex-col items-center justify-center py-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900">
@@ -1957,6 +2172,9 @@ export default function App() {
         color={THEME_COLOR}
         text="kit"
         sponsor={{ name: "@m1kapp/kit", url: "https://github.com/m1kapp/kit" }}
+        trackSlug="gh"
+        claimed
+        counts={{ today: 1, total: 120 }}
       >
         <AppShell>
           <AppShellHeader>
@@ -1964,9 +2182,6 @@ export default function App() {
               @m1kapp/kit
             </span>
             <div className="flex items-center gap-2">
-              <a href="https://m1k.app/gh" target="_blank" rel="noopener noreferrer">
-                <img alt="Hits" src="https://m1k.app/badge/gh-dark.svg" />
-              </a>
               <HeaderShareButton />
             </div>
           </AppShellHeader>
