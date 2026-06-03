@@ -40,14 +40,37 @@ export default function App() {
 
 ## 모듈 구성
 
+> **하나의 import면 끝.** UI · OG · PWA · Fetch · Utils가 전부 `@m1kapp/kit` 메인 export에 들어 있습니다. `/server`만 별도 서브패스예요. 서브패스를 일일이 외울 필요 없이 `import { ... } from "@m1kapp/kit"` 하나로 다 꺼내 쓰세요.
+
 | 모듈 | import | 설명 |
 |---|---|---|
-| UI | `@m1kapp/kit` | 컴포넌트 24개 + 훅 |
+| UI | `@m1kapp/kit` | 컴포넌트 45개 + 훅 |
 | OG Image | `@m1kapp/kit` | OG 이미지 생성 (서버) |
 | PWA | `@m1kapp/kit` | manifest, viewport, 설치 유도 |
 | Fetch | `@m1kapp/kit` | 캐싱·중복제거·재시도 fetch 유틸 |
 | Utils | `@m1kapp/kit` | 날짜·숫자 포맷, 범용 훅 |
 | **Server** | `@m1kapp/kit/server` | Next.js API route 핸들러 유틸 |
+
+---
+
+## 레시피 — 이럴 땐 이거
+
+손으로 만들기 전에 먼저 찾아보세요. 흔한 화면은 대부분 조합으로 끝납니다.
+
+| 하고 싶은 것 | 이렇게 |
+|---|---|
+| 모바일 앱 셸 | `AppShell` + `AppShellHeader` / `AppShellContent` + `TabBar`/`Tab` + `Watermark` |
+| 목록 + 로딩 + 빈 화면 | `useFetch` → 로딩이면 `Skeleton`, 빈 배열이면 `EmptyState` |
+| 폼 저장 후 피드백 | `useFormSubmit` + `useToast` (인라인 텍스트 대신 토스트) |
+| 설정 화면 | `Section` + `Field`(`inline`) + `Switch` |
+| 인라인 토글 (오늘/이번주) | `SegmentedControl` (하단 글로벌 내비는 `TabBar`) |
+| 채팅 / AI 비서 | `MessageList` + `ChatBubble` + `TypingIndicator` |
+| "이렇게 할까요?" 확인 | `ActionCard` (메시지 흐름 안), 모달이면 `Dialog` |
+| 일정 / 타임라인 행 | `ListRow` (`sizeByMinutes`로 소요시간 비례 높이) |
+| 메모 속 URL 링크 | `LinkifiedText` |
+| API 호출 | `createApiClient` (`get`/`post`/`put`/`delete` + `ApiError`) |
+| 주기적 갱신 | `usePolling` (`pauseOnHidden`) |
+| 테마색 한 번에 | `<AppShell accent="#e2603f">` → 모든 컴포넌트가 `--kit-accent`로 따라옴 |
 
 ---
 
@@ -246,6 +269,169 @@ colors.green   // "#22c55e"
 // blue | purple | green | orange | pink | red | yellow | cyan | slate | zinc
 ```
 
+**임의 색도 OK.** 팔레트는 프리셋일 뿐이고, `ThemeDialog`의 `palette` / `onSelect`는 어떤 hex든 받습니다. 그리고 `Switch`·`SegmentedControl`·`ChatBubble`·`ActionCard`·`ListRow`·`LinkifiedText`의 accent는 `--kit-accent` CSS 변수를 따라가므로, 한 곳만 바꾸면 전체 톤이 바뀝니다.
+
+```tsx
+// ① AppShell accent prop — 가장 쉬움 (하위 전체에 적용)
+<AppShell accent="#e2603f">...</AppShell>
+
+// ② 아무 래퍼에나 CSS 변수로
+<div style={{ "--kit-accent": "#e2603f" } as React.CSSProperties}>...</div>
+
+// ③ 컴포넌트별 override
+<Switch checked={on} onChange={setOn} accent="#e2603f" />
+```
+
+### 폼 · 설정
+
+```tsx
+import { Field, Switch } from "@m1kapp/kit";
+
+// 라벨드 인풋 (stacked 기본 / inline / multiline)
+<Field label="이름" value={name} onChange={setName} placeholder="이름" />
+<Field label="이메일" value={email} inline readOnly />
+<Field label="메모" value={memo} onChange={setMemo} multiline rows={3} hint="자유롭게 적어주세요" />
+
+// on/off 토글 — accent는 --kit-accent 자동 연동
+<Switch checked={on} onChange={setOn} aria-label="알림" />
+```
+
+### 세그먼트 토글
+
+```tsx
+import { SegmentedControl } from "@m1kapp/kit";
+
+<SegmentedControl
+  value={view}
+  onChange={setView}
+  options={[{ value: "today", label: "오늘" }, { value: "week", label: "이번 주" }]}
+/>
+// 인라인 토글용. 하단 글로벌 내비게이션은 TabBar를 쓰세요.
+```
+
+### 채팅 / 대화
+
+```tsx
+import { MessageList, ChatBubble, TypingIndicator } from "@m1kapp/kit";
+import type { ChatMessage } from "@m1kapp/kit";
+
+const messages: ChatMessage[] = [
+  { role: "user", content: "내일 3시 회의 잡아줘", timestamp: Date.now() },
+  { role: "assistant", content: "네, 잡아드릴게요." },
+];
+
+// dayDivider: timestamp 기준 날짜가 바뀌면 구분선 자동 삽입
+<MessageList messages={messages} dayDivider>
+  {pending && <TypingIndicator />}
+</MessageList>
+
+// 직접 쓰려면
+<ChatBubble role="user">오늘 일정 보여줘</ChatBubble>
+<ChatBubble role="assistant">3건 있어요.</ChatBubble>
+```
+
+### 확인 카드 (propose → confirm → execute)
+
+LLM 툴콜처럼 "제안 → 확인 → 실행" 흐름을 메시지 안에 박을 때. 모달이 아니라 흐름에 인라인됩니다.
+
+```tsx
+import { ActionCard } from "@m1kapp/kit";
+
+const [state, setState] = useState<"pending" | "loading" | "done" | "cancelled">("pending");
+
+<ActionCard
+  title="이렇게 기록해둘까요?"
+  state={state}
+  items={["🗓 6/4 15:00 디자인 리뷰", "📌 6/4 (종일) 마감일"]}
+  onConfirm={() => { setState("loading"); /* … */ setState("done"); }}
+  onCancel={() => setState("cancelled")}
+/>
+// state별 색/문구 자동: pending → done(초록) / cancelled(취소선) / loading
+```
+
+### 리스트 / 타임라인 행
+
+```tsx
+import { ListRow } from "@m1kapp/kit";
+
+<ListRow
+  accent="#7fc06a"          // 왼쪽 컬러바 (생략 시 --kit-accent)
+  lead="14:00" leadSub="15:00"
+  title="디자인 리뷰" sub="👥 김상훈"
+  trailing="● 지금" active   // 현재 항목 강조
+  heightScale={60 / 30}      // 높이 배율 (1=기본, 46–130px). 일정은 분/30을 넘김
+  onClick={open}
+/>
+```
+
+### 텍스트 내 링크
+
+```tsx
+import { LinkifiedText } from "@m1kapp/kit";
+
+<LinkifiedText>{"회의록: https://docs.google.com/…\n화상: meet.google.com/abc-def"}</LinkifiedText>
+// http(s) URL + (기본) meet.google.com 같은 도메인/경로를 자동 링크. 줄바꿈 보존.
+```
+
+### 진행 표시 · 단계
+
+```tsx
+import { Stepper, Collapsible, ProgressRing } from "@m1kapp/kit";
+
+// 다단계 진행 표시 (위저드/멀티페이즈 플로우)
+<Stepper current={phase} onStepClick={setPhase} steps={[
+  { label: "분석", icon: "📝" }, { label: "준비", icon: "📸" }, { label: "생성", icon: "✨" },
+]} />
+
+// 접기 카드 (헤더+배지+상태)
+<Collapsible leading={1} title="페르소나 분석" subtitle="스타일 파악" completed
+  open={open === 1} onToggle={() => setOpen(open === 1 ? null : 1)}>
+  <p>본문…</p>
+</Collapsible>
+
+// 원형 진행률
+<ProgressRing value={7} max={10}><span className="text-2xl font-black">7</span></ProgressRing>
+```
+
+### 입력 · 편집
+
+```tsx
+import { Select, ColorPicker, InlineEdit } from "@m1kapp/kit";
+
+// 앵커드 드롭다운 (카운트·비활성 옵션, 외부클릭/ESC 닫힘)
+<Select value={cat} onChange={setCat} placeholder="난이도" options={[
+  { value: "a", label: "초급", count: 12 }, { value: "b", label: "고급", count: 0, disabled: true },
+]} />
+
+// 컬러 피커 (프리셋 + 커스텀 hex)
+<ColorPicker value={color} onChange={setColor} />
+
+// 탭하여 편집 (Enter 저장 · Esc 취소)
+<InlineEdit value={name} onChange={rename} className="text-lg font-bold" />
+```
+
+### 복사 · 데이터
+
+```tsx
+import { CopyButton, CodeBlock, useCopy, BarList, Countdown, Carousel, Img } from "@m1kapp/kit";
+
+<CopyButton text="npm i @m1kapp/kit">설치 복사</CopyButton>
+<CodeBlock label="install" code="npm i @m1kapp/kit" />
+const { copied, copy } = useCopy();   // keyed: copy(text, "row-3")
+
+// 가로 막대 분석 차트
+<BarList items={[{ label: "/", value: 120 }, { label: "/about", value: 64, href: "/about" }]} />
+
+// 카운트다운 (D-day)
+<Countdown to="2026-12-31" onComplete={celebrate} />
+
+// 스와이프 캐러셀 (controlled, 점 인디케이터)
+<Carousel count={slides.length} index={i} onChange={setI}>{slides[i]}</Carousel>
+
+// 다중 URL 폴백 이미지
+<Img candidates={[avatarUrl, gravatar]} fallback={<Avatar fallback="MH" />} className="h-10 w-10 rounded-full" />
+```
+
 ### 워터마크
 
 ```tsx
@@ -255,6 +441,32 @@ import { Watermark } from "@m1kapp/kit";
   {children}
 </Watermark>
 ```
+
+`Watermark`는 하단에 `PoweredByKit` 크레딧을 자동 내장합니다.
+
+### 방문자 트래커 (m1k.app) — 선택, 기본 OFF
+
+`Watermark`/`PoweredByKit` 하단 크레딧이 방문자 수를 집계할 수 있습니다. **slug가 있을 때만** 켜지고, 없으면 아무것도 전송하지 않아요(기본 off). 집계는 페이지뷰 카운트뿐 — PII 없음.
+
+```bash
+# 1) 사이트 등록 (무로그인) → slug 발급
+npx m1kkit track https://myside.app
+```
+
+```bash
+# 2) .env 에 한 줄 → 이후 자동 집계 (스니펫 붙여넣기 불필요)
+NEXT_PUBLIC_M1K_SLUG=your-slug
+```
+
+```tsx
+// 끄기 / 명시 지정
+<Watermark track={false}>…</Watermark>        // 비콘 끔
+<Watermark trackSlug="your-slug">…</Watermark> // env 대신 직접 지정
+// PoweredByKit 단독 사용 시: <PoweredByKit slug="your-slug" track={false} />
+```
+
+> `npx m1kkit claim` 으로 익명 등록 사이트를 내 m1k.app 계정에 귀속할 수 있어요.
+> (`.m1k.json`의 일회용 토큰 + 로그인으로 인증.) 귀속하는 김에 **kit이 이 프로젝트에서 코드를 얼마나 아껴줬는지** 분석도 같이 출력해요 — `--no-stats`로 끌 수 있어요.
 
 ---
 
@@ -545,10 +757,17 @@ export const GET = handler(async () => {
 순수 함수 — 의존성 없음, 어디서나 import.
 
 ```ts
-import { relativeTime, formatNumber, formatPrice, cn } from "@m1kapp/kit";
+import { relativeTime, formatNumber, formatPrice, cn, formatDuration, groupByDay } from "@m1kapp/kit";
 
 // 상대 시간
 relativeTime(post.createdAt)               // "3분 전", "어제", "2025. 4. 19."
+
+// 소요 시간 포맷
+formatDuration(90_000)                     // "1분 30초"
+formatDuration(3_661_000, { style: "clock" }) // "1:01:01"
+
+// 날짜별 그룹핑 — [{ date, label: "오늘"|"어제"|"4월 19일 (토)", items }]
+groupByDay(logs, (l) => l.timestamp)
 
 // 숫자 포맷
 formatNumber(1_500)                        // "1.5천"
