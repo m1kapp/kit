@@ -103,7 +103,8 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
   const touchX = useRef(0);
   const moved = useRef(false);
 
-  // Visitor counts — explicit prop wins, else fetched from m1k.app (needs CORS).
+  // Visitor counts — explicit prop wins, else fetched from m1k.app's lean public
+  // count endpoint (?view=count → { today, total } only, CORS-enabled).
   const [fetched, setFetched] = useState<{ today: number; total: number } | null>(null);
   const visitorCounts = counts
     ? { today: counts.today ?? 0, total: counts.total ?? 0 }
@@ -112,7 +113,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
   useEffect(() => {
     if (!tracking || counts) return;
     let alive = true;
-    fetch(`https://${trackerHost}/api/sites/${encodeURIComponent(trackerSlug!)}`)
+    fetch(`https://${trackerHost}/api/sites/${encodeURIComponent(trackerSlug!)}?view=count`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (alive && d) setFetched({ today: Number(d.todayCount ?? d.today ?? 0), total: Number(d.total ?? 0) }); })
       .catch(() => { /* CORS/offline — counter just won't show */ });
