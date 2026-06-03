@@ -155,11 +155,10 @@ for (const name of allImports) {
   // 카테고리별 사용 수 (loc 0이어도 카운트 — "Tab"도 사용한 거니까)
   usedByCategory[meta.category] = (usedByCategory[meta.category] || 0) + 1;
 
-  // LOC 절약은 소스 파일 단위로 1번만
-  if (meta.source && countedSources.has(meta.source)) continue;
-  if (meta.source) countedSources.add(meta.source);
-
-  if (meta.loc > 0) {
+  // LOC 절약은 소스 파일 단위로 1번만. 대표(loc>0)만 카운트하므로 import
+  // 순서와 무관 — 비대표(loc 0)가 먼저 와도 source를 선점하지 않는다.
+  if (meta.loc > 0 && !(meta.source && countedSources.has(meta.source))) {
+    if (meta.source) countedSources.add(meta.source);
     usedFeatures.push({ name, loc: meta.loc, category: meta.category });
     savedLines += meta.loc;
   }
