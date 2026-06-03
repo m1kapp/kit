@@ -51,6 +51,17 @@ export interface WatermarkProps {
    * Default: false (badge is shown)
    */
   hidePoweredBy?: boolean;
+  /**
+   * m1k.app visitor-tracker slug, forwarded to the embedded PoweredByKit badge.
+   * Falls back to `NEXT_PUBLIC_M1K_SLUG`. No slug → no tracking (off by default).
+   */
+  trackSlug?: string;
+  /** Set false to disable the visitor beacon even when a slug is present */
+  track?: boolean;
+  /** Mark the site as claimed (인증됨). When tracking but not claimed, a "미인증" marker shows. */
+  claimed?: boolean;
+  /** Visitor counts for the footer ({ today, total }). Omit to auto-fetch from m1k.app. */
+  counts?: { today?: number; total?: number };
 }
 
 const BASE_STYLE = `
@@ -138,6 +149,10 @@ export function Watermark({
   sponsor,
   speed = 40,
   hidePoweredBy = false,
+  trackSlug,
+  track,
+  claimed,
+  counts,
 }: WatermarkProps) {
   injectStyle();
 
@@ -194,7 +209,7 @@ export function Watermark({
 
   return (
     <div
-      className="h-dvh w-full relative overflow-hidden"
+      className="h-dvh w-full relative overflow-clip"
       style={{ backgroundColor: color, transition: "background-color 0.5s ease" }}
     >
       {/* Single SVG with <pattern> — tiles are rendered by the browser, no extra DOM nodes */}
@@ -306,7 +321,7 @@ export function Watermark({
         style={{ maxWidth }}
       >
         {children}
-        {!hidePoweredBy && <PoweredByKit variant="overlay" />}
+        {!hidePoweredBy && <PoweredByKit variant="overlay" slug={trackSlug} track={track} claimed={claimed} counts={counts} />}
       </div>
     </div>
   );
