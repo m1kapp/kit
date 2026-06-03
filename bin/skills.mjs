@@ -28,6 +28,10 @@ const SKILLS = [
     name: "m1kapp-pwa",
     desc: "/m1kapp-pwa   — PWA 설정 점검 및 @m1kapp/kit/pwa 자동 적용",
   },
+  {
+    name: "m1kapp-stats",
+    desc: "/m1kapp-stats — 코드 분석(stats) 켜기 · kit-stats.json 생성/갱신 · PoweredByKit 패널 데이터 채우기",
+  },
 ];
 
 const args = process.argv.slice(2);

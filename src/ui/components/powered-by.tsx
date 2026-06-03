@@ -429,10 +429,13 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
                 </div>
               )}
 
-              {/* 분석 시점 */}
-              <p className="text-xs text-zinc-300 dark:text-zinc-600">
-                분석: {new Date(stats.generatedAt).toLocaleDateString("ko-KR")}
-              </p>
+              {/* 분석 시점 + 갱신 안내 (데이터가 있을 땐 '실행'이 아니라 '갱신') */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-300 dark:text-zinc-600">
+                <span>분석: {new Date(stats.generatedAt).toLocaleDateString("ko-KR")}</span>
+                <span aria-hidden>·</span>
+                <span>갱신하려면</span>
+                <code className="rounded bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 font-mono text-zinc-500 dark:text-zinc-400">npx m1kkit stats</code>
+              </div>
             </>
             );
           })()}
