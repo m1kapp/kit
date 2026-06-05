@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { InAppSheet } from "./in-app-sheet";
+import { ChevronLeftIcon, ChevronRightIcon } from "./_icons";
 
 /** Kit version — injected at build time via tsup define */
 declare const __KIT_VERSION__: string;
@@ -97,11 +98,11 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  // Footer carousel — one-way loop: [counter, powered, counter-clone].
+  // Footer carousel between two faces: [counter, powered]. Arrows + swipe + auto.
   const [idx, setIdx] = useState(0);
-  const [anim, setAnim] = useState(true);
   const touchX = useRef(0);
   const moved = useRef(false);
+  const go = (dir: number) => setIdx((i) => (i + dir + 2) % 2);
 
   // Visitor counts — explicit prop wins, else fetched from m1k.app's lean public
   // count endpoint (?view=count → { today, total } only, CORS-enabled).
@@ -122,24 +123,12 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
 
   const hasCounter = tracking && !!visitorCounts;
 
-  // one-way auto-advance every 10s (pause while the sheet is open)
+  // auto-advance every 10s (pause while the sheet is open)
   useEffect(() => {
     if (!hasCounter || open) return;
-    const id = setInterval(() => setIdx((i) => Math.min(i + 1, 2)), 10_000);
+    const id = setInterval(() => setIdx((i) => (i + 1) % 2), 10_000);
     return () => clearInterval(id);
   }, [hasCounter, open]);
-
-  // seamless loop: after sliding onto the clone (idx 2), snap back to 0 without animation
-  useEffect(() => {
-    if (idx === 2) {
-      const t = setTimeout(() => { setAnim(false); setIdx(0); }, 540);
-      return () => clearTimeout(t);
-    }
-    if (!anim) {
-      const t = setTimeout(() => setAnim(true), 40);
-      return () => clearTimeout(t);
-    }
-  }, [idx, anim]);
 
   const ver = version || KIT_VERSION;
 
@@ -172,8 +161,8 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
   return (
     <>
       {tracking ? (
-        // Footer — one-way looping carousel between the visitor counter and the
-        // powered-by credit. A hidden badge img does the actual counting (once).
+        // Footer — carousel between the visitor counter and the powered-by
+        // credit, navigable by arrows/swipe. A hidden badge img counts once.
         (() => {
           const counterFace = (
             <button
@@ -216,23 +205,39 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
               onTouchEnd={(e) => {
                 const x = e.changedTouches[0]?.clientX;
                 if (x === undefined) return;
-                // one-way; clamp at the clone (idx 2) so a swipe during the
-                // 540ms snap-back window can't overshoot into a blank frame
-                if (Math.abs(touchX.current - x) > 40) setIdx((i) => Math.min(i + 1, 2));
+                const dx = touchX.current - x;       // +: swiped left → next
+                if (Math.abs(dx) > 40) go(dx > 0 ? 1 : -1);
               }}
             >
               {/* hidden beacon — counts each page view once */}
               <img src={badgeUrl} alt="" aria-hidden="true" width={1} height={1} decoding="async" style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} />
               {hasCounter ? (
-                <div className="overflow-hidden">
-                  <div
-                    className={`flex ${anim ? "transition-transform duration-500 ease-out" : ""}`}
-                    style={{ transform: `translateX(-${idx * 100}%)` }}
-                  >
-                    {counterFace}
-                    {poweredFace}
-                    {counterFace}
+                <div className="relative">
+                  <div className="overflow-hidden mx-5">
+                    <div
+                      className="flex transition-transform duration-500 ease-out"
+                      style={{ transform: `translateX(-${idx * 100}%)` }}
+                    >
+                      {counterFace}
+                      {poweredFace}
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => go(-1)}
+                    aria-label="이전"
+                    className="absolute inset-y-0 left-0 flex items-center px-1 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <ChevronLeftIcon size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => go(1)}
+                    aria-label="다음"
+                    className="absolute inset-y-0 right-0 flex items-center px-1 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <ChevronRightIcon size={14} />
+                  </button>
                 </div>
               ) : (
                 poweredFace

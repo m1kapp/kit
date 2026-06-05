@@ -315,13 +315,18 @@ export function Watermark({
         />
       )}
 
-      {/* content */}
+      {/* content — shell + powered-by grouped and bottom-aligned, so a viewport
+          taller than the shell pushes the slack up (into the watermark pattern)
+          instead of leaving dead space under the badge. Equal top/bottom spacers
+          keep the group centered when there's only a little slack. */}
       <div
-        className="relative z-10 h-full flex flex-col items-center justify-center mx-auto sm:p-3 sm:gap-1"
+        className="relative z-10 h-full flex flex-col items-center mx-auto sm:p-3 sm:gap-1"
         style={{ maxWidth }}
       >
+        <div className="flex-[2] min-h-0" />
         {children}
         {!hidePoweredBy && <PoweredByKit variant="overlay" slug={trackSlug} track={track} claimed={claimed} counts={counts} />}
+        <div className="flex-1 min-h-0" />
       </div>
     </div>
   );
