@@ -133,7 +133,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
   const ver = version || KIT_VERSION;
 
   useEffect(() => {
-    if (!open || stats || loading) return;
+    if (!open || stats || loading || error) return;
     setLoading(true);
     fetch(statsUrl)
       .then((r) => {
