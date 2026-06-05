@@ -12,9 +12,32 @@ export interface AppShellProps {
    * Accent color (any CSS color) propagated to kit components as `--kit-accent`.
    * Lets you re-skin the whole shell — Switch, SegmentedControl, ChatBubble,
    * ActionCard, ListRow… — in one place. e.g. accent="#e2603f"
+   *
+   * When `accent` is a hex color, a contrasting foreground (`--kit-accent-fg`,
+   * black/white) is derived automatically so labels on the accent stay legible.
    */
   accent?: string;
+  /**
+   * Foreground color used *on top of* the accent (`--kit-accent-fg`). Defaults
+   * to an auto-derived black/white for hex accents, else white. Set this when
+   * `accent` is a non-hex CSS color (named/rgb/hsl) and the default contrasts poorly.
+   */
+  accentFg?: string;
   style?: CSSProperties;
+}
+
+/** Pick black or white for legible text on a hex background (per WCAG relative luminance). */
+function contrastFg(accent: string): string | undefined {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(accent.trim());
+  if (!m) return undefined; // not a hex color — caller should pass accentFg
+  let hex = m[1];
+  if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  return L > 0.4 ? "#000000" : "#ffffff";
 }
 
 /**
@@ -27,9 +50,18 @@ export function AppShell({
   maxWidth = 430,
   maxHeight = 932,
   accent,
+  accentFg,
   style,
 }: AppShellProps) {
-  const accentVar = accent ? ({ "--kit-accent": accent } as CSSProperties) : undefined;
+  const vars: Record<string, string> = {};
+  if (accent) {
+    vars["--kit-accent"] = accent;
+    const fg = accentFg ?? contrastFg(accent);
+    if (fg) vars["--kit-accent-fg"] = fg;
+  } else if (accentFg) {
+    vars["--kit-accent-fg"] = accentFg;
+  }
+  const accentVar = Object.keys(vars).length ? (vars as CSSProperties) : undefined;
   return (
     <div
       className={`app-shell-root relative w-full h-full flex flex-col bg-white dark:bg-zinc-950 shadow-2xl ring-1 ring-black/10 dark:ring-zinc-700 sm:rounded-2xl overflow-hidden ${className}`}

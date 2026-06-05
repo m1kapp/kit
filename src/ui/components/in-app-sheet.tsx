@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useEscapeKey } from "../hooks/use-escape-key";
 import { useFocusTrap } from "../hooks/use-focus-trap";
@@ -42,6 +42,7 @@ export function InAppSheet({
 }: InAppSheetProps) {
   const [anchorRef, target] = usePortalTarget();
   const trapRef = useFocusTrap<HTMLDivElement>(open);
+  const titleId = useId();
   /** Whether the portal DOM is mounted */
   const [mounted, setMounted] = useState(false);
   /** Whether the enter transition has been triggered (1-frame delay after mount) */
@@ -139,7 +140,7 @@ export function InAppSheet({
       {target && mounted
         ? createPortal(
             <div
-              className={`absolute inset-0 z-50 overflow-hidden ${entered ? "pointer-events-auto" : "pointer-events-none"}`}
+              className={`absolute inset-0 z-[200] overflow-hidden ${entered ? "pointer-events-auto" : "pointer-events-none"}`}
             >
               {/* backdrop */}
               <div
@@ -153,6 +154,7 @@ export function InAppSheet({
                   ref={trapRef}
                   role="dialog"
                   aria-modal="true"
+                  aria-labelledby={title ? titleId : undefined}
                   className={`relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform ${fullHeight ? "h-full flex flex-col" : ""} ${className}`}
                   style={sheetStyle}
                   onClick={(e) => e.stopPropagation()}
@@ -168,7 +170,7 @@ export function InAppSheet({
                   {(title || !hideClose) && (
                     <div className="flex items-center justify-between px-5 pt-1 pb-2">
                       {title ? (
-                        <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{title}</p>
+                        <p id={titleId} className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{title}</p>
                       ) : (
                         <span />
                       )}

@@ -125,7 +125,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
   // one-way auto-advance every 10s (pause while the sheet is open)
   useEffect(() => {
     if (!hasCounter || open) return;
-    const id = setInterval(() => setIdx((i) => i + 1), 10_000);
+    const id = setInterval(() => setIdx((i) => Math.min(i + 1, 2)), 10_000);
     return () => clearInterval(id);
   }, [hasCounter, open]);
 
@@ -216,7 +216,9 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
               onTouchEnd={(e) => {
                 const x = e.changedTouches[0]?.clientX;
                 if (x === undefined) return;
-                if (Math.abs(touchX.current - x) > 40) setIdx((i) => i + 1); // one-way
+                // one-way; clamp at the clone (idx 2) so a swipe during the
+                // 540ms snap-back window can't overshoot into a blank frame
+                if (Math.abs(touchX.current - x) > 40) setIdx((i) => Math.min(i + 1, 2));
               }}
             >
               {/* hidden beacon — counts each page view once */}

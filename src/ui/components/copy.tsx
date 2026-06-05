@@ -1,5 +1,23 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
+/** Legacy execCommand copy — works on insecure origins where navigator.clipboard is absent. */
+function fallbackCopy(text: string): boolean {
+  if (typeof document === "undefined") return false;
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Clipboard copy + feedback. `copied` is `true` (or the passed `key`) for
  * `timeout` ms after a copy, so one hook can drive many copy targets.
@@ -16,15 +34,22 @@ export function useCopy(timeout = 2_000) {
   // clear any pending timer on unmount
   useEffect(() => () => { if (timer.current !== undefined) clearTimeout(timer.current); }, []);
 
-  function copy(text: string, key?: string) {
-    try {
-      navigator.clipboard.writeText(text);
-    } catch {
-      /* clipboard unavailable */
-    }
+  function flagCopied(key?: string) {
     setCopied(key ?? true);
     if (timer.current !== undefined) clearTimeout(timer.current);
     timer.current = setTimeout(() => setCopied(null), timeout);
+  }
+
+  function copy(text: string, key?: string) {
+    // writeText() rejects asynchronously on insecure origins / denied permission,
+    // so only flip to the "copied" state once the write actually succeeds.
+    try {
+      const p = navigator.clipboard?.writeText(text);
+      if (p) p.then(() => flagCopied(key)).catch(() => { /* copy failed — no false success */ });
+      else fallbackCopy(text) && flagCopied(key);
+    } catch {
+      if (fallbackCopy(text)) flagCopied(key);
+    }
   }
 
   return { copied, copy };

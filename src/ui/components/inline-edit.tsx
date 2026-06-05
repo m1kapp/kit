@@ -44,7 +44,12 @@ export function InlineEdit({
     const v = draft.trim();
     // Only commit when the user actually edited — avoids clobbering an external
     // update to `value` that landed while the field was focused but untouched.
-    if (v && v !== startValue.current) onChange(v);
+    if (v && v !== startValue.current) {
+      // Advance the baseline so the blur that fires when Enter unmounts the
+      // input doesn't run onChange a second time with the same value.
+      startValue.current = v;
+      onChange(v);
+    }
     setEditing(false);
   }
 

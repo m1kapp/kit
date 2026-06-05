@@ -85,12 +85,20 @@ export async function fetchWithRetry(url: string | URL, opts: FetchRetryOptions 
       async () => {
         const ac = new AbortController();
         const timer = setTimeout(() => ac.abort(), timeoutMs);
+        // Honor the caller's signal *and* our per-attempt timeout: abort our
+        // controller if the caller aborts, so the timeout can never be bypassed.
+        const onCallerAbort = () => ac.abort();
+        if (init.signal) {
+          if (init.signal.aborted) ac.abort();
+          else init.signal.addEventListener("abort", onCallerAbort, { once: true });
+        }
         try {
-          const res = await fetch(url, { ...init, signal: init.signal ?? ac.signal });
+          const res = await fetch(url, { ...init, signal: ac.signal });
           if (retryStatuses.includes(res.status)) throw new RetryableStatus(res);
           return res;
         } finally {
           clearTimeout(timer);
+          init.signal?.removeEventListener("abort", onCallerAbort);
         }
       },
       {
@@ -147,6 +155,11 @@ export async function scrapeOg(target: string, opts: { timeoutMs?: number } = {}
       signal: ac.signal,
       headers: { "user-agent": "Mozilla/5.0 (compatible; m1kapp-kit/scrapeOg)" },
     });
+    // Don't scrape an error page (404/500…) as if it were the target's OG data.
+    if (!res.ok) {
+      res.body?.cancel().catch(() => {});
+      throw new Error(`scrapeOg: ${res.status} ${res.statusText} for ${url}`);
+    }
     html = await res.text();
   } finally {
     clearTimeout(timer);
