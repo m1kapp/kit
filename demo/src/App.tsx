@@ -2296,8 +2296,314 @@ const HeartIcon = () => (
   </svg>
 );
 
+/* ══════════════════════════════════════════════
+   Templates Tab
+══════════════════════════════════════════════ */
+const TEMPLATE_LIST = [
+  { id: "bio",       icon: "🪪", name: "개인 Bio",      desc: "링크트리 스타일 · 소개 · 프로젝트 · SNS" },
+  { id: "landing",   icon: "🛍", name: "랜딩 / 쇼핑몰", desc: "히어로 · 기능 목록 · 상품 카드 · CTA" },
+  { id: "dashboard", icon: "📊", name: "데이터 대시보드", desc: "KPI · BarList · ProgressRing · 필터" },
+] as const;
+type TemplateId = typeof TEMPLATE_LIST[number]["id"];
+
+/* Bio */
+const BIO_COLOR = "#8b5cf6";
+function BioTemplate() {
+  const C = BIO_COLOR;
+  return (
+    <div className="bg-white" style={{ ["--kit-accent" as string]: C } as React.CSSProperties}>
+      {/* Hero — color header strip */}
+      <div className="relative px-6 pt-12 pb-10 text-center" style={{ backgroundColor: C + "0c" }}>
+        <div className="w-20 h-20 rounded-full p-[3px] mx-auto" style={{ background: `linear-gradient(135deg, ${C}, #ec4899)` }}>
+          <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-3xl font-black" style={{ color: C }}>M</div>
+        </div>
+        {/* 이름 극대화 */}
+        <h1 className="text-[2.6rem] font-black mt-5 leading-none tracking-tight text-zinc-900">Minho<br />Yoo</h1>
+        <p className="text-xs font-semibold mt-3 uppercase tracking-[0.15em]" style={{ color: C }}>풀스택 · 사이드프로젝트 메이커</p>
+        {/* 스킬 — 점 구분자로 미니멀하게 */}
+        <p className="text-[11px] text-zinc-400 mt-4 tracking-wide">React · Next.js · TypeScript · Tailwind</p>
+      </div>
+
+      {/* Links — 컬러 하이라이트 하나만 */}
+      <div className="px-5 pt-6 space-y-2.5">
+        {[
+          { icon: "💻", label: "GitHub", sub: "github.com/m1kapp" },
+          { icon: "𝕏",  label: "X (Twitter)", sub: "@m1kapp" },
+          { icon: "✉️", label: "이메일", sub: "wingedcompany@gmail.com" },
+        ].map((l) => (
+          <button key={l.label} className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl bg-zinc-50 border border-zinc-100 text-left hover:bg-zinc-100 active:scale-[0.99] transition-all">
+            <span className="text-lg">{l.icon}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-zinc-800">{l.label}</p>
+              <p className="text-[10px] text-zinc-400 truncate mt-0.5">{l.sub}</p>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        ))}
+        {/* 메인 링크만 컬러 필 */}
+        <button className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-left active:scale-[0.99] transition-all text-white" style={{ background: `linear-gradient(135deg, ${C}, #7c3aed)` }}>
+          <span className="text-lg">📊</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold">m1k.app</p>
+            <p className="text-[10px] opacity-60 mt-0.5">방문자 트래커 서비스</p>
+          </div>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 shrink-0"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+
+      {/* Projects — 왼쪽 컬러바로 카드 다양화 */}
+      <div className="px-5 pt-8 pb-10">
+        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4">프로젝트</p>
+        <div className="space-y-3">
+          {[
+            { name: "m1k.app", desc: "방문자 1,000명을 향한 여정", badge: "LIVE", c: C },
+            { name: "LLMRace", desc: "LLM 출시 레이스 D-day 예측", badge: "LIVE", c: "#ec4899" },
+            { name: "@m1kapp/kit", desc: "사이드 프로젝트 React UI 킷", badge: "OSS", c: "#22c55e" },
+          ].map((p) => (
+            <div key={p.name} className="flex items-center gap-4 py-3 border-b border-zinc-100 last:border-0">
+              <div className="w-1 h-10 rounded-full shrink-0" style={{ backgroundColor: p.c }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-black text-zinc-900">{p.name}</p>
+                <p className="text-[11px] text-zinc-400 mt-0.5">{p.desc}</p>
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-full shrink-0" style={{ backgroundColor: p.c + "15", color: p.c }}>{p.badge}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const LANDING_COLOR = "#f59e0b";
+function LandingTemplate() {
+  const C = LANDING_COLOR;
+  const [sel, setSel] = useState<string | null>("pro");
+  return (
+    <div className="bg-white" style={{ ["--kit-accent" as string]: C } as React.CSSProperties}>
+      {/* Hero — 헤드라인 극대화 */}
+      <div className="px-6 pt-14 pb-10">
+        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.15em] px-3 py-1 rounded-full" style={{ backgroundColor: C + "18", color: C }}>
+          ✦ v1.0 출시
+        </span>
+        <h1 className="text-[3rem] font-black leading-[1.0] tracking-tight text-zinc-900 mt-5">
+          아이디어를<br /><span style={{ color: C }}>제품으로.</span>
+        </h1>
+        <p className="text-sm text-zinc-500 mt-4 leading-relaxed max-w-[260px]">
+          설계부터 배포까지, @m1kapp/kit 하나로.
+        </p>
+        <div className="flex gap-3 mt-7">
+          <button className="px-6 py-3 rounded-2xl text-sm font-black text-white shadow-lg" style={{ backgroundColor: C }}>
+            무료로 시작
+          </button>
+          <button className="px-6 py-3 rounded-2xl text-sm font-semibold text-zinc-500 border border-zinc-200">
+            데모 보기
+          </button>
+        </div>
+        <p className="text-[10px] text-zinc-400 mt-4">이미 <b className="text-zinc-700">2,400+</b>명이 사용 중</p>
+      </div>
+
+      {/* Features — 구분선 기반, 카드 없이 */}
+      <div className="px-6 border-t border-zinc-100">
+        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pt-7 mb-5">주요 기능</p>
+        {[
+          { icon: "⚡", title: "빠른 개발", desc: "50개+ 컴포넌트로 즉시 시작" },
+          { icon: "📱", title: "PWA 내장",  desc: "앱 설치 유도까지 한 번에" },
+          { icon: "🔍", title: "SEO 자동",  desc: "메타태그·사이트맵·JSON-LD" },
+          { icon: "🎨", title: "테마 자유", desc: "다크모드·컬러 피커 내장" },
+        ].map((f, i) => (
+          <div key={f.title} className={`flex items-center gap-4 py-4 ${i < 3 ? "border-b border-zinc-100" : ""}`}>
+            <span className="text-2xl w-8 shrink-0">{f.icon}</span>
+            <div>
+              <p className="text-sm font-black text-zinc-900">{f.title}</p>
+              <p className="text-[11px] text-zinc-400 mt-0.5">{f.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pricing — 인기 플랜 컬러 필 */}
+      <div className="px-6 pt-8 pb-10 border-t border-zinc-100">
+        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-5">요금제</p>
+        <div className="space-y-3">
+          {[
+            { id: "free", name: "Free",  price: 0,     perks: ["프로젝트 1개", "기본 분석"],                 hot: false },
+            { id: "pro",  name: "Pro",   price: 9900,  perks: ["프로젝트 무제한", "고급 분석", "우선 지원"], hot: true  },
+            { id: "team", name: "Team",  price: 29900, perks: ["팀원 5명", "공유 대시보드"],                  hot: false },
+          ].map((p) => (
+            <button key={p.id} onClick={() => setSel(p.id)}
+              className="w-full text-left p-5 rounded-2xl transition-all"
+              style={p.hot ? { backgroundColor: C, color: "white" } : { backgroundColor: "#f9f9f9", border: `2px solid ${sel === p.id ? C : "transparent"}` }}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className={`text-base font-black ${p.hot ? "text-white" : "text-zinc-900"}`}>{p.name}</p>
+                    {p.hot && <span className="text-[9px] font-black bg-white/20 px-2 py-0.5 rounded-full">인기</span>}
+                  </div>
+                  <div className="flex gap-2 mt-1.5 flex-wrap">
+                    {p.perks.map(k => <span key={k} className={`text-[10px] ${p.hot ? "text-white/70" : "text-zinc-400"}`}>{k}</span>)}
+                  </div>
+                </div>
+                <p className={`text-lg font-black tabular-nums shrink-0 ${p.hot ? "text-white" : "text-zinc-900"}`}>
+                  {p.price === 0 ? "무료" : `₩${(p.price/1000).toFixed(0)}K`}
+                  {p.price > 0 && <span className={`text-[10px] font-normal ml-0.5 ${p.hot ? "text-white/60" : "text-zinc-400"}`}>/월</span>}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+        <button className="mt-5 w-full py-4 rounded-2xl text-sm font-black text-white" style={{ backgroundColor: C }}>
+          지금 시작하기 →
+        </button>
+        <p className="text-center text-[10px] text-zinc-400 mt-3">신용카드 불필요 · 언제든 해지</p>
+      </div>
+    </div>
+  );
+}
+
+const DASH_COLOR = "#06b6d4";
+function DataDashboardTemplate() {
+  const C = DASH_COLOR;
+  const [period, setPeriod] = useState<"7d" | "30d">("30d");
+  return (
+    <div className="bg-white" style={{ ["--kit-accent" as string]: C } as React.CSSProperties}>
+      {/* Header */}
+      <div className="px-6 pt-8 pb-4 flex items-end justify-between border-b border-zinc-100">
+        <div>
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Analytics</p>
+          <h1 className="text-2xl font-black text-zinc-900 mt-1 leading-none">대시보드</h1>
+        </div>
+        <SegmentedControl value={period} onChange={setPeriod} options={[{ value: "7d", label: "7일" }, { value: "30d", label: "30일" }]} />
+      </div>
+
+      {/* KPI — 숫자 극대화, 배경 없이 */}
+      <div className="grid grid-cols-2 border-b border-zinc-100">
+        {[
+          { label: "총 방문자", value: period === "30d" ? "12,450" : "3,210", delta: "+18%", up: true,  c: C },
+          { label: "신규 가입", value: period === "30d" ? "342"    : "89",     delta: "+34%", up: true,  c: "#22c55e" },
+          { label: "평균 체류", value: "2m 14s",                               delta: "−3%",  up: false, c: "#f59e0b" },
+          { label: "전환율",   value: "3.8%",                                  delta: "+0.4%", up: true, c: "#a855f7" },
+        ].map((s, i) => (
+          <div key={s.label} className={`px-6 py-5 ${i % 2 === 0 ? "border-r border-zinc-100" : ""} ${i < 2 ? "border-b border-zinc-100" : ""}`}>
+            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{s.label}</p>
+            <p className="text-3xl font-black mt-2 tabular-nums leading-none" style={{ color: s.c }}>{s.value}</p>
+            <span className={`text-[10px] font-bold mt-2 inline-block ${s.up ? "text-emerald-500" : "text-red-500"}`}>
+              {s.up ? "↑" : "↓"} {s.delta}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Page breakdown */}
+      <div className="px-6 pt-7 pb-5 border-b border-zinc-100">
+        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-5">페이지별 방문</p>
+        <BarList items={[
+          { label: "/홈",     value: 4820 },
+          { label: "/상품",   value: 2341 },
+          { label: "/빌더",   value: 1209 },
+          { label: "/마이",   value: 743 },
+          { label: "/클레임", value: 312 },
+        ]} />
+      </div>
+
+      {/* Goal rings */}
+      <div className="px-6 pt-7 pb-5 border-b border-zinc-100">
+        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6">월간 목표</p>
+        <div className="flex justify-around">
+          {[
+            { label: "방문자", value: 12450, max: 15000, c: C },
+            { label: "가입",   value: 342,   max: 500,   c: "#22c55e" },
+            { label: "결제",   value: 28,    max: 50,    c: "#f59e0b" },
+          ].map((r) => (
+            <div key={r.label} className="flex flex-col items-center gap-2">
+              <ProgressRing value={r.value} max={r.max} size={80} accent={r.c}>
+                <span className="text-base font-black text-zinc-900">{Math.round(r.value / r.max * 100)}%</span>
+              </ProgressRing>
+              <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wide">{r.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Sources */}
+      <div className="px-6 pt-7 pb-10">
+        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-5">유입 경로</p>
+        <div className="space-y-4">
+          {[
+            { src: "직접 접속",   pct: 42, c: C },
+            { src: "X (Twitter)", pct: 28, c: "#ec4899" },
+            { src: "Google",      pct: 18, c: "#f59e0b" },
+            { src: "기타",        pct: 12, c: "#a1a1aa" },
+          ].map((s) => (
+            <div key={s.src} className="flex items-center gap-3">
+              <p className="text-xs font-semibold text-zinc-600 w-20 shrink-0">{s.src}</p>
+              <div className="flex-1 h-1 rounded-full bg-zinc-100">
+                <div className="h-full rounded-full transition-all" style={{ width: `${s.pct}%`, backgroundColor: s.c }} />
+              </div>
+              <p className="text-xs font-black tabular-nums w-9 text-right" style={{ color: s.c }}>{s.pct}%</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function TemplatesTab({ themeColor }: { themeColor: string }) {
+  const [active, setActive] = useState<TemplateId | null>(null);
+  const current = TEMPLATE_LIST.find((t) => t.id === active);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    if (active) {
+      html.classList.remove("dark");
+    } else {
+      html.classList.add("dark");
+    }
+    return () => { html.classList.add("dark"); };
+  }, [active]);
+  return (
+    <>
+      {active && (
+        <div className="sticky top-0 z-10 flex items-center gap-1 px-4 py-3 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-900">
+          <button onClick={() => setActive(null)} className="-ml-1 p-1 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <BackIcon />
+          </button>
+          <span className="font-black text-zinc-900 dark:text-white">{current?.icon} {current?.name}</span>
+        </div>
+      )}
+      <div key={active ?? "list"}>
+        {!active && (
+          <Section className="pt-5">
+            <SectionHeader>앱 템플릿</SectionHeader>
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-3 leading-relaxed">
+              kit 컴포넌트로 만든 보편적인 화면 패턴. 그대로 복사해서 쓰세요.
+            </p>
+            <div className="space-y-2">
+              {TEMPLATE_LIST.map((t) => (
+                <button key={t.id} onClick={() => setActive(t.id)} className="w-full text-left p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-[0.99] transition-all group flex items-center gap-3">
+                  <span className="text-2xl">{t.icon}</span>
+                  <div className="flex-1">
+                    <p className="font-bold text-zinc-900 dark:text-zinc-100">{t.name}</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">{t.desc}</p>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-500 transition-colors shrink-0"><polyline points="9 18 15 12 9 6" /></svg>
+                </button>
+              ))}
+            </div>
+          </Section>
+        )}
+        {active === "bio"       && <BioTemplate />}
+        {active === "landing"   && <LandingTemplate />}
+        {active === "dashboard" && <DataDashboardTemplate />}
+      </div>
+    </>
+  );
+}
+
 export default function App() {
-  const [tab, setTab] = useState<"home" | "libraries">("home");
+  const [tab, setTab] = useState<"home" | "libraries" | "templates">("home");
   const [fabDialogOpen, setFabDialogOpen] = useState(false);
   const [liked, setLiked] = useState(false);
 
@@ -2328,6 +2634,7 @@ export default function App() {
           <AppShellContent key={tab}>
             {tab === "home"      && <HomeTab themeColor={THEME_COLOR} onGoToLibraries={() => setTab("libraries")} />}
             {tab === "libraries" && <LibrariesTab themeColor={THEME_COLOR} />}
+            {tab === "templates" && <TemplatesTab themeColor={THEME_COLOR} />}
             <Fab
               onClick={() => setFabDialogOpen(true)}
               icon={<HeartIcon />}
@@ -2363,6 +2670,13 @@ export default function App() {
               label="라이브러리"
               activeColor={THEME_COLOR}
               icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>}
+            />
+            <Tab
+              active={tab === "templates"}
+              onClick={() => setTab("templates")}
+              label="템플릿"
+              activeColor={THEME_COLOR}
+              icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" /></svg>}
             />
           </TabBar>
         </AppShell>

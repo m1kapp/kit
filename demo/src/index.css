@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --font-sans: "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif;
+}
+
 html {
   font-family: "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif, "Tossface";
 }
