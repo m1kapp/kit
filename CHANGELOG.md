@@ -7,6 +7,7 @@
 - feat(ui): `FetchProgress` — 전역 useFetch 활동 기반 상단 로딩바 (`variant: "sweep" | "creep"`, `active`로 수동 제어 가능)
 - feat(fetch): `subscribeFetchActivity` / `getFetchActiveCount` — 전역 fetch 인플라이트 추적
 - feat(ui): `Tab`에 `render` prop — 라우터 Link 주입으로 프리페치 지원
+- feat(powered-by): 푸터 방문자 카운터 클릭 → 통계 상세 시트 (오늘·7일·30일·누적 + 30일 일별 차트 + make-1k 진행률, `?view=public` CORS API 사용. 국가·기기·유입경로는 m1k.app 링크로)
 
 ## 0.0.17
 - fix(watermark): 긴 텍스트 줄바꿈 + 3D 렌더링 개선

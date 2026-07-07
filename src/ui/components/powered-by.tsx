@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { InAppSheet } from "./in-app-sheet";
 import { ChevronLeftIcon, ChevronRightIcon } from "./_icons";
+import { todayKST } from "../../server/datetime";
 
 /** Kit version — injected at build time via tsup define */
 declare const __KIT_VERSION__: string;
@@ -25,6 +26,30 @@ interface UsageInfo {
   used: number;
   total: number;
   percent: number;
+}
+
+interface SiteStats {
+  slug: string;
+  title: string | null;
+  today: number;
+  weekly: number;
+  monthly: number;
+  total: number;
+  progress: number;
+  daily: { date: string; count: number }[];
+  createdAt: string;
+}
+
+/** 최근 N일을 KST 기준으로 0-채움한 연속 시계열로 변환 (오늘 포함, 과거→현재 순) */
+function fillLastDays(daily: { date: string; count: number }[], days: number): { date: string; count: number }[] {
+  const byDate = new Map(daily.map((d) => [d.date, Number(d.count)]));
+  const out: { date: string; count: number }[] = [];
+  const now = Date.now();
+  for (let i = days - 1; i >= 0; i--) {
+    const date = todayKST(now - i * 86400_000);
+    out.push({ date, count: byDate.get(date) ?? 0 });
+  }
+  return out;
 }
 
 interface KitStats {
@@ -123,12 +148,27 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
 
   const hasCounter = tracking && !!visitorCounts;
 
-  // auto-advance every 10s (pause while the sheet is open)
+  // 방문자 통계 상세 시트 — 카운터 클릭 시 열림, 열릴 때 공개 통계(?view=public) fetch
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [siteStats, setSiteStats] = useState<SiteStats | null>(null);
+  const [siteStatsError, setSiteStatsError] = useState(false);
   useEffect(() => {
-    if (!hasCounter || open) return;
+    if (!statsOpen || !trackerSlug) return;
+    let alive = true;
+    setSiteStatsError(false);
+    fetch(`https://${trackerHost}/api/sites/${encodeURIComponent(trackerSlug)}?view=public`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => { if (alive) setSiteStats(d); })
+      .catch(() => { if (alive) setSiteStatsError(true); });
+    return () => { alive = false; };
+  }, [statsOpen, trackerHost, trackerSlug]);
+
+  // auto-advance every 10s (pause while a sheet is open)
+  useEffect(() => {
+    if (!hasCounter || open || statsOpen) return;
     const id = setInterval(() => setIdx((i) => (i + 1) % 2), 10_000);
     return () => clearInterval(id);
-  }, [hasCounter, open]);
+  }, [hasCounter, open, statsOpen]);
 
   const ver = version || KIT_VERSION;
 
@@ -157,6 +197,8 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
   const barStyle = variant === "overlay" ? { paddingBottom: `max(0.25rem, env(safe-area-inset-bottom))` } : undefined;
   const badgeUrl = trackerSlug ? `https://${trackerHost}/badge/${encodeURIComponent(trackerSlug)}.svg` : "";
   const openOnTap = () => { if (!moved.current) setOpen(true); };
+  const openStatsOnTap = () => { if (!moved.current) setStatsOpen(true); };
+  const sitePageUrl = trackerSlug ? `https://${trackerHost}/${encodeURIComponent(trackerSlug)}` : "";
 
   return (
     <>
@@ -167,7 +209,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
           const counterFace = (
             <button
               type="button"
-              onClick={openOnTap}
+              onClick={openStatsOnTap}
               aria-label="방문자 통계"
               className="flex w-full shrink-0 basis-full items-center justify-center cursor-pointer"
             >
@@ -250,6 +292,87 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
           v{ver} · powered by @m1kapp/kit
         </button>
       )}
+
+      {/* 방문자 통계 상세 시트 — 카운터 클릭 */}
+      <InAppSheet open={statsOpen} onClose={() => setStatsOpen(false)} title="방문자 통계">
+        <div className="px-5 pb-8 space-y-5 overflow-y-auto flex-1">
+          {siteStatsError && (
+            <p className="text-sm text-zinc-400 dark:text-zinc-500 py-6 text-center">
+              통계를 불러오지 못했어요. 아래 링크에서 확인해 주세요.
+            </p>
+          )}
+          {!siteStats && !siteStatsError && (
+            <p className="text-sm text-zinc-400 dark:text-zinc-500 py-6 text-center">불러오는 중...</p>
+          )}
+          {siteStats && (() => {
+            const days = fillLastDays(siteStats.daily, 30);
+            const max = Math.max(...days.map((d) => d.count), 1);
+            const chips: [string, number][] = [
+              ["오늘", siteStats.today],
+              ["최근 7일", siteStats.weekly],
+              ["최근 30일", siteStats.monthly],
+              ["누적", siteStats.total],
+            ];
+            return (
+              <>
+                {/* 요약 카운트 */}
+                <div className="grid grid-cols-4 gap-2">
+                  {chips.map(([label, value]) => (
+                    <div key={label} className="rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 px-2 py-3 text-center">
+                      <p className="text-[11px] text-zinc-400 dark:text-zinc-500">{label}</p>
+                      <p className="text-base font-bold tabular-nums text-zinc-800 dark:text-zinc-200">{value.toLocaleString()}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 최근 30일 일별 차트 */}
+                <div>
+                  <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">최근 30일</p>
+                  <div className="flex items-end gap-[2px] h-20">
+                    {days.map((d) => (
+                      <div
+                        key={d.date}
+                        title={`${d.date} · ${d.count.toLocaleString()}`}
+                        className="flex-1 rounded-t-sm bg-[var(--kit-accent,#18181b)]"
+                        style={{ height: `${Math.max((d.count / max) * 100, d.count > 0 ? 4 : 1.5)}%`, opacity: d.count > 0 ? 0.85 : 0.25 }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex justify-between mt-1 text-[10px] text-zinc-300 dark:text-zinc-600 tabular-nums">
+                    <span>{days[0]?.date.slice(5)}</span>
+                    <span>{days[days.length - 1]?.date.slice(5)}</span>
+                  </div>
+                </div>
+
+                {/* 1k 진행률 */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-zinc-500 dark:text-zinc-400">make 1k</span>
+                    <span className="font-mono text-zinc-600 dark:text-zinc-300">{Math.round(siteStats.progress * 100)}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                    <div className="h-full rounded-full bg-[var(--kit-accent,#18181b)]" style={{ width: `${siteStats.progress * 100}%` }} />
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+
+          {/* 국가·기기·유입경로 등 풀 통계는 m1k.app에서 */}
+          {sitePageUrl && (
+            <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
+              <a
+                href={sitePageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+              >
+                전체 통계 보기 (국가·기기·유입경로) → m1k.app
+              </a>
+            </div>
+          )}
+        </div>
+      </InAppSheet>
 
       <InAppSheet open={open} onClose={() => setOpen(false)} title="@m1kapp/kit" fullHeight>
         <div className="px-5 pb-8 space-y-6 overflow-y-auto flex-1">
