@@ -3,7 +3,7 @@ export type { ApiClient, ApiClientOptions } from "./client";
 
 export { ApiError } from "./errors";
 
-export { useFetch, clearFetchCache } from "./use-fetch";
+export { useFetch, clearFetchCache, invalidateFetch } from "./use-fetch";
 export type { UseFetchOptions, UseFetchResult } from "./use-fetch";
 
 export { subscribeFetchActivity, getFetchActiveCount } from "./activity";

@@ -16,11 +16,31 @@ interface CacheEntry<T> {
 const CACHE_MAX = 500;
 const _cache = new Map<string, CacheEntry<unknown>>();
 const _inflight = new Map<string, Promise<unknown>>();
+// Mounted useFetch hooks by URL — so invalidateFetch can force live refetches
+const _subscribers = new Map<string, Set<() => void>>();
 
 /** Manually invalidate cache entries. Pass a URL to clear one, or nothing to clear all. */
 export function clearFetchCache(url?: string) {
   if (url) _cache.delete(url);
   else _cache.clear();
+}
+
+/**
+ * Invalidate cached data AND force every mounted useFetch hook on that URL to
+ * refetch immediately (stale-while-revalidate: current data stays visible
+ * while the refetch runs). Pass nothing to invalidate everything.
+ *
+ * The react-query `invalidateQueries` equivalent:
+ * `await fetch("/api/weekly", { method: "POST" }); invalidateFetch("/api/weekly");`
+ */
+export function invalidateFetch(url?: string) {
+  if (url) {
+    _cache.delete(url);
+    _subscribers.get(url)?.forEach((reload) => reload());
+  } else {
+    _cache.clear();
+    for (const set of _subscribers.values()) set.forEach((reload) => reload());
+  }
 }
 
 function cacheSet(url: string, entry: CacheEntry<unknown>) {
@@ -221,6 +241,23 @@ export function useFetch<T>(
     load();
     return () => { mounted.current = false; };
   }, [load]);
+
+  // Register with the invalidation registry so invalidateFetch(url) can
+  // force this hook to refetch while mounted
+  useEffect(() => {
+    if (!url) return;
+    const reload = () => load(true);
+    let set = _subscribers.get(url);
+    if (!set) {
+      set = new Set();
+      _subscribers.set(url, set);
+    }
+    set.add(reload);
+    return () => {
+      set.delete(reload);
+      if (set.size === 0) _subscribers.delete(url);
+    };
+  }, [url, load]);
 
   useEffect(() => {
     if (!revalidateOnFocus) return;
