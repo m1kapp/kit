@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ApiError } from "./errors";
 import { parseBody } from "./client";
+import { trackFetchStart, trackFetchEnd } from "./activity";
 
 /* ─────────────────────────────────────────
    Module-level cache & dedup store
@@ -70,7 +71,15 @@ export type FetchStatus = "idle" | "loading" | "success" | "error";
 export interface UseFetchOptions<T> {
   /** Skip fetching when false (default: true) */
   enabled?: boolean;
-  /** Cache duration in ms. 0 = no cache (default: 0) */
+  /**
+   * Freshness window in ms (default: 0 — always stale).
+   *
+   * Results are ALWAYS cached and shown instantly on the next mount
+   * (stale-while-revalidate). `staleTime` only controls whether a
+   * background revalidation fires: within the window the cache is
+   * trusted as-is; past it, the cached data is shown immediately and
+   * refreshed in the background (`revalidating: true`).
+   */
   staleTime?: number;
   /** Number of retries on network error (default: 2) */
   retry?: number;
@@ -91,11 +100,17 @@ export interface UseFetchResult<T> {
   /**
    * Lifecycle status:
    * - `"idle"` — url is null/undefined or `enabled: false`
-   * - `"loading"` — fetch in progress
-   * - `"success"` — data loaded (note: data may be null if the API returned null)
-   * - `"error"` — last fetch failed
+   * - `"loading"` — fetch in progress with NO cached data to show (cold load)
+   * - `"success"` — data shown (possibly stale — see `revalidating`)
+   * - `"error"` — last fetch failed and no cached data was available
    */
   status: FetchStatus;
+  /**
+   * True while a background revalidation is in flight — cached data is
+   * already displayed. Use for subtle indicators (top bar, spinner icon),
+   * NOT for replacing content.
+   */
+  revalidating: boolean;
   /** Manually trigger a refetch (ignores cache) */
   refetch: () => void;
 }
@@ -118,20 +133,17 @@ export function useFetch<T>(
     onError,
   } = options;
 
+  // Stale-while-revalidate: any cached entry (fresh OR stale) seeds the
+  // initial render so remounts never flash a loading state.
   const [data, setData] = useState<T | undefined>(() => {
-    if (!url || staleTime === 0) return undefined;
-    const hit = _cache.get(url);
-    if (hit && Date.now() - hit.ts < staleTime) return hit.data as T;
-    return undefined;
+    if (!url) return undefined;
+    return _cache.get(url)?.data as T | undefined;
   });
   const [status, setStatus] = useState<FetchStatus>(() => {
     if (!url || !enabled) return "idle";
-    if (staleTime > 0) {
-      const hit = _cache.get(url);
-      if (hit && Date.now() - hit.ts < staleTime) return "success";
-    }
-    return "loading";
+    return _cache.has(url) ? "success" : "loading";
   });
+  const [revalidating, setRevalidating] = useState(false);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const mounted = useRef(true);
@@ -150,25 +162,31 @@ export function useFetch<T>(
         return;
       }
 
-      if (!force && staleTime > 0) {
-        const hit = _cache.get(url);
-        if (hit && Date.now() - hit.ts < staleTime) {
-          setData(hit.data as T);
-          setStatus("success");
-          return;
-        }
+      const hit = _cache.get(url);
+      if (hit) {
+        // Show cached data immediately — even when stale (SWR)
+        setData(hit.data as T);
+        setStatus("success");
+        const fresh = staleTime > 0 && Date.now() - hit.ts < staleTime;
+        if (fresh && !force) return;
+        setRevalidating(true);
+      } else {
+        // Cold load — nothing to show yet
+        setStatus("loading");
       }
-
-      setStatus("loading");
       setError(undefined);
 
       try {
         // Deduplicate in-flight requests for the same URL
         let promise = _inflight.get(url) as Promise<T> | undefined;
         if (!promise) {
+          trackFetchStart();
           promise = withRetry(() => fetcherRef.current(url), retry, retryDelay);
           _inflight.set(url, promise);
-          promise.finally(() => _inflight.delete(url));
+          promise.finally(() => {
+            _inflight.delete(url);
+            trackFetchEnd();
+          });
         }
 
         const result = await promise;
@@ -177,12 +195,16 @@ export function useFetch<T>(
         cacheSet(url, { data: result, ts: Date.now() });
         setData(result);
         setStatus("success");
+        setRevalidating(false);
         onSuccessRef.current?.(result);
       } catch (e) {
         if (!mounted.current) return;
         const err = e as Error;
         setError(err);
-        setStatus("error");
+        setRevalidating(false);
+        // Background revalidation failure keeps showing cached data;
+        // only a cold load with nothing to show surfaces "error"
+        setStatus(hit ? "success" : "error");
         onErrorRef.current?.(err);
       }
     },
@@ -213,5 +235,5 @@ export function useFetch<T>(
     };
   }, [load, revalidateOnFocus]);
 
-  return { data, loading: status === "loading", error, status, refetch };
+  return { data, loading: status === "loading", error, status, revalidating, refetch };
 }
