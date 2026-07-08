@@ -140,3 +140,41 @@ export function groupByDay<T>(
 
   return order.map((date) => map.get(date)!);
 }
+
+/* ─────────────────────────────────────────
+   fillDateSeries
+   일별 카운트 시계열의 빈 날짜를 0으로 채움
+───────────────────────────────────────── */
+export interface DateCount {
+  date: string;
+  count: number;
+}
+
+/**
+ * 최근 N일을 0-채움한 연속 시계열로 변환 (오늘 포함, 과거→현재 순).
+ * 날짜 키는 "YYYY-MM-DD", 기본 KST — 차트 X축이 끊기지 않게 한다.
+ *
+ * @example
+ * fillDateSeries([{ date: "2026-07-06", count: 3 }], 7)
+ * // [{date:"2026-07-01",count:0}, …, {date:"2026-07-06",count:3}, {date:"2026-07-07",count:0}]
+ */
+export function fillDateSeries(
+  daily: DateCount[],
+  days: number,
+  timeZone = "Asia/Seoul",
+): DateCount[] {
+  const byDate = new Map(daily.map((d) => [d.date, Number(d.count)]));
+  const out: DateCount[] = [];
+  const now = Date.now();
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  for (let i = days - 1; i >= 0; i--) {
+    const date = fmt.format(new Date(now - i * 86_400_000));
+    out.push({ date, count: byDate.get(date) ?? 0 });
+  }
+  return out;
+}

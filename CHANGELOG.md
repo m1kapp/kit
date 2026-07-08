@@ -8,6 +8,13 @@
 - feat(fetch): `subscribeFetchActivity` / `getFetchActiveCount` — 전역 fetch 인플라이트 추적
 - feat(ui): `Tab`에 `render` prop — 라우터 Link 주입으로 프리페치 지원
 - feat(powered-by): 푸터 방문자 카운터 클릭 → 통계 상세 시트 (오늘·7일·30일·누적 + 30일 일별 차트 + make-1k 진행률, `?view=public` CORS API 사용. 국가·기기·유입경로는 m1k.app 링크로)
+- feat(fetch): `invalidateFetch(url?)` — 캐시 무효화 + 마운트된 useFetch 강제 재조회 (invalidateQueries 대체)
+- feat(fetch): `postJson(body)` — POST 조회용 fetcher. 캐시 키는 `경로#식별자` 컨벤션
+- feat(ui): `AsyncList` — 로딩/에러/빈/성공 4상태 비동기 리스트 (useFetch status 직결)
+- feat(ui): `IconButton` — ghost/outline 아이콘 전용 버튼
+- feat(ui): `Input`/`Textarea` — label 없는 단독 입력 프리미티브 (Field와 동일 스타일 토큰)
+- feat(ui): `Divider`에 `spacing`("none"|"sm"|"md")·`color` prop
+- feat(utils): `fillDateSeries` — 일별 시계열 0-채움 (powered-by 내부 구현 승격)
 
 ## 0.0.17
 - fix(watermark): 긴 텍스트 줄바꿈 + 3D 렌더링 개선

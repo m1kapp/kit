@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { InAppSheet } from "./in-app-sheet";
 import { ChevronLeftIcon, ChevronRightIcon } from "./_icons";
-import { todayKST } from "../../server/datetime";
+import { fillDateSeries } from "../../utils";
 
 /** Kit version — injected at build time via tsup define */
 declare const __KIT_VERSION__: string;
@@ -40,17 +40,6 @@ interface SiteStats {
   createdAt: string;
 }
 
-/** 최근 N일을 KST 기준으로 0-채움한 연속 시계열로 변환 (오늘 포함, 과거→현재 순) */
-function fillLastDays(daily: { date: string; count: number }[], days: number): { date: string; count: number }[] {
-  const byDate = new Map(daily.map((d) => [d.date, Number(d.count)]));
-  const out: { date: string; count: number }[] = [];
-  const now = Date.now();
-  for (let i = days - 1; i >= 0; i--) {
-    const date = todayKST(now - i * 86400_000);
-    out.push({ date, count: byDate.get(date) ?? 0 });
-  }
-  return out;
-}
 
 interface KitStats {
   generatedAt: string;
@@ -305,7 +294,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
             <p className="text-sm text-zinc-400 dark:text-zinc-500 py-6 text-center">불러오는 중...</p>
           )}
           {siteStats && (() => {
-            const days = fillLastDays(siteStats.daily, 30);
+            const days = fillDateSeries(siteStats.daily, 30);
             const max = Math.max(...days.map((d) => d.count), 1);
             const chips: [string, number][] = [
               ["오늘", siteStats.today],

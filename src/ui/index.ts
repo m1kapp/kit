@@ -15,10 +15,20 @@ export type { TabBarProps, TabProps, TabRootProps } from "./components/tab-bar";
 export { FetchProgress } from "./components/fetch-progress";
 export type { FetchProgressProps } from "./components/fetch-progress";
 
+export { AsyncList } from "./components/async-list";
+export type { AsyncListProps, AsyncListStatus } from "./components/async-list";
+
+export { IconButton } from "./components/icon-button";
+export type { IconButtonProps } from "./components/icon-button";
+
+export { Input, Textarea } from "./components/input";
+export type { InputProps, TextareaProps } from "./components/input";
+
 export { Section, SectionHeader } from "./components/section";
 export type { SectionProps, SectionHeaderProps } from "./components/section";
 
 export { Divider } from "./components/divider";
+export type { DividerProps } from "./components/divider";
 
 export { StatChip } from "./components/stat-chip";
 export type { StatChipProps } from "./components/stat-chip";
