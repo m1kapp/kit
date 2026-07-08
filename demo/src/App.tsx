@@ -18,7 +18,7 @@ import {
   ActionCard, ListRow, LinkifiedText,
   mobileViewport, svgIcon, createManifest,
   PWAInstallButton, IOSInstallSheet, usePWAInstall,
-  useFetch, usePolling,
+  useFetch, usePolling, FetchProgress, AsyncList, IconButton, Input, Textarea,
   relativeTime, formatNumber, formatPrice, cn,
   Stepper, Collapsible, CopyButton, Img, Select, ColorPicker,
   CodeBlock, InlineEdit, BarList, ProgressRing, Countdown, Carousel,
@@ -640,6 +640,83 @@ function UtilsDemo() {
   );
 }
 
+function RefreshIcon({ size = 18 }: { size?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7" /><path d="M21 3v6h-6" /></svg>;
+}
+
+function V030Demo({ themeColor }: { themeColor: string }) {
+  const [text, setText] = useState("");
+  const [memo, setMemo] = useState("");
+  const [listState, setListState] = useState<"pending" | "success" | "empty" | "error">("success");
+  const [barOn, setBarOn] = useState(false);
+  useEffect(() => {
+    if (!barOn) return;
+    const t = setTimeout(() => setBarOn(false), 3000);
+    return () => clearTimeout(t);
+  }, [barOn]);
+  const items = listState === "empty" ? [] : ["첫 번째 항목", "두 번째 항목", "세 번째 항목"];
+  return (
+    <div className="space-y-3" style={{ ["--kit-accent" as string]: themeColor } as React.CSSProperties}>
+      <ComponentCard name="FetchProgress" desc="상단 스윕 로딩바 — useFetch 전역 활동 자동 감지 (active로 수동 제어)" code={`// AppShell 안, 헤더 아래에 한 번만\n<FetchProgress top={56} color={accent} />\n// 수동 제어\n<FetchProgress active={revalidating} />`}>
+        <div className="relative h-14 rounded-xl bg-zinc-50 dark:bg-zinc-900 overflow-hidden flex items-center justify-center">
+          <FetchProgress active={barOn} color={themeColor} />
+          <button onClick={() => setBarOn(true)} className="text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+            {barOn ? "재검증 중..." : "3초 로딩바 재생 ▶"}
+          </button>
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="AsyncList" desc="로딩/에러/빈/성공 4상태 리스트 — useFetch status 직결" code={`const { data, status } = useFetch<Item[]>("/api/items");\n<AsyncList data={data} status={status}\n  renderItem={(v) => <Row key={v.id} {...v} />}\n  skeleton={<Skeleton className="h-8" />} skeletonCount={3} />`}>
+        <div className="space-y-2">
+          <div className="flex gap-1.5">
+            {(["pending", "success", "empty", "error"] as const).map((st) => (
+              <button key={st} onClick={() => setListState(st)} className={`text-[10px] px-2 py-1 rounded-full border ${listState === st ? "border-zinc-400 text-zinc-700 dark:text-zinc-200" : "border-zinc-200 dark:border-zinc-700 text-zinc-400"}`}>{st}</button>
+            ))}
+          </div>
+          <AsyncList
+            data={listState === "pending" ? undefined : items}
+            status={listState === "empty" ? "success" : listState === "pending" ? "pending" : listState}
+            error={new Error("네트워크 오류 예시")}
+            renderItem={(v) => <div key={v} className="py-2 px-3 text-sm text-zinc-700 dark:text-zinc-300 border-b border-zinc-100 dark:border-zinc-800 last:border-0">{v}</div>}
+            skeleton={<Skeleton className="h-8 mb-1.5" />}
+            skeletonCount={3}
+            emptyMessage="아직 항목이 없어요"
+          />
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="IconButton" desc="아이콘 전용 버튼 — ghost / outline" code={`<IconButton icon={<RefreshCw size={18} />} label="새로고침" onClick={reload} />\n<IconButton variant="outline" size="lg" icon={<X />} label="닫기" />`}>
+        <div className="flex items-center gap-2">
+          <IconButton icon={<RefreshIcon size={14} />} label="새로고침 sm" size="sm" />
+          <IconButton icon={<RefreshIcon />} label="새로고침 md" />
+          <IconButton icon={<RefreshIcon size={22} />} label="새로고침 lg" size="lg" />
+          <IconButton variant="outline" icon={<RefreshIcon size={14} />} label="아웃라인 sm" size="sm" />
+          <IconButton variant="outline" icon={<RefreshIcon />} label="아웃라인 md" />
+          <IconButton variant="outline" icon={<RefreshIcon size={22} />} label="아웃라인 lg" size="lg" />
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="Input · Textarea" desc="label 없는 단독 입력 — Field와 같은 스타일 토큰" code={`<Input value={q} onChange={setQ} placeholder="검색..." onEnter={submit} />\n<Textarea value={memo} onChange={setMemo} rows={3} />`}>
+        <div className="space-y-2">
+          <Input value={text} onChange={setText} placeholder="검색어 입력 후 Enter" onEnter={() => setText("")} />
+          <Textarea value={memo} onChange={setMemo} placeholder="메모..." rows={2} />
+        </div>
+      </ComponentCard>
+
+      <ComponentCard name="Divider spacing·color" desc="여백 프리셋 + 클래스 충돌 없는 색 지정" code={`<Divider />                       // 기본 mx-4 my-6\n<Divider spacing="none" color="rgba(239,68,68,.35)" />`}>
+        <div className="text-xs text-zinc-400">
+          <span>기본</span>
+          <Divider />
+          <span>spacing=&quot;sm&quot;</span>
+          <Divider spacing="sm" />
+          <span>spacing=&quot;none&quot; + color</span>
+          <Divider spacing="none" color={themeColor} />
+        </div>
+      </ComponentCard>
+    </div>
+  );
+}
+
 function NewComponentsDemo({ themeColor }: { themeColor: string }) {
   const [on, setOn] = useState(true);
   const [seg, setSeg] = useState<"today" | "week">("today");
@@ -883,6 +960,16 @@ function UIDetail({ themeColor }: {
             </div>
           </ComponentCard>
         </div>
+      </Section>
+
+      <Divider />
+
+      <Section>
+        <SectionHeader>신규 (v0.0.30)</SectionHeader>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-3 leading-relaxed">
+          SWR 개편과 함께 추가된 컴포넌트예요. useFetch는 이제 캐시를 먼저 보여주고 백그라운드에서 갱신합니다.
+        </p>
+        <V030Demo themeColor={themeColor} />
       </Section>
 
       <Divider />
@@ -1374,8 +1461,24 @@ const { data, loading, error, refetch } = useFetch<Todo[]>(
   }
 );`} />
 
+          <CodeCard title="invalidateFetch — 뮤테이션 후 갱신 (v0.0.30)" code={`import { invalidateFetch } from "@m1kapp/kit";
+
+// POST로 데이터 바꾼 뒤, 마운트된 useFetch 훅들 강제 재조회
+await fetch("/api/weekly", { method: "POST", body });
+invalidateFetch("/api/weekly");
+// 화면엔 기존 데이터 유지 + FetchProgress 스윕바만 지나감`} />
+
+          <CodeCard title="postJson — POST 조회 + 캐시 키 (v0.0.30)" code={`import { useFetch, postJson } from "@m1kapp/kit";
+
+// 캐시 키는 \`경로#식별자\` — '#' 뒤는 요청에서 잘림
+const { data, status } = useFetch<Playlist[]>(
+  \`/api/playlist#info:\${listId}\`,
+  { fetcher: postJson({ listId, infoOnly: true }) }
+);`} />
+
           <div className="grid grid-cols-2 gap-2">
             {[
+              { label: "SWR", desc: "캐시 먼저 표시, 백그라운드 재검증 (revalidating)" },
               { label: "캐시", desc: "staleTime 동안 중복 요청 없음" },
               { label: "중복제거", desc: "같은 URL 동시 요청 → 1개만 실행" },
               { label: "retry", desc: "네트워크 오류 시 지수 백오프 재시도" },
