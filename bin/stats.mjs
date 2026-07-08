@@ -101,6 +101,14 @@ function countLines(content) {
   return { total, code };
 }
 
+// 코드 청결도 분석 — 분기 밀도·파일 크기 기반 휴리스틱
+// 주석/문자열 안까지 세는 러프한 근사지만, 프로젝트 간 상대 비교엔 충분
+function analyzeQuality(content) {
+  const branchTokens = content.match(/\bif\s*\(|\belse\b|\bcase\s|\bcatch\s*[({]|\?\s*[^.:]|&&|\|\|/g);
+  const fnTokens = content.match(/\bfunction\b|=>/g);
+  return { branches: branchTokens?.length || 0, functions: fnTokens?.length || 0 };
+}
+
 // kit import 감지
 function detectKitImports(content) {
   const found = new Set();
@@ -130,6 +138,10 @@ if (files.length === 0) {
 
 let totalLines = 0;
 let codeLines = 0;
+let totalBranches = 0;
+let totalFunctions = 0;
+let maxFile = { path: "", lines: 0 };
+let longFiles = 0; // 200줄 초과 파일 수
 const allImports = new Set();
 
 for (const file of files) {
@@ -137,9 +149,28 @@ for (const file of files) {
   const counts = countLines(content);
   totalLines += counts.total;
   codeLines += counts.code;
+  const q = analyzeQuality(content);
+  totalBranches += q.branches;
+  totalFunctions += q.functions;
+  if (counts.code > maxFile.lines) maxFile = { path: path.relative(process.cwd(), file), lines: counts.code };
+  if (counts.code > 200) longFiles++;
   const imports = detectKitImports(content);
   for (const imp of imports) allImports.add(imp);
 }
+
+// 청결도 스코어 (100점 만점, 상대 비교용 휴리스틱)
+// - 분기 밀도(100줄당 분기 수): 10 이하 무감점, 초과분 ×2 감점 (최대 40)
+// - 200줄 초과 파일: 개당 5점 감점 (최대 30)
+// - 평균 파일 길이: 80줄 이하 무감점, 초과분 /4 감점 (최대 30)
+const branchDensity = codeLines > 0 ? Math.round((totalBranches / codeLines) * 1000) / 10 : 0;
+const avgFileLines = files.length > 0 ? Math.round(codeLines / files.length) : 0;
+const qualityScore = Math.max(0, Math.round(
+  100
+  - Math.min(40, Math.max(0, branchDensity - 10) * 2)
+  - Math.min(30, longFiles * 5)
+  - Math.min(30, Math.max(0, avgFileLines - 80) / 4)
+));
+const qualityGrade = qualityScore >= 90 ? "A+" : qualityScore >= 80 ? "A" : qualityScore >= 70 ? "B" : qualityScore >= 60 ? "C" : "D";
 
 // 절약량 계산
 // 같은 소스 파일에서 여러 export를 쓰더라도 파일 LOC는 한 번만 카운트
@@ -184,6 +215,16 @@ const stats = {
     totalLines,
     codeLines,
   },
+  quality: {
+    score: qualityScore,
+    grade: qualityGrade,
+    branchDensity,        // 100줄당 분기 수 (if/else/case/catch/삼항/&&/||)
+    branches: totalBranches,
+    functions: totalFunctions,
+    avgFileLines,
+    longFiles,            // 200줄 초과 파일 수
+    maxFile,
+  },
   kit: {
     features: usedFeatures.sort((a, b) => b.loc - a.loc),
     savedLines,
@@ -207,4 +248,5 @@ console.log(`    훅: ${usage.hook.used}/${usage.hook.total}개 (${usage.hook.pe
 console.log(`    유틸리티: ${usage.util.used}/${usage.util.total}개 (${usage.util.percent}%)`);
 console.log(`  절약량: 약 ${savedLines.toLocaleString()}줄, ${estimatedKB}KB (A4 ${estimatedA4}장)`);
 console.log(`  비율: 전체의 약 ${savedPercent}%를 kit이 대신 처리`);
+console.log(`  청결도: ${qualityGrade} (${qualityScore}점) — 분기밀도 ${branchDensity}/100줄, 평균 ${avgFileLines}줄/파일, 200줄+ ${longFiles}개`);
 console.log(`\n  저장됨 → ${path.relative(process.cwd(), outPath)}\n`);
