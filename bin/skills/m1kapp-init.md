@@ -21,19 +21,23 @@ description: "@m1kapp/kit 기반 Next.js 프로젝트 초기 설정을 인터랙
 2. **앱 화면은 반드시 이 트리로 감싼다.** `AppShell`만 쓰면 화면 좌측에 붙고 휑하다. 중앙정렬·풀화면 배경·powered-by 풋터는 `Watermark`가 담당한다.
    ```tsx
    "use client";
-   import { Watermark, AppShell, AppShellHeader, AppShellContent, TabBar, Tab } from "@m1kapp/kit";
+   import { Watermark, AppShell, AppShellHeader, AppShellContent, FetchProgress, TabBar, Tab } from "@m1kapp/kit";
+   import Link from "next/link";
 
    <Watermark color="#0a0d16" text="앱이름" maxWidth={460}>
      <AppShell maxWidth={460}>
        <AppShellHeader>…헤더…</AppShellHeader>
+       <FetchProgress top={56} color="[테마컬러]" />   {/* 백그라운드 갱신 표시 — useFetch 쓰면 자동 */}
        <AppShellContent>…스크롤 본문…</AppShellContent>
        <TabBar>
-         <Tab active={…} onClick={…} label="홈" icon={<span>🏠</span>} activeColor="[테마컬러]" />
+         {/* Next 라우트 탭이면 render+Link — 프리페치로 탭 전환이 즉시가 된다 */}
+         <Tab active={…} render={(p) => <Link href="/home" prefetch {...p} />} label="홈" icon={<span>🏠</span>} activeColor="[테마컬러]" />
+         {/* 라우터 없는 useState 탭 전환이면 기존처럼 onClick */}
        </TabBar>
      </AppShell>
    </Watermark>
    ```
-   - `AppShell`/`TabBar`는 인터랙티브 → 이 트리는 **`"use client"` 컴포넌트**에 둔다. 데이터는 서버 컴포넌트(page.tsx)에서 계산해 props로 내려준다.
+   - `AppShell`/`TabBar`는 인터랙티브 → 이 트리는 **`"use client"` 컴포넌트**에 둔다.
    - `maxWidth`는 Watermark와 AppShell을 **같은 값**으로 맞춘다(기본 430~460).
 
 3. **이모지는 토스페이스로 통일한다.** 장식용 이모지는 남발하지 말고, 쓰는 이모지는 토스 스타일로 폴백시킨다.
@@ -42,7 +46,16 @@ description: "@m1kapp/kit 기반 Next.js 프로젝트 초기 설정을 인터랙
 
 4. **🚫 `node_modules/@m1kapp/kit` 디렉토리 안에서 `npm run build`/스크립트를 절대 돌리지 마라.** kit 자체 빌드가 돌아 `dist/`를 날린다. 깨지면 `rm -rf node_modules/@m1kapp/kit && npm install @m1kapp/kit`로 복구. 빌드는 항상 프로젝트 루트에서.
 
-5. **kit 컴포넌트 카탈로그**(필요 시 골라 쓰기): 레이아웃 `AppShell/AppShellHeader/AppShellContent`, 내비 `TabBar/Tab/Fab`, 표시 `Section/SectionHeader/StatChip/Badge/Avatar/EmptyState/Divider`, 브랜딩 `Watermark`, 입력 `Button/EmojiButton`, 테마 `ThemeButton/ThemeDialog`, 모션 `Typewriter`. SEO는 `@m1kapp/kit/seo`, OG는 `@m1kapp/kit/ogimage`, PWA는 `@m1kapp/kit/pwa`.
+5. **데이터는 `useFetch`로 가져온다 — 스피너로 콘텐츠를 갈아끼우지 마라.** v0.0.30부터 useFetch는 SWR(stale-while-revalidate): 캐시를 즉시 보여주고 백그라운드에서 갱신한다. 로딩 표시는 `FetchProgress` 상단 바 하나면 끝.
+   ```tsx
+   const { data, status } = useFetch<Item[]>("/api/items");        // GET
+   const { data } = useFetch(`/api/list#${id}`, { fetcher: postJson({ id }) }); // POST 조회 — 캐시 키는 경로#식별자
+   // 뮤테이션 후: await fetch(...POST...); invalidateFetch("/api/items");
+   ```
+   - 목록 렌더는 `AsyncList`(로딩/에러/빈/성공 4상태 자동)에 `data`/`status`를 그대로 꽂는다.
+   - `loading`은 캐시가 전혀 없는 첫 로드에만 true — 스켈레톤은 그때만 보인다. 재검증 감지는 `revalidating`.
+
+6. **kit 컴포넌트 카탈로그**(필요 시 골라 쓰기): 레이아웃 `AppShell/AppShellHeader/AppShellContent`, 내비 `TabBar/Tab/Fab`, 데이터 `useFetch/usePolling/invalidateFetch/postJson/AsyncList/FetchProgress`, 표시 `Section/SectionHeader/StatChip/Badge/Avatar/EmptyState/Divider/Skeleton/BarList/ProgressRing/GrassMap`, 오버레이 `Dialog/InAppSheet/ToastProvider·useToast/Tooltip`, 브랜딩 `Watermark/PoweredByKit`, 입력 `Button/IconButton/Input/Textarea/Field/Select/Switch/SegmentedControl/EmojiButton/InlineEdit/ColorPicker`, 테마 `ThemeButton/ThemeDialog`, 모션 `Typewriter/Countdown/Carousel`. SEO는 `@m1kapp/kit/seo`, OG는 `@m1kapp/kit/ogimage`, PWA는 `@m1kapp/kit/pwa`.
 
 ---
 
@@ -130,9 +143,9 @@ export const viewport = mobileViewport;
 
 ### 앱쉘 레이아웃 — (1) 선택 시
 - `"use client"` 컴포넌트(예: `components/AppRoot.tsx`)에 위 **핵심 규칙 2번** 트리를 그대로 생성.
-- `page.tsx`(서버 컴포넌트)는 데이터만 계산해서 `<AppRoot data={…} />`로 내려준다.
-- 탭이 여러 개면 `useState`로 탭 전환, 각 탭은 별도 패널 컴포넌트로 분리.
-- `AppShellContent` 안의 섹션은 `Section`/`SectionHeader`/`StatChip` 등 kit 컴포넌트를 우선 사용.
+- 데이터: 자주 갱신되거나 탭 전환마다 보이는 데이터는 **클라이언트에서 `useFetch`**(핵심 규칙 5번 — SWR 캐시로 탭 전환이 즉시). SEO가 중요한 정적 콘텐츠만 서버 컴포넌트에서 props로.
+- 탭이 라우트면 `Tab render+Link prefetch`, 단일 페이지 내 전환이면 `useState`. 각 탭은 별도 패널 컴포넌트로 분리.
+- `AppShellContent` 안의 섹션은 `Section`/`SectionHeader`/`StatChip` 등 kit 컴포넌트를 우선 사용. 목록은 `AsyncList`.
 
 ### Tossface 이모지 — (2) 선택 시
 - layout `<head>`: `<link rel="preconnect" href="https://cdn.jsdelivr.net" />` + tossface css `<link>`.
