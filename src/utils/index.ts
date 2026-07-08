@@ -178,3 +178,45 @@ export function fillDateSeries(
   }
   return out;
 }
+
+/* ─────────────────────────────────────────
+   formatKoreanNumber
+   56789 → "5만", 123456789 → "1억", 1234 → "1천"
+───────────────────────────────────────── */
+/**
+ * 한국식 수 축약 (내림). 조회수·좋아요 표기용 — 단위는 호출부에서
+ * `${formatKoreanNumber(n)}회`처럼 붙인다.
+ */
+export function formatKoreanNumber(n: number | string): string {
+  const count = typeof n === "string" ? parseInt(n, 10) : n;
+  if (!Number.isFinite(count)) return "0";
+  if (count >= 100_000_000) return `${Math.floor(count / 100_000_000).toLocaleString()}억`;
+  if (count >= 10_000) return `${Math.floor(count / 10_000).toLocaleString()}만`;
+  if (count >= 1_000) return `${Math.floor(count / 1_000).toLocaleString()}천`;
+  return count.toLocaleString();
+}
+
+/* ─────────────────────────────────────────
+   ISO 8601 duration (유튜브 API 등의 "PT1H2M3S")
+───────────────────────────────────────── */
+export interface IsoDuration {
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+/** "PT1H2M3S" → { hours: 1, minutes: 2, seconds: 3 } */
+export function parseIsoDuration(duration: string): IsoDuration {
+  const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+  return {
+    hours: parseInt(match?.[1] ?? "0") || 0,
+    minutes: parseInt(match?.[2] ?? "0") || 0,
+    seconds: parseInt(match?.[3] ?? "0") || 0,
+  };
+}
+
+/** "PT1H2M3S" → 3723 (초) */
+export function isoDurationToSec(duration: string): number {
+  const { hours, minutes, seconds } = parseIsoDuration(duration);
+  return hours * 3600 + minutes * 60 + seconds;
+}

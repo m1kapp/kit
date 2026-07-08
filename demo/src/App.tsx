@@ -18,7 +18,7 @@ import {
   ActionCard, ListRow, LinkifiedText,
   mobileViewport, svgIcon, createManifest,
   PWAInstallButton, IOSInstallSheet, usePWAInstall,
-  useFetch, usePolling, FetchProgress, AsyncList, IconButton, Input, Textarea,
+  useFetch, usePolling, FetchProgress, AsyncList, IconButton, Input, Textarea, MediaCard, UnderlineTabs,
   relativeTime, formatNumber, formatPrice, cn,
   Stepper, Collapsible, CopyButton, Img, Select, ColorPicker,
   CodeBlock, InlineEdit, BarList, ProgressRing, Countdown, Carousel,
@@ -644,6 +644,20 @@ function RefreshIcon({ size = 18 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7" /><path d="M21 3v6h-6" /></svg>;
 }
 
+function UnderlineTabsCard({ themeColor }: { themeColor: string }) {
+  const [tab, setTab] = useState("all");
+  return (
+    <ComponentCard name="UnderlineTabs" desc="언더라인 콘텐츠 필터 탭 — 하단 내비 TabBar와 별개" code={`<UnderlineTabs tabs={[{ id: "all", label: "전체" }, …]}\n  active={tab} onChange={setTab} sticky />`}>
+      <UnderlineTabs
+        tabs={[{ id: "all", label: "전체" }, { id: "music", label: "음악" }, { id: "trip", label: "여행" }, { id: "game", label: "게임" }]}
+        active={tab}
+        onChange={setTab}
+        activeColor={themeColor}
+      />
+    </ComponentCard>
+  );
+}
+
 function V030Demo({ themeColor }: { themeColor: string }) {
   const [text, setText] = useState("");
   const [memo, setMemo] = useState("");
@@ -702,6 +716,15 @@ function V030Demo({ themeColor }: { themeColor: string }) {
           <Textarea value={memo} onChange={setMemo} placeholder="메모..." rows={2} />
         </div>
       </ComponentCard>
+
+      <ComponentCard name="MediaCard" desc="썸네일+배지 미디어 카드 (horizontal/vertical)" code={`<MediaCard thumbnail={v.thumb} badge="12:34" onClick={open}>\n  <p className="text-sm line-clamp-2">{v.title}</p>\n</MediaCard>`}>
+        <MediaCard thumbnail="https://picsum.photos/seed/kit/320/180" badge="12:34" onClick={() => {}}>
+          <p className="text-sm font-semibold leading-tight line-clamp-2">영상 최고의 순간을 즐기세요</p>
+          <p className="text-xs text-zinc-400 mt-1">조회수 5만회 · 3시간 전</p>
+        </MediaCard>
+      </ComponentCard>
+
+      <UnderlineTabsCard themeColor={themeColor} />
 
       <ComponentCard name="Divider spacing·color" desc="여백 프리셋 + 클래스 충돌 없는 색 지정" code={`<Divider />                       // 기본 mx-4 my-6\n<Divider spacing="none" color="rgba(239,68,68,.35)" />`}>
         <div className="text-xs text-zinc-400">
@@ -965,7 +988,7 @@ function UIDetail({ themeColor }: {
       <Divider />
 
       <Section>
-        <SectionHeader>신규 (v0.0.30)</SectionHeader>
+        <SectionHeader>신규 (v0.0.30–31)</SectionHeader>
         <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-3 leading-relaxed">
           SWR 개편과 함께 추가된 컴포넌트예요. useFetch는 이제 캐시를 먼저 보여주고 백그라운드에서 갱신합니다.
         </p>

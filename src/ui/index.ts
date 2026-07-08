@@ -24,6 +24,12 @@ export type { IconButtonProps } from "./components/icon-button";
 export { Input, Textarea } from "./components/input";
 export type { InputProps, TextareaProps } from "./components/input";
 
+export { MediaCard } from "./components/media-card";
+export type { MediaCardProps } from "./components/media-card";
+
+export { UnderlineTabs } from "./components/underline-tabs";
+export type { UnderlineTabsProps, UnderlineTab } from "./components/underline-tabs";
+
 export { Section, SectionHeader } from "./components/section";
 export type { SectionProps, SectionHeaderProps } from "./components/section";
 
