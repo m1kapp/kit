@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.32
+- fix(cli): `m1kkit stats` 200줄+ 파일 감점 절벽 완화 — 이진 카운트(200줄 넘으면 무조건 파일당 1) 대신 초과분 비례 심각도(200→400줄 0→1, 400→600줄 1→2, 600줄+ 캡)로 채점. 파일 수 적은 프로젝트가 파일 1개만 살짝 넘어도 즉시 만점 감점 맞던 문제 해소, 심하게 큰 파일은 기존과 동일하게 페널티 유지
+
 ## 0.0.31
 - feat(cli): `m1kkit stats`에 코드 청결도 분석 — 분기밀도·평균 파일 길이·200줄+ 파일 수 기반 score/grade를 kit-stats.json `quality`에 기록
 - feat(cli): `m1kkit stats` 프론트/백엔드/공용 분리 집계 — `source.breakdown`에 버킷별 files·codeLines (api·route·middleware·"use server"=backend, tsx·"use client"=frontend, 나머지=shared)

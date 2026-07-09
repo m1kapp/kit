@@ -390,6 +390,7 @@ let totalBranches = 0;
 let totalFunctions = 0;
 let maxFile = { path: "", lines: 0 };
 let longFiles = 0; // 200줄 초과 파일 수
+let longFileSeverity = 0; // 200→400줄 0→1, 400→600줄 1→2로 완만하게 누적 (600줄+ 파일당 최대 2)
 const allImports = new Set();
 const ts = loadTypescript();
 const allFns = []; // AST 모드: {name, cc, cog, line, file}
@@ -417,7 +418,10 @@ for (const file of files) {
     fileContents.push({ file: rel, content });
   }
   if (counts.code > maxFile.lines) maxFile = { path: path.relative(process.cwd(), file), lines: counts.code };
-  if (counts.code > 200) longFiles++;
+  if (counts.code > 200) {
+    longFiles++;
+    longFileSeverity += Math.min(2, (counts.code - 200) / 200);
+  }
   const imports = detectKitImports(content);
   for (const imp of imports) allImports.add(imp);
 }
@@ -431,7 +435,10 @@ const avgFileLines = files.length > 0 ? Math.round(codeLines / files.length) : 0
 // - cog>15 함수 비율 ×3 (최대 25), cog>25 함수 비율 ×5 (최대 15)
 // - 최악 함수: cog 20 초과분 ×1 (최대 15)
 // - 중복 밀도: 3% 초과분 ×2.5 (최대 25) ← 새 축
-// - 200줄 초과 파일 비율 ×2 (최대 10) / 평균 파일 길이 80줄 초과분 /5 (최대 10)
+// - 200줄 초과 파일: 초과분에 비례한 심각도(200→400줄 0→1, 400→600줄 1→2, 600줄+ 캡) 비율 ×1.5 (최대 10)
+//   ※ 파일 개수 기준 이진 카운트(200줄 넘으면 무조건 1) 대신 심각도 가중 — 살짝 넘는 파일과
+//     터무니없이 큰 파일을 구분하고, 파일 수 적은 프로젝트가 파일 1개만으로 즉시 만점 감점 맞는 절벽 방지.
+// / 평균 파일 길이 80줄 초과분 /5 (최대 10)
 let qualityScore;
 let cc = null;
 let cognitive = null;
@@ -465,14 +472,14 @@ if (ts && allFns.length > 0) {
 
   const over15Pct = (cogOver15.length / allFns.length) * 100;
   const over25Pct = (cogOver25.length / allFns.length) * 100;
-  const longFilesPct = (longFiles / files.length) * 100;
+  const longFileSeverityPct = (longFileSeverity / files.length) * 100;
   qualityScore = Math.max(0, Math.round(
     100
     - Math.min(25, over15Pct * 3)
     - Math.min(15, over25Pct * 5)
     - Math.min(15, Math.max(0, maxCog - 20))
     - Math.min(25, Math.max(0, duplication.percent - 3) * 2.5)
-    - Math.min(10, longFilesPct * 2)
+    - Math.min(10, longFileSeverityPct * 1.5)
     - Math.min(10, Math.max(0, avgFileLines - 80) / 5)
   ));
 } else {
@@ -480,7 +487,7 @@ if (ts && allFns.length > 0) {
   qualityScore = Math.max(0, Math.round(
     100
     - Math.min(40, Math.max(0, branchDensity - 10) * 2)
-    - Math.min(30, longFiles * 5)
+    - Math.min(30, longFileSeverity * 2.5)
     - Math.min(30, Math.max(0, avgFileLines - 80) / 4)
   ));
 }
