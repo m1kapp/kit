@@ -5,6 +5,8 @@
 - feat(cli): `m1kkit stats` 프론트/백엔드/공용 분리 집계 — `source.breakdown`에 버킷별 files·codeLines (api·route·middleware·"use server"=backend, tsx·"use client"=frontend, 나머지=shared)
 - feat(cli): 청결도 AST 업그레이드 — 프로젝트의 typescript로 함수별 cyclomatic complexity 측정(McCabe), `quality.cc`에 avg/p90/max/over10/over20/worst5 기록, 비율 기반 감점제 재설계. typescript 없으면 regex 폴백(`quality.engine`)
 - feat(skill): `/m1kapp-clean` — 청결도 올리기 스킬. CC 높은 함수부터 표준 기법(조기 반환·분기 테이블화·헬퍼 추출)으로 리팩토링 후 stats 재측정 루프
+- refactor: kit 자체 청결도 C(60) → A+(94) — PoweredByKit CC31 분해(방문자 통계/크레딧 시트 분리), GrassMap·ActionCard·Shell(og)·InAppSheet·Stepper·Collapsible 정리, og.tsx 5모듈 분할, 200줄+ 파일 0개. 공개 API 불변
+- refactor(demo): App.tsx 2,813줄 → 24개 파일 분할, 데모 청결도 B(73) → A+(94)
 - feat(ui): `MediaCard` — 썸네일+배지 미디어 카드 (horizontal/vertical)
 - feat(ui): `UnderlineTabs` — 언더라인 콘텐츠 필터 탭 (하단 내비 TabBar와 별개)
 - feat(utils): `formatKoreanNumber`(만/억/천 축약), `parseIsoDuration`/`isoDurationToSec`(유튜브 API "PT1H2M3S")

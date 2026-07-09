@@ -55,8 +55,6 @@ export function ActionCard({
   className = "",
 }: ActionCardProps) {
   const accentColor = accent ?? "var(--kit-accent)";
-  const done = state === "done";
-  const cancelled = state === "cancelled";
   const loading = state === "loading";
 
   const l = {
@@ -69,49 +67,48 @@ export function ActionCard({
     ...labels,
   };
 
-  const heading = done ? `✅ ${l.done}` : cancelled ? `✖️ ${l.cancelled}` : l.pending;
+  // 상태별 톤 — pending/loading은 accent(인라인 style), done/cancelled는 고정 톤
+  const tones = {
+    done: {
+      container: "border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40",
+      heading: "text-emerald-600 dark:text-emerald-400",
+      item: "text-zinc-700 dark:text-zinc-200",
+      accented: false,
+      headingText: `✅ ${l.done}`,
+    },
+    cancelled: {
+      container: "border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/40",
+      heading: "text-zinc-400 dark:text-zinc-500",
+      item: "text-zinc-400 line-through dark:text-zinc-500",
+      accented: false,
+      headingText: `✖️ ${l.cancelled}`,
+    },
+    active: {
+      container: "bg-white dark:bg-zinc-900",
+      heading: "",
+      item: "text-zinc-700 dark:text-zinc-200",
+      accented: true,
+      headingText: l.pending,
+    },
+  } as const;
+  const tone = tones[state === "done" ? "done" : state === "cancelled" ? "cancelled" : "active"];
 
-  // pending uses the accent color (var or prop); done/cancelled use static tones.
-  const containerStyle: CSSProperties | undefined =
-    !done && !cancelled ? { borderColor: accentColor } : undefined;
-  const headingStyle: CSSProperties | undefined =
-    !done && !cancelled ? { color: accentColor } : undefined;
+  const containerStyle: CSSProperties | undefined = tone.accented ? { borderColor: accentColor } : undefined;
+  const headingStyle: CSSProperties | undefined = tone.accented ? { color: accentColor } : undefined;
 
   return (
     <div
-      className={`max-w-[88%] self-start rounded-2xl border p-3 ${
-        done
-          ? "border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40"
-          : cancelled
-            ? "border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/40"
-            : "bg-white dark:bg-zinc-900"
-      } ${className}`}
+      className={`max-w-[88%] self-start rounded-2xl border p-3 ${tone.container} ${className}`}
       style={containerStyle}
     >
-      <div
-        className={`mb-1.5 text-[11px] font-extrabold ${
-          done
-            ? "text-emerald-600 dark:text-emerald-400"
-            : cancelled
-              ? "text-zinc-400 dark:text-zinc-500"
-              : ""
-        }`}
-        style={headingStyle}
-      >
-        {heading}
+      <div className={`mb-1.5 text-[11px] font-extrabold ${tone.heading}`} style={headingStyle}>
+        {tone.headingText}
       </div>
 
       {items && items.length > 0 && (
         <div className="flex flex-col gap-1">
           {items.map((it, k) => (
-            <div
-              key={k}
-              className={`text-[12.5px] leading-snug ${
-                cancelled
-                  ? "text-zinc-400 line-through dark:text-zinc-500"
-                  : "text-zinc-700 dark:text-zinc-200"
-              }`}
-            >
+            <div key={k} className={`text-[12.5px] leading-snug ${tone.item}`}>
               {it}
             </div>
           ))}

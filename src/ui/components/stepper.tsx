@@ -32,6 +32,80 @@ export interface StepperProps {
  *   { label: "생성", icon: "✨" },
  * ]} />
  */
+function StepBadge({ complete, active, accentColor, fallback }: {
+  complete: boolean; active: boolean; accentColor: string; fallback: React.ReactNode;
+}) {
+  const badgeStyle: CSSProperties | undefined =
+    complete || active ? { backgroundColor: accentColor, color: "var(--kit-accent-fg,#fff)" } : undefined;
+  return (
+    <span
+      className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-black transition-all ${
+        complete || active ? "" : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500"
+      }`}
+      style={badgeStyle}
+    >
+      {complete ? <CheckIcon /> : fallback}
+    </span>
+  );
+}
+
+function StepConnector({ complete, accentColor }: { complete: boolean; accentColor: string }) {
+  const doneStyle = complete ? { backgroundColor: accentColor } : undefined;
+  const baseCls = complete ? "" : "bg-zinc-200 dark:bg-zinc-700";
+  return (
+    <span className="mx-2 flex flex-1 items-center">
+      <span className={`h-px flex-1 transition-all ${baseCls}`} style={doneStyle} />
+      <span className={`mx-0.5 h-1 w-1 rounded-full transition-all ${baseCls}`} style={doneStyle} />
+      <span className={`h-px flex-1 transition-all ${baseCls}`} style={doneStyle} />
+    </span>
+  );
+}
+
+function StepItem({ step, i, total, complete, active, clickable, isLast, accentColor, onStepClick }: {
+  step: StepperProps["steps"][number];
+  i: number;
+  total: number;
+  complete: boolean;
+  active: boolean;
+  clickable: boolean;
+  isLast: boolean;
+  accentColor: string;
+  onStepClick?: (i: number) => void;
+}) {
+  const labelStyle: CSSProperties | undefined = active ? { color: accentColor } : undefined;
+
+  return (
+    <div className="flex flex-1 items-center">
+      <button
+        type="button"
+        onClick={() => clickable && onStepClick!(i)}
+        disabled={!clickable}
+        className={`flex items-center gap-2 transition-all disabled:cursor-default ${
+          active ? "opacity-100" : "opacity-50 enabled:hover:opacity-80"
+        }`}
+      >
+        <StepBadge complete={complete} active={active} accentColor={accentColor} fallback={step.icon ?? i + 1} />
+        <span className="flex flex-col items-start">
+          <span
+            className={`text-[8px] font-bold uppercase tracking-widest ${
+              active ? "" : "text-zinc-400 dark:text-zinc-500"
+            }`}
+            style={labelStyle}
+          >
+            {i + 1}/{total}
+          </span>
+          <span
+            className={`text-[11px] font-bold ${active ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400 dark:text-zinc-500"}`}
+          >
+            {step.label}
+          </span>
+        </span>
+      </button>
+      {!isLast && <StepConnector complete={complete} accentColor={accentColor} />}
+    </div>
+  );
+}
+
 export function Stepper({
   steps,
   current,
@@ -45,67 +119,20 @@ export function Stepper({
 
   return (
     <div className={`flex items-center ${className}`}>
-      {steps.map((step, i) => {
-        const complete = i <= lastDone;
-        const active = i === current;
-        const clickable = !!onStepClick && i <= current;
-        const badgeStyle: CSSProperties | undefined =
-          complete || active ? { backgroundColor: accentColor, color: "var(--kit-accent-fg,#fff)" } : undefined;
-        const labelStyle: CSSProperties | undefined = active ? { color: accentColor } : undefined;
-
-        return (
-          <div key={i} className="flex flex-1 items-center">
-            <button
-              type="button"
-              onClick={() => clickable && onStepClick!(i)}
-              disabled={!clickable}
-              className={`flex items-center gap-2 transition-all disabled:cursor-default ${
-                active ? "opacity-100" : "opacity-50 enabled:hover:opacity-80"
-              }`}
-            >
-              <span
-                className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-black transition-all ${
-                  complete || active ? "" : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500"
-                }`}
-                style={badgeStyle}
-              >
-                {complete ? <CheckIcon /> : (step.icon ?? i + 1)}
-              </span>
-              <span className="flex flex-col items-start">
-                <span
-                  className={`text-[8px] font-bold uppercase tracking-widest ${
-                    active ? "" : "text-zinc-400 dark:text-zinc-500"
-                  }`}
-                  style={labelStyle}
-                >
-                  {i + 1}/{steps.length}
-                </span>
-                <span
-                  className={`text-[11px] font-bold ${active ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400 dark:text-zinc-500"}`}
-                >
-                  {step.label}
-                </span>
-              </span>
-            </button>
-            {i < steps.length - 1 && (
-              <span className="mx-2 flex flex-1 items-center">
-                <span
-                  className={`h-px flex-1 transition-all ${complete ? "" : "bg-zinc-200 dark:bg-zinc-700"}`}
-                  style={complete ? { backgroundColor: accentColor } : undefined}
-                />
-                <span
-                  className={`mx-0.5 h-1 w-1 rounded-full transition-all ${complete ? "" : "bg-zinc-200 dark:bg-zinc-700"}`}
-                  style={complete ? { backgroundColor: accentColor } : undefined}
-                />
-                <span
-                  className={`h-px flex-1 transition-all ${complete ? "" : "bg-zinc-200 dark:bg-zinc-700"}`}
-                  style={complete ? { backgroundColor: accentColor } : undefined}
-                />
-              </span>
-            )}
-          </div>
-        );
-      })}
+      {steps.map((step, i) => (
+        <StepItem
+          key={i}
+          step={step}
+          i={i}
+          total={steps.length}
+          complete={i <= lastDone}
+          active={i === current}
+          clickable={!!onStepClick && i <= current}
+          isLast={i === steps.length - 1}
+          accentColor={accentColor}
+          onStepClick={onStepClick}
+        />
+      ))}
     </div>
   );
 }

@@ -1,22 +1,90 @@
 {
-  "generatedAt": "2026-05-03T17:01:07.367Z",
-  "kitVersion": "0.0.23",
+  "generatedAt": "2026-07-09T05:53:35.439Z",
+  "kitVersion": "0.0.31",
   "source": {
     "dir": "src",
-    "files": 2,
-    "totalLines": 2032,
-    "codeLines": 1856
+    "files": 26,
+    "totalLines": 2962,
+    "codeLines": 2673,
+    "breakdown": {
+      "frontend": {
+        "files": 25,
+        "codeLines": 2590
+      },
+      "backend": {
+        "files": 0,
+        "codeLines": 0
+      },
+      "shared": {
+        "files": 1,
+        "codeLines": 83
+      }
+    }
+  },
+  "quality": {
+    "engine": "ast",
+    "score": 94,
+    "grade": "A+",
+    "cc": {
+      "functions": 193,
+      "avg": 1.7,
+      "p90": 3,
+      "max": 11,
+      "over10": 1,
+      "over20": 0,
+      "worst": [
+        {
+          "name": "LibrariesTab",
+          "cc": 11,
+          "file": "src/tabs/LibrariesTab.tsx",
+          "line": 149
+        },
+        {
+          "name": "FetchDetail",
+          "cc": 10,
+          "file": "src/tabs/FetchDetail.tsx",
+          "line": 9
+        },
+        {
+          "name": "UtilsDetail",
+          "cc": 10,
+          "file": "src/tabs/UtilsDetail.tsx",
+          "line": 12
+        },
+        {
+          "name": "(anonymous)",
+          "cc": 9,
+          "file": "src/templates/LandingTemplate.tsx",
+          "line": 58
+        },
+        {
+          "name": "App",
+          "cc": 8,
+          "file": "src/App.tsx",
+          "line": 52
+        }
+      ]
+    },
+    "branchDensity": 5.9,
+    "branches": 157,
+    "functions": 224,
+    "avgFileLines": 103,
+    "longFiles": 0,
+    "maxFile": {
+      "path": "src/tabs/UtilsDetail.tsx",
+      "lines": 176
+    }
   },
   "kit": {
     "features": [
       {
         "name": "GrassMap",
-        "loc": 314,
+        "loc": 194,
         "category": "component"
       },
       {
         "name": "Watermark",
-        "loc": 228,
+        "loc": 189,
         "category": "component"
       },
       {
@@ -26,7 +94,32 @@
       },
       {
         "name": "InAppSheet",
-        "loc": 160,
+        "loc": 175,
+        "category": "component"
+      },
+      {
+        "name": "jsonLd",
+        "loc": 168,
+        "category": "util"
+      },
+      {
+        "name": "relativeTime",
+        "loc": 167,
+        "category": "util"
+      },
+      {
+        "name": "ActionCard",
+        "loc": 114,
+        "category": "component"
+      },
+      {
+        "name": "Stepper",
+        "loc": 111,
+        "category": "component"
+      },
+      {
+        "name": "Select",
+        "loc": 109,
         "category": "component"
       },
       {
@@ -35,13 +128,8 @@
         "category": "component"
       },
       {
-        "name": "Typewriter",
-        "loc": 98,
-        "category": "component"
-      },
-      {
-        "name": "ShareButton",
-        "loc": 98,
+        "name": "Countdown",
+        "loc": 104,
         "category": "component"
       },
       {
@@ -50,8 +138,58 @@
         "category": "component"
       },
       {
+        "name": "useShare",
+        "loc": 98,
+        "category": "hook"
+      },
+      {
+        "name": "Typewriter",
+        "loc": 98,
+        "category": "component"
+      },
+      {
+        "name": "Collapsible",
+        "loc": 94,
+        "category": "component"
+      },
+      {
+        "name": "Carousel",
+        "loc": 94,
+        "category": "component"
+      },
+      {
         "name": "ToastProvider",
         "loc": 93,
+        "category": "component"
+      },
+      {
+        "name": "AppShell",
+        "loc": 76,
+        "category": "component"
+      },
+      {
+        "name": "FetchProgress",
+        "loc": 75,
+        "category": "component"
+      },
+      {
+        "name": "ListRow",
+        "loc": 71,
+        "category": "component"
+      },
+      {
+        "name": "Field",
+        "loc": 67,
+        "category": "component"
+      },
+      {
+        "name": "Input",
+        "loc": 67,
+        "category": "component"
+      },
+      {
+        "name": "InlineEdit",
+        "loc": 62,
         "category": "component"
       },
       {
@@ -65,8 +203,28 @@
         "category": "component"
       },
       {
-        "name": "AppShell",
-        "loc": 51,
+        "name": "usePWAInstall",
+        "loc": 55,
+        "category": "hook"
+      },
+      {
+        "name": "ColorPicker",
+        "loc": 54,
+        "category": "component"
+      },
+      {
+        "name": "UnderlineTabs",
+        "loc": 53,
+        "category": "component"
+      },
+      {
+        "name": "PWAInstallButton",
+        "loc": 53,
+        "category": "component"
+      },
+      {
+        "name": "ProgressRing",
+        "loc": 50,
         "category": "component"
       },
       {
@@ -75,12 +233,52 @@
         "category": "component"
       },
       {
+        "name": "SegmentedControl",
+        "loc": 49,
+        "category": "component"
+      },
+      {
+        "name": "AsyncList",
+        "loc": 49,
+        "category": "component"
+      },
+      {
+        "name": "BarList",
+        "loc": 48,
+        "category": "component"
+      },
+      {
+        "name": "TabBar",
+        "loc": 45,
+        "category": "component"
+      },
+      {
+        "name": "IconButton",
+        "loc": 45,
+        "category": "component"
+      },
+      {
         "name": "useFormSubmit",
         "loc": 43,
         "category": "hook"
       },
       {
-        "name": "TabBar",
+        "name": "Switch",
+        "loc": 40,
+        "category": "component"
+      },
+      {
+        "name": "CodeBlock",
+        "loc": 37,
+        "category": "component"
+      },
+      {
+        "name": "LinkifiedText",
+        "loc": 36,
+        "category": "component"
+      },
+      {
+        "name": "MediaCard",
         "loc": 36,
         "category": "component"
       },
@@ -115,6 +313,11 @@
         "category": "component"
       },
       {
+        "name": "Divider",
+        "loc": 18,
+        "category": "component"
+      },
+      {
         "name": "Section",
         "loc": 17,
         "category": "component"
@@ -125,17 +328,7 @@
         "category": "component"
       },
       {
-        "name": "mobileViewport",
-        "loc": 16,
-        "category": "util"
-      },
-      {
         "name": "colors",
-        "loc": 12,
-        "category": "util"
-      },
-      {
-        "name": "relativeTime",
         "loc": 12,
         "category": "util"
       },
@@ -143,32 +336,27 @@
         "name": "useDebounce",
         "loc": 8,
         "category": "hook"
-      },
-      {
-        "name": "Divider",
-        "loc": 3,
-        "category": "component"
       }
     ],
-    "savedLines": 1933,
-    "savedKB": 76,
-    "savedA4": 24,
-    "savedPercent": 51,
+    "savedLines": 3718,
+    "savedKB": 145,
+    "savedA4": 46,
+    "savedPercent": 58,
     "usage": {
       "component": {
-        "used": 29,
-        "total": 30,
-        "percent": 97
+        "used": 56,
+        "total": 59,
+        "percent": 95
       },
       "hook": {
         "used": 7,
-        "total": 11,
-        "percent": 64
+        "total": 13,
+        "percent": 54
       },
       "util": {
-        "used": 8,
-        "total": 12,
-        "percent": 67
+        "used": 13,
+        "total": 26,
+        "percent": 50
       }
     }
   }

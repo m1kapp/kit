@@ -30,34 +30,10 @@ const EASE_CLOSE = "cubic-bezier(0.32, 0.72, 0, 1)";
 const DURATION_OPEN = 500; // ms — generous for spring feel
 const DURATION_CLOSE = 300; // ms — snappy exit
 
-export function InAppSheet({
-  open,
-  onClose,
-  children,
-  className = "",
-  title,
-  fullHeight = false,
-  hideClose = false,
-  closeLabel = "닫기",
-}: InAppSheetProps) {
-  const [anchorRef, target] = usePortalTarget();
-  const trapRef = useFocusTrap<HTMLDivElement>(open);
-  const titleId = useId();
-  /** Whether the portal DOM is mounted */
+/** 마운트 → 1프레임 뒤 enter 전환, 닫힘 → exit 애니메이션 후 언마운트 */
+function useSheetTransition(open: boolean) {
   const [mounted, setMounted] = useState(false);
-  /** Whether the enter transition has been triggered (1-frame delay after mount) */
   const [entered, setEntered] = useState(false);
-
-  // Swipe state
-  const dragState = useRef<{ startY: number; currentY: number; dragging: boolean }>({
-    startY: 0,
-    currentY: 0,
-    dragging: false,
-  });
-  const [dragOffset, setDragOffset] = useState(0);
-
-  useScrollLock(open, anchorRef);
-  useEscapeKey(open, onClose);
 
   // Mount / unmount lifecycle
   useEffect(() => {
@@ -83,6 +59,18 @@ export function InAppSheet({
       return () => cancelAnimationFrame(raf);
     }
   }, [mounted, open]);
+
+  return { mounted, entered };
+}
+
+/** 아래로 스와이프 → 임계 초과 시 onClose. dragOffset은 시트 translateY */
+function useSheetDrag(open: boolean, onClose: () => void) {
+  const dragState = useRef<{ startY: number; currentY: number; dragging: boolean }>({
+    startY: 0,
+    currentY: 0,
+    dragging: false,
+  });
+  const [dragOffset, setDragOffset] = useState(0);
 
   // Reset drag offset when closed
   useEffect(() => {
@@ -114,25 +102,48 @@ export function InAppSheet({
     setDragOffset(0);
   }, [onClose]);
 
-  // Build sheet inline styles — drag overrides transition
-  const sheetStyle: React.CSSProperties =
-    dragOffset > 0
-      ? { transform: `translateY(${dragOffset}px)`, transition: "none" }
-      : {
-          transform: entered ? "translateY(0)" : "translateY(100%)",
-          transition: `transform ${entered ? DURATION_OPEN : DURATION_CLOSE}ms ${entered ? EASE_OPEN : EASE_CLOSE}`,
-        };
+  return { dragOffset, onTouchStart, onTouchMove, onTouchEnd };
+}
 
-  const backdropStyle: React.CSSProperties =
-    dragOffset > 0
-      ? {
-          opacity: Math.max(0, 1 - dragOffset / 300),
-          transition: "none",
-        }
-      : {
-          opacity: entered ? 1 : 0,
-          transition: `opacity ${entered ? DURATION_OPEN : DURATION_CLOSE}ms ${entered ? EASE_OPEN : EASE_CLOSE}`,
-        };
+// 인라인 스타일 — 드래그 중엔 transition 끔
+function buildSheetStyle(dragOffset: number, entered: boolean): React.CSSProperties {
+  if (dragOffset > 0) return { transform: `translateY(${dragOffset}px)`, transition: "none" };
+  return {
+    transform: entered ? "translateY(0)" : "translateY(100%)",
+    transition: `transform ${entered ? DURATION_OPEN : DURATION_CLOSE}ms ${entered ? EASE_OPEN : EASE_CLOSE}`,
+  };
+}
+
+function buildBackdropStyle(dragOffset: number, entered: boolean): React.CSSProperties {
+  if (dragOffset > 0) return { opacity: Math.max(0, 1 - dragOffset / 300), transition: "none" };
+  return {
+    opacity: entered ? 1 : 0,
+    transition: `opacity ${entered ? DURATION_OPEN : DURATION_CLOSE}ms ${entered ? EASE_OPEN : EASE_CLOSE}`,
+  };
+}
+
+export function InAppSheet({
+  open,
+  onClose,
+  children,
+  className = "",
+  title,
+  fullHeight = false,
+  hideClose = false,
+  closeLabel = "닫기",
+}: InAppSheetProps) {
+  const [anchorRef, target] = usePortalTarget();
+  const trapRef = useFocusTrap<HTMLDivElement>(open);
+  const titleId = useId();
+
+  useScrollLock(open, anchorRef);
+  useEscapeKey(open, onClose);
+
+  const { mounted, entered } = useSheetTransition(open);
+  const { dragOffset, onTouchStart, onTouchMove, onTouchEnd } = useSheetDrag(open, onClose);
+
+  const sheetStyle = buildSheetStyle(dragOffset, entered);
+  const backdropStyle = buildBackdropStyle(dragOffset, entered);
 
   return (
     <>
