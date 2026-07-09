@@ -7,6 +7,8 @@
 - feat(skill): `/m1kapp-clean` — 청결도 올리기 스킬. CC 높은 함수부터 표준 기법(조기 반환·분기 테이블화·헬퍼 추출)으로 리팩토링 후 stats 재측정 루프
 - refactor: kit 자체 청결도 C(60) → A+(94) — PoweredByKit CC31 분해(방문자 통계/크레딧 시트 분리), GrassMap·ActionCard·Shell(og)·InAppSheet·Stepper·Collapsible 정리, og.tsx 5모듈 분할, 200줄+ 파일 0개. 공개 API 불변
 - refactor(demo): App.tsx 2,813줄 → 24개 파일 분할, 데모 청결도 B(73) → A+(94)
+- feat(cli): 청결도 스코어 v2 — cognitive complexity(중첩 가중, 논리연쇄 1회, ?? 제외) + **중복 코드 감지**(토큰 정규화 슬라이딩 윈도우, 리터럴 원문 유지·테스트 제외)가 채점 축. `quality.cognitive`·`quality.duplication`(worstBlocks 위치 포함) 기록, cc는 참고용 유지
+- feat(cli): `m1kkit stats --llm` — Claude(haiku)로 최악 함수들 네이밍·응집도·본질적 복잡성 자문. 점수 미반영(결정성 유지), `quality.llm`에 기록
 - feat(ui): `MediaCard` — 썸네일+배지 미디어 카드 (horizontal/vertical)
 - feat(ui): `UnderlineTabs` — 언더라인 콘텐츠 필터 탭 (하단 내비 TabBar와 별개)
 - feat(utils): `formatKoreanNumber`(만/억/천 축약), `parseIsoDuration`/`isoDurationToSec`(유튜브 API "PT1H2M3S")
