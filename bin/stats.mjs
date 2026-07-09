@@ -101,12 +101,87 @@ function countLines(content) {
   return { total, code };
 }
 
-// 코드 청결도 분석 — 분기 밀도·파일 크기 기반 휴리스틱
+// 코드 청결도 분석 — 분기 밀도·파일 크기 기반 휴리스틱 (typescript 미설치 시 폴백)
 // 주석/문자열 안까지 세는 러프한 근사지만, 프로젝트 간 상대 비교엔 충분
 function analyzeQuality(content) {
   const branchTokens = content.match(/\bif\s*\(|\belse\b|\bcase\s|\bcatch\s*[({]|\?\s*[^.:]|&&|\|\|/g);
   const fnTokens = content.match(/\bfunction\b|=>/g);
   return { branches: branchTokens?.length || 0, functions: fnTokens?.length || 0 };
+}
+
+// 프로젝트의 typescript 패키지 로드 (AST 기반 정밀 분석용)
+function loadTypescript() {
+  try {
+    const require = createRequire(path.resolve(process.cwd(), "package.json"));
+    return require("typescript");
+  } catch {
+    return null;
+  }
+}
+
+// AST 기반 함수별 cyclomatic complexity (McCabe)
+// 결정 포인트: if/삼항/case/catch/루프/&&/||/?? — 중첩 함수는 별도 함수로 분리 집계
+function analyzeAstComplexity(ts, filePath, content) {
+  const kind = /\.(tsx|jsx)$/.test(filePath) ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const sf = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true, kind);
+
+  const isFnLike = (n) =>
+    ts.isFunctionDeclaration(n) || ts.isFunctionExpression(n) || ts.isArrowFunction(n) ||
+    ts.isMethodDeclaration(n) || ts.isGetAccessor(n) || ts.isSetAccessor(n) || ts.isConstructorDeclaration(n);
+
+  const fnName = (n) => {
+    if (n.name) return n.name.getText(sf);
+    const p = n.parent;
+    if (p && ts.isVariableDeclaration(p)) return p.name.getText(sf);
+    if (p && ts.isPropertyAssignment(p)) return p.name.getText(sf);
+    return "(anonymous)";
+  };
+
+  const ccOf = (fn) => {
+    let cc = 1;
+    const walk = (n) => {
+      if (n !== fn && isFnLike(n)) return; // 중첩 함수는 자기 항목에서 계산
+      switch (n.kind) {
+        case ts.SyntaxKind.IfStatement:
+        case ts.SyntaxKind.ConditionalExpression:
+        case ts.SyntaxKind.CaseClause:
+        case ts.SyntaxKind.CatchClause:
+        case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.ForInStatement:
+        case ts.SyntaxKind.ForOfStatement:
+        case ts.SyntaxKind.WhileStatement:
+        case ts.SyntaxKind.DoStatement:
+          cc++;
+          break;
+        case ts.SyntaxKind.BinaryExpression: {
+          const op = n.operatorToken.kind;
+          if (
+            op === ts.SyntaxKind.AmpersandAmpersandToken ||
+            op === ts.SyntaxKind.BarBarToken ||
+            op === ts.SyntaxKind.QuestionQuestionToken
+          ) cc++;
+          break;
+        }
+      }
+      ts.forEachChild(n, walk);
+    };
+    ts.forEachChild(fn, walk);
+    return cc;
+  };
+
+  const fns = [];
+  const collect = (n) => {
+    if (isFnLike(n) && (n.body || ts.isArrowFunction(n))) {
+      fns.push({
+        name: fnName(n),
+        cc: ccOf(n),
+        line: sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1,
+      });
+    }
+    ts.forEachChild(n, collect);
+  };
+  collect(sf);
+  return fns;
 }
 
 // 파일 분류 — frontend(UI) / backend(API·서버) / shared(공용 유틸)
@@ -160,6 +235,8 @@ let totalFunctions = 0;
 let maxFile = { path: "", lines: 0 };
 let longFiles = 0; // 200줄 초과 파일 수
 const allImports = new Set();
+const ts = loadTypescript();
+const allFns = []; // AST 모드: {name, cc, line, file}
 const breakdown = {
   frontend: { files: 0, codeLines: 0 },
   backend: { files: 0, codeLines: 0 },
@@ -177,24 +254,63 @@ for (const file of files) {
   const q = analyzeQuality(content);
   totalBranches += q.branches;
   totalFunctions += q.functions;
+  if (ts) {
+    const rel = path.relative(process.cwd(), file);
+    for (const fn of analyzeAstComplexity(ts, file, content)) allFns.push({ ...fn, file: rel });
+  }
   if (counts.code > maxFile.lines) maxFile = { path: path.relative(process.cwd(), file), lines: counts.code };
   if (counts.code > 200) longFiles++;
   const imports = detectKitImports(content);
   for (const imp of imports) allImports.add(imp);
 }
 
-// 청결도 스코어 (100점 만점, 상대 비교용 휴리스틱)
-// - 분기 밀도(100줄당 분기 수): 10 이하 무감점, 초과분 ×2 감점 (최대 40)
-// - 200줄 초과 파일: 개당 5점 감점 (최대 30)
-// - 평균 파일 길이: 80줄 이하 무감점, 초과분 /4 감점 (최대 30)
 const branchDensity = codeLines > 0 ? Math.round((totalBranches / codeLines) * 1000) / 10 : 0;
 const avgFileLines = files.length > 0 ? Math.round(codeLines / files.length) : 0;
-const qualityScore = Math.max(0, Math.round(
-  100
-  - Math.min(40, Math.max(0, branchDensity - 10) * 2)
-  - Math.min(30, longFiles * 5)
-  - Math.min(30, Math.max(0, avgFileLines - 80) / 4)
-));
+
+// 청결도 스코어 (100점 만점)
+// AST 모드: 함수별 cyclomatic complexity 기반 — McCabe/SonarQube 관행(CC>10 경고, CC>20 심각) 근거
+// 프로젝트 크기 편향 없게 비율 기반 감점:
+// - CC>10 함수 비율 ×3 (최대 30), CC>20 함수 비율 ×5 (최대 25)
+// - 최악 함수: CC 15 초과분 ×1 (최대 20)
+// - 200줄 초과 파일 비율 ×2 (최대 15) / 평균 파일 길이 80줄 초과분 /5 (최대 10)
+let qualityScore;
+let cc = null;
+if (ts && allFns.length > 0) {
+  const sorted = [...allFns].sort((a, b) => b.cc - a.cc);
+  const over10 = sorted.filter((f) => f.cc > 10);
+  const over20 = sorted.filter((f) => f.cc > 20);
+  const maxCC = sorted[0].cc;
+  const p90 = sorted[Math.floor((sorted.length - 1) * 0.1)].cc; // 상위 10% 경계
+  const avgCC = Math.round((allFns.reduce((s, f) => s + f.cc, 0) / allFns.length) * 10) / 10;
+  cc = {
+    functions: allFns.length,
+    avg: avgCC,
+    p90,
+    max: maxCC,
+    over10: over10.length,
+    over20: over20.length,
+    worst: sorted.slice(0, 5).map(({ name, cc, file, line }) => ({ name, cc, file, line })),
+  };
+  const over10Pct = (over10.length / allFns.length) * 100;
+  const over20Pct = (over20.length / allFns.length) * 100;
+  const longFilesPct = (longFiles / files.length) * 100;
+  qualityScore = Math.max(0, Math.round(
+    100
+    - Math.min(30, over10Pct * 3)
+    - Math.min(25, over20Pct * 5)
+    - Math.min(20, Math.max(0, maxCC - 15))
+    - Math.min(15, longFilesPct * 2)
+    - Math.min(10, Math.max(0, avgFileLines - 80) / 5)
+  ));
+} else {
+  // regex 폴백 (typescript 미설치)
+  qualityScore = Math.max(0, Math.round(
+    100
+    - Math.min(40, Math.max(0, branchDensity - 10) * 2)
+    - Math.min(30, longFiles * 5)
+    - Math.min(30, Math.max(0, avgFileLines - 80) / 4)
+  ));
+}
 const qualityGrade = qualityScore >= 90 ? "A+" : qualityScore >= 80 ? "A" : qualityScore >= 70 ? "B" : qualityScore >= 60 ? "C" : "D";
 
 // 절약량 계산
@@ -242,8 +358,10 @@ const stats = {
     breakdown, // frontend(UI) / backend(API·서버) / shared(공용) 별 files·codeLines
   },
   quality: {
+    engine: cc ? "ast" : "regex", // ast = typescript AST 함수별 cyclomatic complexity
     score: qualityScore,
     grade: qualityGrade,
+    cc,                   // {functions, avg, p90, max, over10, over20, worst[5]} — AST 모드만
     branchDensity,        // 100줄당 분기 수 (if/else/case/catch/삼항/&&/||)
     branches: totalBranches,
     functions: totalFunctions,
@@ -277,5 +395,12 @@ console.log(`    훅: ${usage.hook.used}/${usage.hook.total}개 (${usage.hook.pe
 console.log(`    유틸리티: ${usage.util.used}/${usage.util.total}개 (${usage.util.percent}%)`);
 console.log(`  절약량: 약 ${savedLines.toLocaleString()}줄, ${estimatedKB}KB (A4 ${estimatedA4}장)`);
 console.log(`  비율: 전체의 약 ${savedPercent}%를 kit이 대신 처리`);
-console.log(`  청결도: ${qualityGrade} (${qualityScore}점) — 분기밀도 ${branchDensity}/100줄, 평균 ${avgFileLines}줄/파일, 200줄+ ${longFiles}개`);
+if (cc) {
+  console.log(`  청결도: ${qualityGrade} (${qualityScore}점) — 함수 ${cc.functions}개, CC 평균 ${cc.avg}·최대 ${cc.max}, CC10+ ${cc.over10}개·CC20+ ${cc.over20}개, 200줄+ ${longFiles}개`);
+  for (const w of cc.worst.filter((f) => f.cc > 10)) {
+    console.log(`    복잡: ${w.name} CC ${w.cc} — ${w.file}:${w.line}`);
+  }
+} else {
+  console.log(`  청결도: ${qualityGrade} (${qualityScore}점) — 분기밀도 ${branchDensity}/100줄, 평균 ${avgFileLines}줄/파일, 200줄+ ${longFiles}개 (regex 폴백 — typescript 설치 시 AST 정밀 분석)`);
+}
 console.log(`\n  저장됨 → ${path.relative(process.cwd(), outPath)}\n`);

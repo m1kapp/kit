@@ -32,6 +32,10 @@ const SKILLS = [
     name: "m1kapp-stats",
     desc: "/m1kapp-stats — 코드 분석(stats) 켜기 · kit-stats.json 생성/갱신 · PoweredByKit 패널 데이터 채우기",
   },
+  {
+    name: "m1kapp-clean",
+    desc: "/m1kapp-clean — 청결도 올리기 · CC 높은 함수 리팩토링 → stats 재측정 루프",
+  },
 ];
 
 const args = process.argv.slice(2);
