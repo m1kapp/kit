@@ -2,6 +2,7 @@
 
 ## 0.0.31
 - feat(cli): `m1kkit stats`에 코드 청결도 분석 — 분기밀도·평균 파일 길이·200줄+ 파일 수 기반 score/grade를 kit-stats.json `quality`에 기록
+- feat(cli): `m1kkit stats` 프론트/백엔드/공용 분리 집계 — `source.breakdown`에 버킷별 files·codeLines (api·route·middleware·"use server"=backend, tsx·"use client"=frontend, 나머지=shared)
 - feat(ui): `MediaCard` — 썸네일+배지 미디어 카드 (horizontal/vertical)
 - feat(ui): `UnderlineTabs` — 언더라인 콘텐츠 필터 탭 (하단 내비 TabBar와 별개)
 - feat(utils): `formatKoreanNumber`(만/억/천 축약), `parseIsoDuration`/`isoDurationToSec`(유튜브 API "PT1H2M3S")

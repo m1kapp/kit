@@ -77,9 +77,9 @@ function collectFiles(dir, exts = [".ts", ".tsx", ".js", ".jsx"]) {
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === "node_modules" || entry.name === ".next" || entry.name === "dist") continue;
+      if (entry.name === "node_modules" || entry.name === ".next" || entry.name === "dist" || entry.name.startsWith(".")) continue;
       results.push(...collectFiles(fullPath, exts));
-    } else if (exts.some((ext) => entry.name.endsWith(ext))) {
+    } else if (exts.some((ext) => entry.name.endsWith(ext)) && !entry.name.endsWith(".d.ts")) {
       results.push(fullPath);
     }
   }
@@ -107,6 +107,23 @@ function analyzeQuality(content) {
   const branchTokens = content.match(/\bif\s*\(|\belse\b|\bcase\s|\bcatch\s*[({]|\?\s*[^.:]|&&|\|\|/g);
   const fnTokens = content.match(/\bfunction\b|=>/g);
   return { branches: branchTokens?.length || 0, functions: fnTokens?.length || 0 };
+}
+
+// 파일 분류 — frontend(UI) / backend(API·서버) / shared(공용 유틸)
+function classifyFile(filePath, content) {
+  const rel = filePath.replace(/\\/g, "/");
+  const head = content.slice(0, 300);
+  if (
+    /\/(api|server)\//.test(rel) ||
+    /(^|\/)(route|middleware|instrumentation)\.(ts|js|mjs)$/.test(rel) ||
+    /^\s*["']use server["']/.test(head)
+  ) {
+    return "backend";
+  }
+  if (/\.(tsx|jsx)$/.test(rel) || /^\s*["']use client["']/.test(head)) {
+    return "frontend";
+  }
+  return "shared";
 }
 
 // kit import 감지
@@ -143,12 +160,20 @@ let totalFunctions = 0;
 let maxFile = { path: "", lines: 0 };
 let longFiles = 0; // 200줄 초과 파일 수
 const allImports = new Set();
+const breakdown = {
+  frontend: { files: 0, codeLines: 0 },
+  backend: { files: 0, codeLines: 0 },
+  shared: { files: 0, codeLines: 0 },
+};
 
 for (const file of files) {
   const content = fs.readFileSync(file, "utf-8");
   const counts = countLines(content);
   totalLines += counts.total;
   codeLines += counts.code;
+  const bucket = breakdown[classifyFile(file, content)];
+  bucket.files++;
+  bucket.codeLines += counts.code;
   const q = analyzeQuality(content);
   totalBranches += q.branches;
   totalFunctions += q.functions;
@@ -214,6 +239,7 @@ const stats = {
     files: files.length,
     totalLines,
     codeLines,
+    breakdown, // frontend(UI) / backend(API·서버) / shared(공용) 별 files·codeLines
   },
   quality: {
     score: qualityScore,
@@ -242,6 +268,9 @@ fs.writeFileSync(outPath, JSON.stringify(stats, null, 2));
 
 console.log(`  파일: ${files.length}개`);
 console.log(`  코드: ${codeLines.toLocaleString()}줄 (전체 ${totalLines.toLocaleString()}줄)`);
+console.log(`    프론트: ${breakdown.frontend.files}개 파일, ${breakdown.frontend.codeLines.toLocaleString()}줄`);
+console.log(`    백엔드: ${breakdown.backend.files}개 파일, ${breakdown.backend.codeLines.toLocaleString()}줄`);
+console.log(`    공용: ${breakdown.shared.files}개 파일, ${breakdown.shared.codeLines.toLocaleString()}줄`);
 console.log(`  kit 사용: ${usedFeatures.length}개 요소`);
 console.log(`    컴포넌트: ${usage.component.used}/${usage.component.total}개 (${usage.component.percent}%)`);
 console.log(`    훅: ${usage.hook.used}/${usage.hook.total}개 (${usage.hook.percent}%)`);
