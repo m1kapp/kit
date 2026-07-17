@@ -458,14 +458,16 @@ npx m1kkit track https://myside.app
 ```
 
 ```bash
-# 2) .env 에 한 줄 → 이후 자동 집계 (스니펫 붙여넣기 불필요)
+# 2) Next.js면 .env 에 한 줄 → 이후 자동 집계 (스니펫 붙여넣기 불필요)
 NEXT_PUBLIC_M1K_SLUG=your-slug
 ```
+
+Vite 등 Next.js가 아닌 앱은 `NEXT_PUBLIC_*` env가 안 읽히니 `trackSlug` prop으로 직접 지정하세요:
 
 ```tsx
 // 끄기 / 명시 지정
 <Watermark track={false}>…</Watermark>        // 비콘 끔
-<Watermark trackSlug="your-slug">…</Watermark> // env 대신 직접 지정
+<Watermark trackSlug="your-slug">…</Watermark> // env 대신 직접 지정 (Vite는 이 방식 사용)
 // PoweredByKit 단독 사용 시: <PoweredByKit slug="your-slug" track={false} />
 ```
 
