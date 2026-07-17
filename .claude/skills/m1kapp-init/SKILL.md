@@ -202,6 +202,7 @@ node_modules
 dist
 .env
 .env.local
+.m1k.json
 ```
 
 ## 실행 절차
@@ -210,5 +211,10 @@ dist
 2. 해당 디렉토리에서 `npm install` 실행
 3. `git init` 및 첫 커밋 준비 (커밋은 사용자 확인 후 진행)
 4. 완료 후 `npm run dev`로 실행 방법 안내
+5. **배포하고 나면 (URL이 생기면) 방문자 트래커를 기본으로 붙인다** —
+   `npx m1kkit track <배포된 URL>` 실행 → 발급된 slug를 `App.tsx`의
+   `<Watermark trackSlug="...">` 에 직접 지정 (Vite라 `NEXT_PUBLIC_M1K_SLUG`
+   env는 안 읽힘). 계정 귀속(`npx m1kkit claim`)은 브라우저 로그인이 필요해서
+   나중에 사용자가 직접 해도 됨 — 트래커 연결 자체를 미룰 이유는 아님.
 
 추가 컨텍스트: $ARGUMENTS

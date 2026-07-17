@@ -20,6 +20,8 @@ const CLAUDE_PROMPT = `@m1kapp/kit으로 모바일 웹앱 만들어줘. CSS는 i
 
 [구조 — 필수] 최상위는 반드시 <Watermark color="..." text="...">로 감싸고 그 안에 <AppShell>을 넣어. AppShell만 단독으로 쓰면 화면이 뷰포트를 안 채우고 쪼그라들고, 하단 PoweredByKit 크레딧도 안 뜸. AppShellContent 안쪽은 <Section>(px-4) 블록을 <Divider spacing="sm" />로 구분해서 쌓아 — 직접 만든 padding div(예: <div className="p-4 flex flex-col gap-4">) 쓰지 말고.
 
+[방문자 트래커 — 배포 후 기본으로 붙이기] 배포해서 URL이 생기면 항상 붙여: npx m1kkit track <배포 URL> 로 slug 발급받고, <Watermark trackSlug="발급된slug"> 로 직접 연결 (Vite면 NEXT_PUBLIC_M1K_SLUG env는 안 먹으니 꼭 prop으로). 계정 귀속(npx m1kkit claim)은 로그인이 필요해서 나중에 해도 되지만, 트래커 연결 자체는 미루지 말고 기본으로 항상 해.
+
 먼저 npm i @m1kapp/kit 해줘.`;
 
 // AI 코딩 에이전트 — 실제 브랜드 로고 (./logos)
