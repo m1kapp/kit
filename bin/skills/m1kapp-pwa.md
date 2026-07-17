@@ -36,12 +36,19 @@ PWA 설정 현황
 
 빠진 항목에 대해 확인 후 적용한다.
 
-아이콘이 없으면: `npx m1kkit favicon` 명령어 안내
-manifest가 없으면: 앱 이름, 테마 컬러를 물어보고 `createManifest` 적용
+아이콘이 없으면: `npx m1kkit favicon --appname="[앱 이름]" --color="[테마 컬러]"` 안내
+— favicon.ico/apple-touch-icon/icon-192/icon-512/icon-maskable-512 뿐 아니라
+og-image.png와 manifest.json까지 한 번에 만들어줌.
+
+manifest가 없으면:
+- Next.js면 앱 이름·테마 컬러를 물어보고 `createManifest` 적용 (아래).
+- Vite 등 App Router가 없는 프로젝트면 `npx m1kkit favicon`이 만든
+  `public/manifest.json`을 그대로 쓰면 됨 — 따로 만들 필요 없음.
+
 viewport가 없으면: `mobileViewport` 적용
 
 ```ts
-// app/manifest.ts
+// app/manifest.ts (Next.js App Router)
 import { createManifest } from "@m1kapp/kit/pwa"
 
 export default function manifest() {

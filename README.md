@@ -527,6 +527,20 @@ export async function GET() {
 <OGImage type="product" title="@m1kapp/kit" tagline="올인원 킷" features={["기능1", "기능2"]} color={c} bg={bg} />
 ```
 
+### CLI로 한 번에 (Next.js 라우트 없이)
+
+Vite 등 서버 없는 SPA라 `app/og/route.tsx`를 못 만든다면, 빌드 없이 CLI로
+파비콘부터 OG 이미지, manifest까지 한 번에 생성하세요:
+
+```bash
+npx m1kkit favicon --appname="My App" --slogan="한 줄 소개" --color=#3b82f6 --domain=myapp.com
+```
+
+`favicon.ico` · `apple-touch-icon.png` · `icon-192.png` · `icon-512.png` ·
+`icon-maskable-512.png` · `og-image.png`(1200×630, 위 `default` 템플릿 사용) ·
+`manifest.json` 7개가 `public/`(자동 감지)에 한 번에 생기고, `<head>`에 붙여넣을
+태그 스니펫도 콘솔에 출력됩니다.
+
 ### 폰트 & 이모지
 
 ```tsx

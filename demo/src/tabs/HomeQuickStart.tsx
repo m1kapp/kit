@@ -15,7 +15,7 @@ const CLAUDE_PROMPT = `@m1kapp/kit으로 모바일 웹앱 만들어줘. CSS는 i
 · 콘텐츠: ListRow · Collapsible · Stepper · Carousel · Badge · Avatar · CodeBlock · CopyButton · LinkifiedText · Countdown · Typewriter
 · 테마: ThemeButton/ThemeDialog, 색은 --kit-accent (예: <AppShell accent="#e2603f">)
 · 유틸: cn · relativeTime · formatNumber · formatPrice · formatDuration · groupByDay
-· PWA/SEO/OG: createManifest · mobileViewport · createMetadata · OGImage
+· PWA/SEO/OG: createManifest · mobileViewport · createMetadata · OGImage · 파비콘/OG이미지/manifest.json 한 번에는 npx m1kkit favicon --appname=... --color=... --slogan=...
 · API 라우트(서버, @m1kapp/kit/server): handler로 감싸고 ok/created/badRequest/unauthorized로 응답 · requireEnv로 env 검증 · 외부 호출은 fetchWithRetry/withRetry · LLM JSON은 recoverJsonFromText · OG는 scrapeOg · 날짜는 todayKST · slug는 idToSlug
 
 [구조 — 필수] 최상위는 반드시 <Watermark color="..." text="...">로 감싸고 그 안에 <AppShell>을 넣어. AppShell만 단독으로 쓰면 화면이 뷰포트를 안 채우고 쪼그라들고, 하단 PoweredByKit 크레딧도 안 뜸. AppShellContent 안쪽은 <Section>(px-4) 블록을 <Divider spacing="sm" />로 구분해서 쌓아 — 직접 만든 padding div(예: <div className="p-4 flex flex-col gap-4">) 쓰지 말고.
