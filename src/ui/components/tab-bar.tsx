@@ -7,12 +7,18 @@ export interface TabBarProps {
 
 /**
  * Sticky bottom navigation tab bar.
+ *
+ * Carries no safe-area padding of its own — TabBar is meant to sit inside
+ * `AppShell`, which sits inside `Watermark`. `Watermark` appends its
+ * `PoweredByKit` credit strip right after `AppShell`, and that strip is the
+ * one that owns the home-indicator safe area (`variant="overlay"`). If
+ * TabBar also padded itself for the safe area, the reservation would be
+ * doubled — a blank gap between the tab icons and the credit strip.
  */
 export function TabBar({ children, className = "" }: TabBarProps) {
   return (
     <nav
       className={`sticky bottom-0 z-20 border-t border-zinc-200 dark:border-zinc-800 flex bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md rounded-b-2xl ${className}`}
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {children}
     </nav>
