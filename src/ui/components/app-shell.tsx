@@ -43,6 +43,19 @@ function contrastFg(accent: string): string | undefined {
 /**
  * Mobile app-like container with rounded corners, shadow, and ring.
  * Centers content and constrains width for a phone-like viewport.
+ *
+ * `AppShell` fills `h-full` of its parent — it does not size itself. Wrap it
+ * in `<Watermark>` (gives `h-dvh` + centering + the `PoweredByKit` credit
+ * strip) rather than a hand-rolled height/centering div; without a sized
+ * parent the shell just collapses to content height.
+ *
+ * @example
+ * <Watermark color="#e2603f" text="myapp">
+ *   <AppShell>
+ *     <AppShellHeader>...</AppShellHeader>
+ *     <AppShellContent><Section>...</Section></AppShellContent>
+ *   </AppShell>
+ * </Watermark>
  */
 export function AppShell({
   children,
@@ -98,7 +111,9 @@ export interface AppShellContentProps {
 }
 
 /**
- * Scrollable main content area.
+ * Scrollable main content area. Carries no padding of its own — build
+ * children from `<Section>` (px-4) blocks separated by `<Divider spacing="sm" />`,
+ * not a hand-rolled `<div className="p-4 flex flex-col gap-4">`.
  */
 export function AppShellContent({ children, className = "" }: AppShellContentProps) {
   return (

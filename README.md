@@ -17,21 +17,25 @@ npm install @m1kapp/kit
 
 ```tsx
 // CSS 자동 주입 — 별도 import 불필요
-import { AppShell, AppShellHeader, AppShellContent, TabBar, Tab } from "@m1kapp/kit";
+import { Watermark, AppShell, AppShellHeader, AppShellContent, Section, TabBar, Tab } from "@m1kapp/kit";
 
 export default function App() {
   return (
-    <AppShell>
-      <AppShellHeader>
-        <h1>My App</h1>
-      </AppShellHeader>
-      <AppShellContent>
-        {/* 콘텐츠 */}
-      </AppShellContent>
-      <TabBar>
-        <Tab href="/" icon={<HomeIcon />} label="홈" />
-      </TabBar>
-    </AppShell>
+    // Watermark가 뷰포트 전체 높이/중앙정렬/하단 크레딧을 같이 줍니다.
+    // AppShell만 단독으로 쓰면 콘텐츠 높이만큼 쪼그라들어요.
+    <Watermark color="#e2603f" text="myapp">
+      <AppShell>
+        <AppShellHeader>
+          <h1>My App</h1>
+        </AppShellHeader>
+        <AppShellContent>
+          <Section className="pt-4">{/* 콘텐츠 — Divider로 섹션 구분 */}</Section>
+        </AppShellContent>
+        <TabBar>
+          <Tab href="/" icon={<HomeIcon />} label="홈" />
+        </TabBar>
+      </AppShell>
+    </Watermark>
   );
 }
 ```
