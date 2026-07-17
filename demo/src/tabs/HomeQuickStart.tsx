@@ -18,6 +18,8 @@ const CLAUDE_PROMPT = `@m1kapp/kit으로 모바일 웹앱 만들어줘. CSS는 i
 · PWA/SEO/OG: createManifest · mobileViewport · createMetadata · OGImage
 · API 라우트(서버, @m1kapp/kit/server): handler로 감싸고 ok/created/badRequest/unauthorized로 응답 · requireEnv로 env 검증 · 외부 호출은 fetchWithRetry/withRetry · LLM JSON은 recoverJsonFromText · OG는 scrapeOg · 날짜는 todayKST · slug는 idToSlug
 
+[구조 — 필수] 최상위는 반드시 <Watermark color="..." text="...">로 감싸고 그 안에 <AppShell>을 넣어. AppShell만 단독으로 쓰면 화면이 뷰포트를 안 채우고 쪼그라들고, 하단 PoweredByKit 크레딧도 안 뜸. AppShellContent 안쪽은 <Section>(px-4) 블록을 <Divider spacing="sm" />로 구분해서 쌓아 — 직접 만든 padding div(예: <div className="p-4 flex flex-col gap-4">) 쓰지 말고.
+
 먼저 npm i @m1kapp/kit 해줘.`;
 
 // AI 코딩 에이전트 — 실제 브랜드 로고 (./logos)
