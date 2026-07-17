@@ -137,51 +137,61 @@ createRoot(document.getElementById("root")!).render(
 ```
 
 ### `src/App.tsx`
-프로젝트 용도에 맞는 최소한의 AppShell 구조:
+
+**중요 — kit 앱은 반드시 `Watermark`로 감싸고 `Section`/`Divider`로 화면을 구성한다.**
+개별 컴포넌트 prop만 보고 짜지 말 것 — `AppShell` 혼자서는 뷰포트를 안 채운다.
+`Watermark`가 `h-dvh` 전체 높이 + 중앙 정렬 + 하단 `PoweredByKit` 크레딧까지 같이 준다
+(`Watermark` 없이 `AppShell`만 쓰면 콘텐츠 높이만큼 쪼그라들고 크레딧도 안 뜬다).
+`AppShellContent` 내부는 `<Section>`(px-4) 블록을 `<Divider spacing="sm" />`로 구분해
+쌓는 게 kit 데모의 표준 리듬이다 — `<div className="p-4 flex flex-col gap-4">` 같은
+직접 만든 wrapper 쓰지 말 것.
+
+프로젝트 용도에 맞는 최소한의 구조:
 ```tsx
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  AppShell, AppShellHeader, AppShellContent,
+  AppShell, AppShellHeader, AppShellContent, Watermark,
+  Section, SectionHeader,
   colors, ThemeButton, ThemeDialog,
 } from "@m1kapp/kit";
 
 export default function App() {
   const [themeOpen, setThemeOpen] = useState(false);
-  const [dark, setDark] = useState(() =>
-    typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
+  const [dark, setDark] = useState(false);
+  const [themeColor, setThemeColor] = useState(colors.blue);
 
+  // `dark:` tailwind variants only fire under a `.dark` ancestor — kit doesn't
+  // apply this for you, ThemeDialog just reports/toggles the boolean.
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (e: MediaQueryListEvent) => setDark(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
   return (
-    <>
-      <AppShell>
+    <Watermark color={themeColor} text="<프로젝트명>">
+      <AppShell accent={themeColor}>
         <AppShellHeader>
-          <프로젝트명>
-          <ThemeButton dark={dark} onClick={() => setThemeOpen(true)} />
+          <span className="text-lg font-black text-zinc-900 dark:text-white tracking-tight">
+            <프로젝트명>
+          </span>
+          <ThemeButton color={themeColor} dark={dark} onClick={() => setThemeOpen(true)} />
         </AppShellHeader>
         <AppShellContent>
-          {/* TODO */}
+          <Section className="pt-4">
+            <SectionHeader>시작하기</SectionHeader>
+            {/* TODO — 여기부터 Section + Divider로 화면 구성 */}
+          </Section>
         </AppShellContent>
       </AppShell>
+
       <ThemeDialog
         open={themeOpen}
         onClose={() => setThemeOpen(false)}
+        current={themeColor}
+        onSelect={setThemeColor}
         dark={dark}
-        onDarkChange={setDark}
-        themeColor={colors.blue}
-        onThemeChange={() => {}}
+        onDarkToggle={() => setDark((d) => !d)}
       />
-    </>
+    </Watermark>
   );
 }
 ```
