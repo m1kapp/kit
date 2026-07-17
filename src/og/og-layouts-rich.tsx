@@ -79,7 +79,7 @@ export function ArticleLayout({ title, author, date, category, sub, color = "#00
   const authorLetterColor = p.authorLetter;
   const dotSepColor = p.dotSep;
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {category && (
         <div style={{ display: "flex", marginBottom: 20 }}>
           <Badge text={category} color={color} bg={bg} />
@@ -115,7 +115,7 @@ export function ArticleLayout({ title, author, date, category, sub, color = "#00
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -129,7 +129,7 @@ export function StatLayout({ stat, label, sub, badge, color = "#007B5F", bg = "d
   const labelColor = isBlend ? "#ffffff" : "#ffffff";
   const mutedColor = isBlend ? "rgba(255,255,255,0.8)" : isGrad ? "rgba(255,255,255,0.55)" : "#71717a";
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {badge && (
         <div style={{ display: "flex", marginBottom: 20 }}>
           <Badge text={badge} color={color} bg={bg} />
@@ -149,7 +149,7 @@ export function StatLayout({ stat, label, sub, badge, color = "#007B5F", bg = "d
       {sub && (
         <EmojiText text={sub} style={{ fontSize: 26, color: mutedColor, marginTop: 14, fontWeight: 500 }} />
       )}
-    </>
+    </div>
   );
 }
 
@@ -165,7 +165,7 @@ export function ProductLayout({ title, tagline, features, badge, color = "#007B5
   const dotColor     = isGrad ? "rgba(255,255,255,0.5)" : isBlend ? "rgba(255,255,255,0.6)" : color;
   const list = (features ?? []).slice(0, 3);
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {badge && (
         <div style={{ display: "flex", marginBottom: 20 }}>
           <Badge text={badge} color={color} bg={bg} />
@@ -188,7 +188,7 @@ export function ProductLayout({ title, tagline, features, badge, color = "#007B5
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
 

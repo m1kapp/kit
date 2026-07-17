@@ -125,6 +125,8 @@ export interface FaviconElementOptions {
   color?: string;
   /** 이미지 크기 px (기본: 512) */
   size?: number;
+  /** PWA maskable 아이콘용 — 안전영역(80%) 안에만 그림. 기본: false */
+  maskable?: boolean;
 }
 
 export function createFaviconElement({
@@ -132,9 +134,11 @@ export function createFaviconElement({
   appName = "app",
   color = "#0f0f1a",
   size = 512,
+  maskable = false,
 }: FaviconElementOptions = {}): React.ReactElement {
   const label = text ?? appName;
-  const fontSize = size * (label.length === 1 ? 0.6 : label.length <= 3 ? 0.42 : 0.3);
+  const contentSize = maskable ? size * 0.8 : size;
+  const fontSize = contentSize * (label.length === 1 ? 0.6 : label.length <= 3 ? 0.42 : 0.3);
 
   return (
     <div style={{
@@ -145,7 +149,7 @@ export function createFaviconElement({
       <div style={{
         display: "flex",
         flexDirection: "row",
-        gap: `${size * 0.02}px`,
+        gap: `${contentSize * 0.02}px`,
         alignItems: "center",
       }}>
         {label.split("").map((char, i) => (

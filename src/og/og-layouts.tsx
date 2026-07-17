@@ -10,7 +10,7 @@ export function DefaultLayout({ title, sub, badge, color = "#007B5F", bg = "dark
   const titleColor = isBlend ? "#ffffff" : "#ffffff";
   const subColor = bg === "gradient" ? "rgba(255,255,255,0.72)" : isBlend ? "rgba(255,255,255,0.85)" : "#a1a1aa";
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {badge && (
         <div style={{ display: "flex", marginBottom: 20 }}>
           <Badge text={badge} color={color} bg={bg} />
@@ -25,7 +25,7 @@ export function DefaultLayout({ title, sub, badge, color = "#007B5F", bg = "dark
           fontSize: 34, color: subColor, marginTop: 22, fontWeight: 500,
         }} />
       )}
-    </>
+    </div>
   );
 }
 
@@ -40,7 +40,7 @@ export function MatchLayout({ home, away, score, sub, badge, color = "#007B5F", 
   const scoreColor = isGrad ? "rgba(255,255,255,0.6)" : isBlend ? "rgba(255,255,255,0.9)" : rgba(color, 0.6);
   const vsColor = isGrad ? "rgba(255,255,255,0.35)" : isBlend ? rgba(color, 0.5) : rgba(color, 0.35);
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {sub && (
         <EmojiText text={sub} style={{ fontSize: 28, color: subColor, fontWeight: 700, marginBottom: 24 }} />
       )}
@@ -64,7 +64,7 @@ export function MatchLayout({ home, away, score, sub, badge, color = "#007B5F", 
           <Badge text={badge} color={color} bg={bg} />
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -76,7 +76,7 @@ export function SquareLayout({ title, sub, badge, color = "#007B5F", bg = "dark"
   const titleColor = isBlend ? "#ffffff" : "#ffffff";
   const subColor = bg === "gradient" ? "rgba(255,255,255,0.72)" : isBlend ? "rgba(255,255,255,0.85)" : "#71717a";
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {badge && (
         <div style={{ display: "flex", marginBottom: 24 }}>
           <Badge text={badge} color={color} bg={bg} />
@@ -91,7 +91,7 @@ export function SquareLayout({ title, sub, badge, color = "#007B5F", bg = "dark"
           fontSize: 38, color: subColor, marginTop: 28, fontWeight: 500,
         }} />
       )}
-    </>
+    </div>
   );
 }
 
