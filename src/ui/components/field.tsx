@@ -22,7 +22,7 @@ export interface FieldProps {
 }
 
 const INPUT_CLASS =
-  "w-full bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3.5 py-2.5 text-[15px] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-400 dark:focus:border-zinc-500 disabled:opacity-50 read-only:bg-transparent read-only:border-transparent read-only:px-0";
+  "w-full bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3.5 py-2.5 text-base text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none transition-colors focus:border-zinc-400 dark:focus:border-zinc-500 disabled:opacity-50 read-only:bg-transparent read-only:border-transparent read-only:px-0";
 
 /**
  * Labeled input row for forms. Stacked by default, or `inline` for a
@@ -72,7 +72,7 @@ export function Field({
   if (inline) {
     return (
       <div className={`flex items-center gap-3 py-1.5 ${className}`}>
-        <span className="shrink-0 text-[15px] text-zinc-500 dark:text-zinc-400">{label}</span>
+        <span className="shrink-0 text-base text-zinc-500 dark:text-zinc-400">{label}</span>
         <div className="flex-1 min-w-0">{control}</div>
       </div>
     );
