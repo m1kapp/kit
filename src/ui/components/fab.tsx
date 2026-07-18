@@ -7,6 +7,8 @@ import { usePortalTarget } from "../hooks/use-portal-target";
 export interface FabProps {
   onClick: () => void;
   icon: ReactNode;
+  /** Accessible label — icon-only button has no other text for screen readers */
+  label: string;
   /** Accent background color. Default: zinc-900/white (follows dark mode) */
   color?: string;
   className?: string;
@@ -21,15 +23,16 @@ export interface FabProps {
  * @example
  * <AppShellContent>
  *   {content}
- *   <Fab onClick={handleAdd} icon={<PlusIcon />} color="#6366f1" />
+ *   <Fab onClick={handleAdd} icon={<PlusIcon />} label="추가" color="#6366f1" />
  * </AppShellContent>
  */
-export function Fab({ onClick, icon, color, className = "" }: FabProps) {
+export function Fab({ onClick, icon, label, color, className = "" }: FabProps) {
   const [anchorRef, portal] = usePortalTarget([".in-app-sheet-content-portal", ".app-shell-root"]);
 
   const button = (
     <button
       onClick={onClick}
+      aria-label={label}
       className={`absolute bottom-6 right-6 z-30 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 hover:scale-105 cursor-pointer ${
         color ? "" : "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
       } ${className}`}

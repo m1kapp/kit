@@ -174,7 +174,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
           <img src={badgeUrl} alt="" aria-hidden="true" width={1} height={1} decoding="async" style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} />
           {hasCounter ? (
             <div className="relative">
-              <div className="overflow-hidden mx-5">
+              <div className="overflow-hidden mx-8">
                 <div
                   className="flex transition-transform duration-500 ease-out"
                   style={{ transform: `translateX(-${idx * 100}%)` }}
@@ -187,7 +187,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
                 type="button"
                 onClick={() => go(-1)}
                 aria-label="이전"
-                className="absolute inset-y-0 left-0 flex items-center px-1 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+                className="absolute inset-y-0 left-0 flex items-center px-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
               >
                 <ChevronLeftIcon size={14} />
               </button>
@@ -195,7 +195,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
                 type="button"
                 onClick={() => go(1)}
                 aria-label="다음"
-                className="absolute inset-y-0 right-0 flex items-center px-1 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+                className="absolute inset-y-0 right-0 flex items-center px-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
               >
                 <ChevronRightIcon size={14} />
               </button>

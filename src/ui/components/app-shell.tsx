@@ -94,11 +94,18 @@ export interface AppShellHeaderProps {
 
 /**
  * Sticky top header with blur backdrop.
+ *
+ * On mobile the shell is full-bleed (no `sm:` margin from Watermark), so this
+ * is the actual topmost element under the device status bar / Dynamic Island
+ * in an installed PWA — `min-height` (not `height`) plus `padding-top` let the
+ * safe-area inset grow the header without squeezing its content, the same
+ * ownership split PoweredByKit uses for the bottom inset.
  */
 export function AppShellHeader({ children, className = "" }: AppShellHeaderProps) {
   return (
     <header
-      className={`sticky top-0 z-20 h-14 px-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md sm:rounded-t-2xl ${className}`}
+      className={`sticky top-0 z-20 px-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md sm:rounded-t-2xl ${className}`}
+      style={{ minHeight: "calc(3.5rem + env(safe-area-inset-top))", paddingTop: "env(safe-area-inset-top)" }}
     >
       {children}
     </header>

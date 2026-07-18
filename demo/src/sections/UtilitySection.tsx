@@ -69,7 +69,7 @@ export function UtilitySection({ themeColor, dark }: { themeColor: string; dark:
           <DialogDemo themeColor={themeColor} />
           <InAppSheetDemo themeColor={themeColor} />
 
-          <ComponentCard name="Fab" desc="Floating Action Button — AppShell 기준 absolute bottom-right 고정" code={`<AppShellContent>\n  {content}\n  <Fab onClick={handleAdd} icon={<PlusIcon />} color="#6366f1" />\n</AppShellContent>`}>
+          <ComponentCard name="Fab" desc="Floating Action Button — AppShell 기준 absolute bottom-right 고정" code={`<AppShellContent>\n  {content}\n  <Fab onClick={handleAdd} icon={<PlusIcon />} label="추가" color="#6366f1" />\n</AppShellContent>`}>
             <div className="flex items-center justify-between">
               <p className="text-xs text-zinc-400">하단의 하트 버튼이 Fab 컴포넌트입니다</p>
               <div

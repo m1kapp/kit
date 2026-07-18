@@ -85,6 +85,7 @@ export default function App() {
             <Fab
               onClick={() => setFabDialogOpen(true)}
               icon={<HeartIcon />}
+              label="좋아요"
               color={THEME_COLOR}
             />
             <Dialog open={fabDialogOpen} onClose={() => setFabDialogOpen(false)} title={liked ? "감사합니다!" : "@m1kapp/kit"}>

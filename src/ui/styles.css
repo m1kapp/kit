@@ -12,16 +12,39 @@
 
   html {
     touch-action: pan-x pan-y;
+    overscroll-behavior-y: none;
   }
 
   body {
     min-height: 100dvh;
+    overscroll-behavior-y: none;
   }
 
-  /* Remove default focus outline on interactive elements */
+  /* Remove default focus outline on interactive elements, but keep it for
+     keyboard/switch-control users via :focus-visible (Safari/Chrome only
+     show :focus-visible for keyboard focus, not touch/mouse taps). */
   button, a, [role="button"], [tabindex] {
     outline: none;
     -webkit-tap-highlight-color: transparent;
+  }
+  button:focus-visible, a:focus-visible, [role="button"]:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--kit-accent);
+    outline-offset: 2px;
+  }
+
+  /* Fixed-height shells (h-dvh) never let the document itself scroll, so any
+     internal scroll container needs its own overscroll containment or a
+     downward swipe at scrollTop 0 triggers Android Chrome's pull-to-refresh. */
+  .tab-scroll, .in-app-sheet-content-portal {
+    overscroll-behavior: contain;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   /* Prevent iOS auto-zoom on input focus (triggered when font-size < 16px) */

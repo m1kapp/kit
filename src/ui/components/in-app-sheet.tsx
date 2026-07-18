@@ -169,36 +169,38 @@ export function InAppSheet({
                   className={`relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform ${fullHeight ? "h-full flex flex-col" : ""} ${className}`}
                   style={sheetStyle}
                   onClick={(e) => e.stopPropagation()}
-                  onTouchStart={onTouchStart}
-                  onTouchMove={onTouchMove}
-                  onTouchEnd={onTouchEnd}
                 >
-                  {/* Drag handle */}
-                  <div className="flex justify-center pt-3 pb-1 cursor-grab">
-                    <div className="w-8 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
-                  </div>
-                  {/* Header row: title + close */}
-                  {(title || !hideClose) && (
-                    <div className="flex items-center justify-between px-5 pt-1 pb-2">
-                      {title ? (
-                        <p id={titleId} className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{title}</p>
-                      ) : (
-                        <span />
-                      )}
-                      {!hideClose && (
-                        <button
-                          onClick={onClose}
-                          aria-label={closeLabel}
-                          className="flex-shrink-0 p-1.5 -mr-1.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                          </svg>
-                        </button>
-                      )}
+                  {/* Drag surface — handle + header only, so a swipe that starts inside
+                      the scrollable content (fullHeight sheets) scrolls instead of
+                      dragging the whole sheet closed. */}
+                  <div onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+                    {/* Drag handle */}
+                    <div className="flex justify-center pt-3 pb-1 cursor-grab">
+                      <div className="w-8 h-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
                     </div>
-                  )}
+                    {/* Header row: title + close */}
+                    {(title || !hideClose) && (
+                      <div className="flex items-center justify-between px-5 pt-1 pb-2">
+                        {title ? (
+                          <p id={titleId} className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{title}</p>
+                        ) : (
+                          <span />
+                        )}
+                        {!hideClose && (
+                          <button
+                            onClick={onClose}
+                            aria-label={closeLabel}
+                            className="flex-shrink-0 -m-3 p-3 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   {fullHeight ? (
                     <div className="flex-1 overflow-y-auto">{children}</div>
                   ) : (

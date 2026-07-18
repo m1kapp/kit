@@ -27,6 +27,12 @@ export function Tooltip({ label, children, placement = "top" }: TooltipProps) {
   const show = (e: React.MouseEvent | React.FocusEvent) => {
     setRect((e.currentTarget as HTMLElement).getBoundingClientRect());
   };
+  // Touch taps synthesize a mouseenter with no matching mouseleave until the
+  // user taps something else — a hover tooltip has no business showing (or
+  // sticking around) for a tap, so only real mice trigger it.
+  const showIfMouse = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") show(e as unknown as React.MouseEvent);
+  };
   const hide = useCallback(() => setRect(null), []);
 
   useEscapeKey(rect !== null, hide);
@@ -43,8 +49,8 @@ export function Tooltip({ label, children, placement = "top" }: TooltipProps) {
     <>
       <span
         className="inline-flex"
-        onMouseEnter={show}
-        onMouseLeave={hide}
+        onPointerEnter={showIfMouse}
+        onPointerLeave={hide}
         onFocus={show}
         onBlur={hide}
         aria-describedby={rect ? tooltipId : undefined}

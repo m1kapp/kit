@@ -65,7 +65,10 @@ export function usePWAInstall(): UsePWAInstallReturn {
 function isIOSSafari(): boolean {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent;
-  const isIOS = /iphone|ipad|ipod/i.test(ua);
+  // iPadOS 13+ reports a desktop Macintosh UA — the touch-points check is the
+  // standard way to tell it apart from an actual Mac (which reports 0).
+  const isIPadOS = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+  const isIOS = /iphone|ipad|ipod/i.test(ua) || isIPadOS;
   // Safari on iOS doesn't have "CriOS" (Chrome) or "FxiOS" (Firefox)
   const isSafariBrowser = isIOS && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua);
   return isSafariBrowser;

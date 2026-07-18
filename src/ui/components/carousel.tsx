@@ -38,7 +38,7 @@ export function Carousel({
   accent,
   className = "",
 }: CarouselProps) {
-  const touchX = useRef(0);
+  const touchStart = useRef({ x: 0, y: 0 });
   const accentColor = accent ?? "var(--kit-accent)";
 
   const go = (dir: -1 | 1) => {
@@ -78,14 +78,17 @@ export function Carousel({
       <div
         className="relative flex w-full items-center justify-center py-2"
         onTouchStart={(e) => {
-          const x = e.touches[0]?.clientX;
-          if (x !== undefined) touchX.current = x;
+          const t = e.touches[0];
+          if (t) touchStart.current = { x: t.clientX, y: t.clientY };
         }}
         onTouchEnd={(e) => {
-          const x = e.changedTouches[0]?.clientX;
-          if (x === undefined) return;
-          const dx = touchX.current - x;
-          if (Math.abs(dx) > 40) go(dx > 0 ? 1 : -1);
+          const t = e.changedTouches[0];
+          if (!t) return;
+          const dx = touchStart.current.x - t.clientX;
+          const dy = touchStart.current.y - t.clientY;
+          // Require a mostly-horizontal gesture — a vertical page scroll with
+          // incidental horizontal drift shouldn't flip the slide.
+          if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(dx > 0 ? 1 : -1);
         }}
       >
         {showArrows && count > 1 && (
@@ -93,9 +96,9 @@ export function Carousel({
             type="button"
             aria-label="이전"
             onClick={() => go(-1)}
-            className="absolute left-3 flex h-7 w-7 items-center justify-center rounded-full border border-zinc-100 bg-white text-zinc-400 shadow-sm transition-transform active:scale-90 dark:border-zinc-700 dark:bg-zinc-800"
+            className="absolute left-3 flex h-9 w-9 items-center justify-center rounded-full border border-zinc-100 bg-white text-zinc-400 shadow-sm transition-transform active:scale-90 dark:border-zinc-700 dark:bg-zinc-800"
           >
-            <ChevronLeftIcon size={14} />
+            <ChevronLeftIcon size={16} />
           </button>
         )}
         <div className="min-w-0 flex-1 select-none px-12">{children}</div>
@@ -104,9 +107,9 @@ export function Carousel({
             type="button"
             aria-label="다음"
             onClick={() => go(1)}
-            className="absolute right-3 flex h-7 w-7 items-center justify-center rounded-full border border-zinc-100 bg-white text-zinc-400 shadow-sm transition-transform active:scale-90 dark:border-zinc-700 dark:bg-zinc-800"
+            className="absolute right-3 flex h-9 w-9 items-center justify-center rounded-full border border-zinc-100 bg-white text-zinc-400 shadow-sm transition-transform active:scale-90 dark:border-zinc-700 dark:bg-zinc-800"
           >
-            <ChevronRightIcon size={14} />
+            <ChevronRightIcon size={16} />
           </button>
         )}
       </div>

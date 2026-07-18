@@ -33,9 +33,11 @@ export function MediaCard({
   className = "",
 }: MediaCardProps) {
   const isHorizontal = layout === "horizontal";
+  const Tag = onClick ? "button" : "div";
   return (
-    <div
-      className={`cursor-pointer ${isHorizontal ? "flex gap-4 py-2" : "flex flex-col gap-2"} ${className}`}
+    <Tag
+      type={onClick ? "button" : undefined}
+      className={`text-left ${onClick ? "cursor-pointer" : ""} ${isHorizontal ? "flex gap-4 py-2" : "flex flex-col gap-2"} ${className}`}
       onClick={onClick}
     >
       <div className={`relative overflow-hidden rounded-md shrink-0 ${isHorizontal ? "w-1/2" : "w-full"}`}>
@@ -48,6 +50,6 @@ export function MediaCard({
         )}
       </div>
       <div className={isHorizontal ? "w-1/2 flex flex-col justify-center" : ""}>{children}</div>
-    </div>
+    </Tag>
   );
 }

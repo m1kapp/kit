@@ -41,7 +41,7 @@ export function VisitorStatsSheet({ open, onClose, trackerHost, trackerSlug, sit
   }, [open, trackerHost, trackerSlug]);
 
   return (
-    <InAppSheet open={open} onClose={onClose} title="방문자 통계">
+    <InAppSheet open={open} onClose={onClose} title="방문자 통계" fullHeight>
       <div className="px-5 pb-8 space-y-5 overflow-y-auto flex-1">
         {error && (
           <p className="text-sm text-zinc-400 dark:text-zinc-500 py-6 text-center">
