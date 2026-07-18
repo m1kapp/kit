@@ -93,6 +93,14 @@ export interface AppShellHeaderProps {
 }
 
 /**
+ * `AppShellHeader`'s rendered height (base 3.5rem/56px + the top safe-area
+ * inset on notched devices). Pass this as `<FetchProgress top={APP_SHELL_HEADER_HEIGHT}>`
+ * instead of hardcoding `56` so the progress bar still sits flush under the
+ * header on a device with a Dynamic Island / notch.
+ */
+export const APP_SHELL_HEADER_HEIGHT = "calc(3.5rem + env(safe-area-inset-top))";
+
+/**
  * Sticky top header with blur backdrop.
  *
  * On mobile the shell is full-bleed (no `sm:` margin from Watermark), so this
@@ -105,7 +113,7 @@ export function AppShellHeader({ children, className = "" }: AppShellHeaderProps
   return (
     <header
       className={`sticky top-0 z-20 px-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md sm:rounded-t-2xl ${className}`}
-      style={{ minHeight: "calc(3.5rem + env(safe-area-inset-top))", paddingTop: "env(safe-area-inset-top)" }}
+      style={{ minHeight: APP_SHELL_HEADER_HEIGHT, paddingTop: "env(safe-area-inset-top)" }}
     >
       {children}
     </header>

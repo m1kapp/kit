@@ -20,8 +20,13 @@ export interface FetchProgressProps {
    * When omitted, the bar shows while ANY useFetch request is in flight.
    */
   active?: boolean;
-  /** Distance from the top of the positioned ancestor, in px (e.g. header height). Default: 0 */
-  top?: number;
+  /**
+   * Distance from the top of the positioned ancestor — a number of px, or any
+   * CSS length (e.g. `"calc(3.5rem + env(safe-area-inset-top))"` to sit below
+   * `AppShellHeader`, whose height grows with the safe-area inset on notched
+   * devices). Default: 0
+   */
+  top?: number | string;
   /** Bar thickness in px. Default: 3 */
   height?: number;
   className?: string;
