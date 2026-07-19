@@ -21,8 +21,8 @@ import { Watermark, AppShell, AppShellHeader, AppShellContent, Section, TabBar, 
 
 export default function App() {
   return (
-    // Watermark가 뷰포트 전체 높이/가로 중앙정렬/하단 크레딧을 같이 줍니다.
-    // (세로는 중앙정렬이 아니라 하단 고정 — 여유 공간은 위로만 감, 크레딧이 항상 바닥에 붙게)
+    // Watermark가 뷰포트 전체 높이/중앙정렬/하단 크레딧을 같이 줍니다.
+    // (크레딧 스트립은 셸 바로 밑에 붙어서 셸과 한 덩어리로 중앙정렬됨 — 화면 진짜 바닥에 고정되는 게 아님)
     // AppShell만 단독으로 쓰면 콘텐츠 높이만큼 쪼그라들어요.
     <Watermark color="#e2603f" text="myapp">
       <AppShell>

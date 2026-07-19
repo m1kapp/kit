@@ -242,10 +242,11 @@ export function Watermark({
         />
       )}
 
-      {/* content — shell + powered-by grouped and bottom-aligned: all slack from
-          a viewport taller than the shell goes into the TOP spacer only, so the
-          badge always sits flush against the true bottom edge instead of
-          floating with dead space beneath it. */}
+      {/* content — shell + powered-by kept as one group, directly adjacent
+          (no gap between them), and that whole group is vertically centered
+          in the viewport via equal top/bottom spacers. The badge moves with
+          the shell, sitting just under it — it does not pin to the true
+          bottom edge of the screen. */}
       <div
         className="relative z-10 h-full flex flex-col items-center mx-auto sm:p-3 sm:gap-1"
         style={{ maxWidth }}
@@ -253,6 +254,7 @@ export function Watermark({
         <div className="flex-1 min-h-0" />
         {children}
         {!hidePoweredBy && <PoweredByKit variant="overlay" slug={trackSlug} track={track} claimed={claimed} counts={counts} />}
+        <div className="flex-1 min-h-0" />
       </div>
     </div>
   );
