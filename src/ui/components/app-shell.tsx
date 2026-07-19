@@ -45,9 +45,14 @@ function contrastFg(accent: string): string | undefined {
  * Centers content and constrains width for a phone-like viewport.
  *
  * `AppShell` fills `h-full` of its parent — it does not size itself. Wrap it
- * in `<Watermark>` (gives `h-dvh` + centering + the `PoweredByKit` credit
- * strip) rather than a hand-rolled height/centering div; without a sized
- * parent the shell just collapses to content height.
+ * in `<Watermark>` (gives `h-dvh` + horizontal centering + the `PoweredByKit`
+ * credit strip) rather than a hand-rolled height/centering div; without a
+ * sized parent the shell just collapses to content height.
+ *
+ * Note: on a viewport taller than the shell, `Watermark` deliberately
+ * bottom-anchors the shell+credit-strip group (slack goes above, not split
+ * top/bottom) so the credit strip always sits flush at the true bottom edge —
+ * it is not vertically centered. See the spacer comment in `watermark.tsx`.
  *
  * @example
  * <Watermark color="#e2603f" text="myapp">
