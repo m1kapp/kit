@@ -340,6 +340,153 @@ function analyzeDuplication(ts, fileContents) {
   return { percent, dupTokens, totalTokens, blocks: blockKeys.size, worstFiles, worstBlocks };
 }
 
+// 파일 I/O 밀도 — "한 번 처리하는 데 파일을 몇 번이나 읽게 되는 구조인가".
+// cognitive·중복은 코드 모양만 보므로, 5줄짜리 흠 없는 리더가 루프에서 120번 불리는
+// 종류는 원리상 못 잡는다(그래서 요청당 492회 읽던 코드가 A+ 100점을 통과했다).
+// 여기선 리더 함수를 찾고, 그게 루프 안에서 불리는 자리를 센다. 리더가 캐시를 끼고
+// 있으면 반복 호출돼도 실제 읽기는 한 번이라 감점하지 않고 참고로만 남긴다.
+const FILE_READ_CALLS = new Set(["readFileSync", "readFile", "readdirSync"]);
+const ITERATING_METHODS = new Set(["map", "forEach", "flatMap", "filter", "reduce", "some", "every", "find"]);
+
+function analyzeIoDensity(ts, fileContents) {
+  const parsed = fileContents.map(({ file, content }) => ({
+    file,
+    sf: ts.createSourceFile(
+      file,
+      content,
+      ts.ScriptTarget.Latest,
+      true,
+      /\.(tsx|jsx)$/.test(file) ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+    ),
+  }));
+
+  const isFnLike = (n) =>
+    ts.isFunctionDeclaration(n) || ts.isFunctionExpression(n) || ts.isArrowFunction(n) ||
+    ts.isMethodDeclaration(n);
+
+  const nameOf = (sf, n) => {
+    if (n.name) return n.name.getText(sf);
+    const p = n.parent;
+    if (p && ts.isVariableDeclaration(p)) return p.name.getText(sf);
+    return null;
+  };
+
+  const lineOf = (sf, n) => sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1;
+
+  // 1단계: 함수마다 "직접 파일을 읽는가 / 자기 캐시를 쓰는가 / 누구를 부르는가"를 모은다
+  const fns = new Map(); // 이름 -> { file, line, readsDirectly, hasOwnCache, calls:Set }
+  for (const { file, sf } of parsed) {
+    const moduleHasCache = /new (Map|WeakMap)\s*[<(]/.test(sf.text);
+    const collect = (node) => {
+      if (isFnLike(node) && node.body) {
+        let readsDirectly = false;
+        let cacheOps = 0;
+        const calls = new Set();
+        const scan = (n) => {
+          if (n !== node && isFnLike(n)) return; // 중첩 함수는 자기 항목에서 본다
+          if (ts.isCallExpression(n)) {
+            const callee = n.expression;
+            const called = ts.isPropertyAccessExpression(callee) ? callee.name.getText(sf) : callee.getText(sf);
+            if (FILE_READ_CALLS.has(called)) readsDirectly = true;
+            if (called === "get" || called === "set") cacheOps++;
+            calls.add(called);
+          }
+          ts.forEachChild(n, scan);
+        };
+        ts.forEachChild(node, scan);
+        const name = nameOf(sf, node);
+        if (name && !fns.has(name)) {
+          fns.set(name, {
+            file,
+            line: lineOf(sf, node),
+            readsDirectly,
+            // 자기 모듈의 Map을 get/set 둘 다 쓰면 캐시를 끼고 읽는 것으로 본다
+            hasOwnCache: moduleHasCache && cacheOps >= 2,
+            calls,
+          });
+        }
+      }
+      ts.forEachChild(node, collect);
+    };
+    ts.forEachChild(sf, collect);
+  }
+
+  // 2단계: 호출 그래프로 "리더"를 전파한다 — getThemeComments → readJson → readFileSync 처럼
+  //        직접 읽지 않고 한 다리 건너 읽는 함수가 실제 N+1의 주인공이라 이게 핵심이다.
+  //        읽기 경로가 전부 캐시를 거치면 그 함수도 캐시된 리더로 본다(반복 호출돼도 읽기는 한 번).
+  const readers = new Map(); // 이름 -> { file, line, cached }
+  for (const [name, fn] of fns) {
+    if (fn.readsDirectly) readers.set(name, { file: fn.file, line: fn.line, cached: fn.hasOwnCache });
+  }
+  const MAX_HOPS = 2; // 얇은 래퍼(getThemeComments → readJson)까지만. 더 깊으면 전부 리더가 된다
+  for (let pass = 0; pass < MAX_HOPS; pass++) {
+    let changed = false;
+    for (const [name, fn] of fns) {
+      if (readers.has(name)) continue;
+      const calledReaders = [...fn.calls].map((c) => readers.get(c)).filter(Boolean);
+      if (calledReaders.length === 0) continue;
+      readers.set(name, {
+        file: fn.file,
+        line: fn.line,
+        cached: fn.hasOwnCache || calledReaders.every((r) => r.cached),
+      });
+      changed = true;
+    }
+    if (!changed) break;
+  }
+
+  // 3단계: 그 리더(또는 fs 읽기 자체)가 루프 안에서 불리는 자리를 찾는다.
+  //        for/while뿐 아니라 map·forEach 같은 순회 콜백 안도 루프로 본다.
+  const sites = [];
+  for (const { file, sf } of parsed) {
+    const walk = (node, inLoop) => {
+      let childInLoop = inLoop;
+      switch (node.kind) {
+        case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.ForInStatement:
+        case ts.SyntaxKind.ForOfStatement:
+        case ts.SyntaxKind.WhileStatement:
+        case ts.SyntaxKind.DoStatement:
+          childInLoop = true;
+          break;
+      }
+      if (ts.isCallExpression(node)) {
+        const callee = node.expression;
+        const called = ts.isPropertyAccessExpression(callee) ? callee.name.getText(sf) : callee.getText(sf);
+        const reader = readers.get(called);
+        if (inLoop && (FILE_READ_CALLS.has(called) || reader)) {
+          sites.push({ file, line: lineOf(sf, node), callee: called, cached: reader ? reader.cached : false });
+        }
+        // 순회 메서드에 넘긴 콜백 본문은 루프 안으로 취급
+        if (ts.isPropertyAccessExpression(callee) && ITERATING_METHODS.has(callee.name.getText(sf))) {
+          for (const arg of node.arguments) {
+            if (isFnLike(arg)) walk(arg, true);
+          }
+        }
+      }
+      ts.forEachChild(node, (child) => {
+        const alreadyWalked =
+          ts.isCallExpression(node) &&
+          ts.isPropertyAccessExpression(node.expression) &&
+          ITERATING_METHODS.has(node.expression.name.getText(sf)) &&
+          isFnLike(child);
+        if (!alreadyWalked) walk(child, childInLoop);
+      });
+    };
+    ts.forEachChild(sf, (n) => walk(n, false));
+  }
+
+  const uncached = sites.filter((s) => !s.cached);
+  const readerList = [...readers.entries()].map(([name, r]) => ({ name, ...r }));
+  return {
+    readers: readerList.length,
+    uncachedReaders: readerList.filter((r) => !r.cached).length,
+    loopSites: sites.length,
+    uncachedLoopSites: uncached.length,
+    worst: uncached.slice(0, 5).map(({ file, line, callee }) => ({ file, line, callee })),
+  };
+}
+
 // 파일 분류 — frontend(UI) / backend(API·서버) / shared(공용 유틸)
 function classifyFile(filePath, content) {
   const rel = filePath.replace(/\\/g, "/");
@@ -439,10 +586,13 @@ const avgFileLines = files.length > 0 ? Math.round(codeLines / files.length) : 0
 //   ※ 파일 개수 기준 이진 카운트(200줄 넘으면 무조건 1) 대신 심각도 가중 — 살짝 넘는 파일과
 //     터무니없이 큰 파일을 구분하고, 파일 수 적은 프로젝트가 파일 1개만으로 즉시 만점 감점 맞는 절벽 방지.
 // / 평균 파일 길이 80줄 초과분 /5 (최대 10)
+// - 루프 안 무캐시 파일읽기 사이트 ×4 (최대 20) ← 새 축. 코드 모양이 아무리 깔끔해도
+//   호출 1번이 파일 N번을 읽는 구조는 여기서만 드러난다(cognitive·중복으론 원리상 안 잡힘).
 let qualityScore;
 let cc = null;
 let cognitive = null;
 let duplication = null;
+let io = null;
 if (ts && allFns.length > 0) {
   const byCc = [...allFns].sort((a, b) => b.cc - a.cc);
   cc = {
@@ -469,6 +619,7 @@ if (ts && allFns.length > 0) {
   };
 
   duplication = analyzeDuplication(ts, fileContents);
+  io = analyzeIoDensity(ts, fileContents);
 
   const over15Pct = (cogOver15.length / allFns.length) * 100;
   const over25Pct = (cogOver25.length / allFns.length) * 100;
@@ -481,6 +632,7 @@ if (ts && allFns.length > 0) {
     - Math.min(25, Math.max(0, duplication.percent - 3) * 2.5)
     - Math.min(10, longFileSeverityPct * 1.5)
     - Math.min(10, Math.max(0, avgFileLines - 80) / 5)
+    - Math.min(20, io.uncachedLoopSites * 4)
   ));
 } else {
   // regex 폴백 (typescript 미설치)
@@ -543,6 +695,7 @@ const stats = {
     grade: qualityGrade,
     cognitive,            // {avg, p90, max, over15, over25, worst[5]} — 중첩 가중 복잡도
     duplication,          // {percent, blocks, worstFiles, worstBlocks} — 토큰 중복 밀도
+    io,                   // {readers, uncachedReaders, loopSites, uncachedLoopSites, worst} — 루프 안 파일 읽기
     cc,                   // {functions, avg, p90, max, over10, over20, worst[5]} — McCabe (참고용)
     branchDensity,        // 100줄당 분기 수 (regex 근사, 참고용)
     branches: totalBranches,
@@ -586,6 +739,12 @@ if (cc) {
     console.log(`  중복 상위 파일: ${duplication.worstFiles.map((f) => `${f.file}(${f.dupTokens}tok)`).join(", ")}`);
     for (const ex of duplication.worstBlocks) {
       console.log(`    중복 블록: ${ex.join(" ≒ ")}`);
+    }
+  }
+  if (io.uncachedLoopSites > 0) {
+    console.log(`  루프 안 파일읽기: ${io.uncachedLoopSites}곳 (캐시 없는 리더 ${io.uncachedReaders}/${io.readers}개) — 호출 1번이 파일 N번 읽습니다`);
+    for (const w of io.worst) {
+      console.log(`    반복 읽기: ${w.callee}() — ${w.file}:${w.line}`);
     }
   }
 } else {
