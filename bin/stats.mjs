@@ -376,32 +376,56 @@ function analyzeIoDensity(ts, fileContents) {
   // 1단계: 함수마다 "직접 파일을 읽는가 / 자기 캐시를 쓰는가 / 누구를 부르는가"를 모은다
   const fns = new Map(); // 이름 -> { file, line, readsDirectly, hasOwnCache, calls:Set }
   for (const { file, sf } of parsed) {
-    const moduleHasCache = /new (Map|WeakMap)\s*[<(]/.test(sf.text);
+    const moduleHasMap = /new (Map|WeakMap)\s*[<(]/.test(sf.text);
+    // 모듈 스코프 변수 이름 — "읽고 또 대입하는" 변수를 쓰면 그게 메모이제이션이다
+    // (globalThis에 물린 캐시나 `let memo = null` 패턴. Map만 캐시로 보면 이런 걸 다 놓친다)
+    const moduleVars = new Set();
+    for (const stmt of sf.statements) {
+      if (ts.isVariableStatement(stmt)) {
+        for (const decl of stmt.declarationList.declarations) {
+          if (ts.isIdentifier(decl.name)) moduleVars.add(decl.name.getText(sf));
+        }
+      }
+    }
+
     const collect = (node) => {
       if (isFnLike(node) && node.body) {
         let readsDirectly = false;
-        let cacheOps = 0;
+        let mapCacheOps = 0;
         const calls = new Set();
+        const readVars = new Set();
+        const writtenVars = new Set();
+        const rootName = (expr) => {
+          let cur = expr;
+          while (ts.isPropertyAccessExpression(cur) || ts.isElementAccessExpression(cur)) cur = cur.expression;
+          return ts.isIdentifier(cur) ? cur.getText(sf) : null;
+        };
         const scan = (n) => {
           if (n !== node && isFnLike(n)) return; // 중첩 함수는 자기 항목에서 본다
           if (ts.isCallExpression(n)) {
             const callee = n.expression;
             const called = ts.isPropertyAccessExpression(callee) ? callee.name.getText(sf) : callee.getText(sf);
             if (FILE_READ_CALLS.has(called)) readsDirectly = true;
-            if (called === "get" || called === "set") cacheOps++;
+            if (called === "get" || called === "set") mapCacheOps++;
             calls.add(called);
           }
+          if (ts.isBinaryExpression(n) && n.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+            const target = rootName(n.left);
+            if (target && moduleVars.has(target)) writtenVars.add(target);
+          }
+          if (ts.isIdentifier(n) && moduleVars.has(n.getText(sf))) readVars.add(n.getText(sf));
           ts.forEachChild(n, scan);
         };
         ts.forEachChild(node, scan);
+        const memoizesByVar = [...writtenVars].some((v) => readVars.has(v));
         const name = nameOf(sf, node);
         if (name && !fns.has(name)) {
           fns.set(name, {
             file,
             line: lineOf(sf, node),
             readsDirectly,
-            // 자기 모듈의 Map을 get/set 둘 다 쓰면 캐시를 끼고 읽는 것으로 본다
-            hasOwnCache: moduleHasCache && cacheOps >= 2,
+            // 캐시로 보는 두 형태: 모듈 Map을 get/set 하거나, 모듈 변수를 읽고 다시 대입하거나
+            hasOwnCache: (moduleHasMap && mapCacheOps >= 2) || memoizesByVar,
             calls,
           });
         }
@@ -439,8 +463,14 @@ function analyzeIoDensity(ts, fileContents) {
   //        for/while뿐 아니라 map·forEach 같은 순회 콜백 안도 루프로 본다.
   const sites = [];
   for (const { file, sf } of parsed) {
-    const walk = (node, inLoop) => {
+    // 캐시를 직접 관리하는 함수 안에서의 읽기는 캐시 미스일 때만 나간다(2단 캐시의 디스크 티어 등)
+    const walk = (node, inLoop, inCachingFn) => {
       let childInLoop = inLoop;
+      let childInCachingFn = inCachingFn;
+      if (isFnLike(node)) {
+        const self = fns.get(nameOf(sf, node));
+        if (self && self.hasOwnCache) childInCachingFn = true;
+      }
       switch (node.kind) {
         case ts.SyntaxKind.ForStatement:
         case ts.SyntaxKind.ForInStatement:
@@ -455,12 +485,13 @@ function analyzeIoDensity(ts, fileContents) {
         const called = ts.isPropertyAccessExpression(callee) ? callee.name.getText(sf) : callee.getText(sf);
         const reader = readers.get(called);
         if (inLoop && (FILE_READ_CALLS.has(called) || reader)) {
-          sites.push({ file, line: lineOf(sf, node), callee: called, cached: reader ? reader.cached : false });
+          const cached = inCachingFn || (reader ? reader.cached : false);
+          sites.push({ file, line: lineOf(sf, node), callee: called, cached });
         }
         // 순회 메서드에 넘긴 콜백 본문은 루프 안으로 취급
         if (ts.isPropertyAccessExpression(callee) && ITERATING_METHODS.has(callee.name.getText(sf))) {
           for (const arg of node.arguments) {
-            if (isFnLike(arg)) walk(arg, true);
+            if (isFnLike(arg)) walk(arg, true, childInCachingFn);
           }
         }
       }
@@ -470,10 +501,10 @@ function analyzeIoDensity(ts, fileContents) {
           ts.isPropertyAccessExpression(node.expression) &&
           ITERATING_METHODS.has(node.expression.name.getText(sf)) &&
           isFnLike(child);
-        if (!alreadyWalked) walk(child, childInLoop);
+        if (!alreadyWalked) walk(child, childInLoop, childInCachingFn);
       });
     };
-    ts.forEachChild(sf, (n) => walk(n, false));
+    ts.forEachChild(sf, (n) => walk(n, false, false));
   }
 
   const uncached = sites.filter((s) => !s.cached);
