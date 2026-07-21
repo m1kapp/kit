@@ -518,6 +518,128 @@ function analyzeIoDensity(ts, fileContents) {
   };
 }
 
+// 렌더 인질 — 데이터 하나를 기다리느라 그와 무관한 UI까지 통째로 못 그리는 자리.
+// `{data && <Nav a={local} b={data.x} onChange={fn} />}` 처럼 프롭 대부분이 이미 아는
+// 값인데 fetch 하나 때문에 전체가 대기하면, 사용자에겐 매번 로딩으로 보인다.
+// 게이트에 걸린 요소가 그 데이터에 실제로 의존하는 비율로 판정한다.
+const HOSTAGE_DEP_RATIO = 0.5; // 프롭 절반도 안 쓰면서 전체를 막고 있으면 인질
+
+function analyzeRenderGates(ts, fileContents) {
+  const findings = [];
+
+  for (const { file, content } of fileContents) {
+    if (!/\.(tsx|jsx)$/.test(file)) continue;
+    const sf = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+
+    // 훅이 물어다 주는 값(로딩이 있는 값)을 찾는다: const { data: x } = useSomething()
+    const fetched = new Set();
+    const findHookVars = (n) => {
+      if (
+        ts.isVariableDeclaration(n) &&
+        n.initializer &&
+        ts.isCallExpression(n.initializer) &&
+        /^use[A-Z]/.test(
+          ts.isPropertyAccessExpression(n.initializer.expression)
+            ? n.initializer.expression.name.getText(sf)
+            : n.initializer.expression.getText(sf),
+        ) &&
+        ts.isObjectBindingPattern(n.name)
+      ) {
+        for (const el of n.name.elements) {
+          const source = (el.propertyName || el.name).getText(sf);
+          if (source === "data") fetched.add(el.name.getText(sf));
+        }
+      }
+      ts.forEachChild(n, findHookVars);
+    };
+    ts.forEachChild(sf, findHookVars);
+    if (fetched.size === 0) continue;
+
+    const rootName = (expr) => {
+      let cur = expr;
+      while (ts.isPropertyAccessExpression(cur) || ts.isElementAccessExpression(cur)) cur = cur.expression;
+      return ts.isIdentifier(cur) ? cur.getText(sf) : null;
+    };
+
+    /** 이 노드가 그 변수를 실제로 참조하는가 */
+    const references = (node, name) => {
+      let found = false;
+      const scan = (n) => {
+        if (found) return;
+        if (ts.isIdentifier(n) && n.getText(sf) === name) found = true;
+        else ts.forEachChild(n, scan);
+      };
+      scan(node);
+      return found;
+    };
+
+    /** 게이트에 쓰인 fetch 변수들 */
+    const gateVars = (expr) => {
+      const names = new Set();
+      const scan = (n) => {
+        if (ts.isIdentifier(n) && fetched.has(n.getText(sf))) names.add(n.getText(sf));
+        ts.forEachChild(n, scan);
+      };
+      scan(expr);
+      return [...names];
+    };
+
+    const inspectGate = (testExpr, element) => {
+      const vars = gateVars(testExpr);
+      if (vars.length === 0) return;
+      const el = ts.isJsxElement(element) ? element.openingElement : element;
+      if (!el.attributes) return;
+      const props = el.attributes.properties;
+      if (props.length < 2) return; // 프롭이 거의 없으면 판단할 근거가 없다
+
+      const dependent = props.filter((p) => vars.some((v) => references(p, v))).length;
+      const ratio = dependent / props.length;
+      if (ratio < HOSTAGE_DEP_RATIO) {
+        findings.push({
+          file,
+          line: sf.getLineAndCharacterOfPosition(el.getStart(sf)).line + 1,
+          element: el.tagName ? el.tagName.getText(sf) : "?",
+          gate: vars.join(", "),
+          dependentProps: dependent,
+          totalProps: props.length,
+        });
+      }
+    };
+
+    const walk = (n) => {
+      // {data && <El .../>}
+      if (
+        ts.isBinaryExpression(n) &&
+        n.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken &&
+        (ts.isJsxElement(n.right) || ts.isJsxSelfClosingElement(n.right))
+      ) {
+        inspectGate(n.left, n.right);
+      }
+      // {data ? <El .../> : null}
+      if (ts.isConditionalExpression(n) && (ts.isJsxElement(n.whenTrue) || ts.isJsxSelfClosingElement(n.whenTrue))) {
+        inspectGate(n.condition, n.whenTrue);
+      }
+      // 괄호로 감싼 JSX도 같은 취급
+      if (
+        ts.isBinaryExpression(n) &&
+        n.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken &&
+        ts.isParenthesizedExpression(n.right) &&
+        (ts.isJsxElement(n.right.expression) || ts.isJsxSelfClosingElement(n.right.expression))
+      ) {
+        inspectGate(n.left, n.right.expression);
+      }
+      ts.forEachChild(n, walk);
+    };
+    ts.forEachChild(sf, walk);
+    void rootName;
+  }
+
+  return {
+    hostages: findings.length,
+    worst: findings.slice(0, 5),
+  };
+}
+
 // 파일 분류 — frontend(UI) / backend(API·서버) / shared(공용 유틸)
 function classifyFile(filePath, content) {
   const rel = filePath.replace(/\\/g, "/");
@@ -617,6 +739,7 @@ const avgFileLines = files.length > 0 ? Math.round(codeLines / files.length) : 0
 //   ※ 파일 개수 기준 이진 카운트(200줄 넘으면 무조건 1) 대신 심각도 가중 — 살짝 넘는 파일과
 //     터무니없이 큰 파일을 구분하고, 파일 수 적은 프로젝트가 파일 1개만으로 즉시 만점 감점 맞는 절벽 방지.
 // / 평균 파일 길이 80줄 초과분 /5 (최대 10)
+// - 렌더 인질(fetch 하나가 무관한 UI까지 막는 자리) ×3 (최대 10)
 // - 루프 안 무캐시 파일읽기 사이트 ×4 (최대 20) ← 새 축. 코드 모양이 아무리 깔끔해도
 //   호출 1번이 파일 N번을 읽는 구조는 여기서만 드러난다(cognitive·중복으론 원리상 안 잡힘).
 let qualityScore;
@@ -624,6 +747,7 @@ let cc = null;
 let cognitive = null;
 let duplication = null;
 let io = null;
+let renderGates = null;
 if (ts && allFns.length > 0) {
   const byCc = [...allFns].sort((a, b) => b.cc - a.cc);
   cc = {
@@ -651,6 +775,7 @@ if (ts && allFns.length > 0) {
 
   duplication = analyzeDuplication(ts, fileContents);
   io = analyzeIoDensity(ts, fileContents);
+  renderGates = analyzeRenderGates(ts, fileContents);
 
   const over15Pct = (cogOver15.length / allFns.length) * 100;
   const over25Pct = (cogOver25.length / allFns.length) * 100;
@@ -664,6 +789,7 @@ if (ts && allFns.length > 0) {
     - Math.min(10, longFileSeverityPct * 1.5)
     - Math.min(10, Math.max(0, avgFileLines - 80) / 5)
     - Math.min(20, io.uncachedLoopSites * 4)
+    - Math.min(10, renderGates.hostages * 3)
   ));
 } else {
   // regex 폴백 (typescript 미설치)
@@ -727,6 +853,7 @@ const stats = {
     cognitive,            // {avg, p90, max, over15, over25, worst[5]} — 중첩 가중 복잡도
     duplication,          // {percent, blocks, worstFiles, worstBlocks} — 토큰 중복 밀도
     io,                   // {readers, uncachedReaders, loopSites, uncachedLoopSites, worst} — 루프 안 파일 읽기
+    renderGates,          // {hostages, worst} — fetch 하나가 무관한 UI까지 막고 있는 자리
     cc,                   // {functions, avg, p90, max, over10, over20, worst[5]} — McCabe (참고용)
     branchDensity,        // 100줄당 분기 수 (regex 근사, 참고용)
     branches: totalBranches,
@@ -770,6 +897,12 @@ if (cc) {
     console.log(`  중복 상위 파일: ${duplication.worstFiles.map((f) => `${f.file}(${f.dupTokens}tok)`).join(", ")}`);
     for (const ex of duplication.worstBlocks) {
       console.log(`    중복 블록: ${ex.join(" ≒ ")}`);
+    }
+  }
+  if (renderGates.hostages > 0) {
+    console.log(`  렌더 인질: ${renderGates.hostages}곳 — 데이터를 기다리느라 이미 아는 UI까지 못 그립니다`);
+    for (const w of renderGates.worst) {
+      console.log(`    인질: <${w.element}> ${w.gate} 대기 (의존 프롭 ${w.dependentProps}/${w.totalProps}) — ${w.file}:${w.line}`);
     }
   }
   if (io.uncachedLoopSites > 0) {
