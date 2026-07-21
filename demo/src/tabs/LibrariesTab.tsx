@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronRightIcon } from "../shared";
 import { Section, SectionHeader } from "@m1kapp/kit";
 import { BackIcon } from "../shared";
 import { UIDetail } from "./UIDetail";
@@ -114,9 +115,7 @@ function LibraryList({ onSelect }: { onSelect: (v: "ui" | "og" | "pwa" | "fetch"
                     </div>
                   </div>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-500 transition-colors flex-shrink-0 mt-1">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+                <ChevronRightIcon size={16} className="text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-500 transition-colors flex-shrink-0 mt-1" />
               </div>
               <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800">
                 <div className="flex gap-3">

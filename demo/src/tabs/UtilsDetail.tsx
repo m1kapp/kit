@@ -1,47 +1,24 @@
-import { useState, useEffect } from "react";
 import {
   Section, SectionHeader, Divider,
-  useDebounce, useFormSubmit, useInView,
+  useInView,
   relativeTime, formatNumber, formatPrice,
 } from "@m1kapp/kit";
-import { CodeCard } from "../shared";
+import { CodeCard, DemoInput, RegisterForm, ValueRow, timeSamples, useDebouncedSearch, useTriggerCount } from "../shared";
 
 /* ══════════════════════════════════════════════
    Utils Detail
 ══════════════════════════════════════════════ */
 export function UtilsDetail({ themeColor }: { themeColor: string }) {
-  const now = new Date();
-  const timeSamples = [
-    { label: "30초 전",  date: new Date(now.getTime() - 30_000) },
-    { label: "25분 전",  date: new Date(now.getTime() - 25 * 60_000) },
-    { label: "3시간 전", date: new Date(now.getTime() - 3 * 3_600_000) },
-    { label: "어제",     date: new Date(now.getTime() - 30 * 3_600_000) },
-    { label: "5일 전",   date: new Date(now.getTime() - 5 * 86_400_000) },
-    { label: "3주 전",   date: new Date(now.getTime() - 21 * 86_400_000) },
-  ];
+  const samples = timeSamples();
   const numSamples = [1_200, 15_000, 230_000, 1_500_000, 120_000_000];
   const priceSamples: [number, string][] = [[9_900, "KRW"], [49_000, "KRW"], [9.99, "USD"], [29.99, "USD"]];
 
   // useDebounce
-  const [input, setInput] = useState("");
-  const debounced = useDebounce(input, 400);
-  const [callCount, setCallCount] = useState(0);
-  useEffect(() => { if (debounced) setCallCount(c => c + 1); }, [debounced]);
-
-  // useFormSubmit
-  const [url, setUrl] = useState("");
-  const { submit, loading, error, data: submitData, reset } = useFormSubmit(
-    async (value: string) => {
-      await new Promise(r => setTimeout(r, 1200));
-      if (!value.startsWith("http")) throw new Error("URL은 http로 시작해야 해요");
-      return { id: Math.random().toString(36).slice(2), url: value };
-    }
-  );
+  const { input, setInput, debounced, callCount } = useDebouncedSearch();
 
   // useInView
   const { ref: inViewRef, inView } = useInView({ threshold: 0.5 });
-  const [inViewCount, setInViewCount] = useState(0);
-  useEffect(() => { if (inView) setInViewCount(c => c + 1); }, [inView]);
+  const inViewCount = useTriggerCount(inView);
 
   return (
     <>
@@ -57,11 +34,8 @@ export function UtilsDetail({ themeColor }: { themeColor: string }) {
       <Section>
         <SectionHeader>relativeTime</SectionHeader>
         <div className="rounded-xl overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800 mb-3">
-          {timeSamples.map(s => (
-            <div key={s.label} className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900">
-              <span className="text-xs text-zinc-400 font-mono">{s.label}</span>
-              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{relativeTime(s.date)}</span>
-            </div>
+          {samples.map(s => (
+            <ValueRow key={s.label} label={s.label} value={relativeTime(s.date)} boxed={false} />
           ))}
         </div>
         <CodeCard title="relativeTime" code={`import { relativeTime } from "@m1kapp/kit";\n\nrelativeTime(post.createdAt) // "3분 전"\nrelativeTime(new Date())     // "방금 전"`} />
@@ -74,18 +48,12 @@ export function UtilsDetail({ themeColor }: { themeColor: string }) {
         <SectionHeader>formatNumber · formatPrice</SectionHeader>
         <div className="grid grid-cols-2 gap-2 mb-3">
           {numSamples.map(n => (
-            <div key={n} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900">
-              <span className="text-[10px] text-zinc-400 font-mono">{n.toLocaleString()}</span>
-              <span className="text-sm font-bold" style={{ color: themeColor }}>{formatNumber(n)}</span>
-            </div>
+            <ValueRow key={n} label={n.toLocaleString()} value={formatNumber(n)} valueColor={themeColor} />
           ))}
         </div>
         <div className="grid grid-cols-2 gap-2 mb-3">
           {priceSamples.map(([n, c]) => (
-            <div key={`${n}-${c}`} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900">
-              <span className="text-[10px] text-zinc-400 font-mono">{c}</span>
-              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatPrice(n, c)}</span>
-            </div>
+            <ValueRow key={`${n}-${c}`} label={c} value={formatPrice(n, c)} />
           ))}
         </div>
         <CodeCard title="formatNumber · formatPrice" code={`formatNumber(15_000)      // "1.5만"\nformatNumber(1_500_000)   // "150만"\nformatPrice(9_900)         // "₩9,900"\nformatPrice(9.99, "USD")   // "$9.99"`} />
@@ -97,14 +65,7 @@ export function UtilsDetail({ themeColor }: { themeColor: string }) {
       <Section>
         <SectionHeader>useDebounce</SectionHeader>
         <div className="space-y-3 mb-3">
-          <input
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="검색어 입력..."
-            className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 text-sm text-zinc-800 dark:text-zinc-200 outline-none ring-1 ring-zinc-200 dark:ring-zinc-800 focus:ring-2 placeholder:text-zinc-400"
-            style={{ fontSize: "16px" }}
-          />
+          <DemoInput value={input} onChange={setInput} placeholder="검색어 입력..." />
           <div className="grid grid-cols-2 gap-2">
             <div className="px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900">
               <p className="text-[10px] text-zinc-400 mb-1">실시간 value</p>
@@ -126,35 +87,7 @@ export function UtilsDetail({ themeColor }: { themeColor: string }) {
       <Section>
         <SectionHeader>useFormSubmit</SectionHeader>
         <div className="space-y-3 mb-3">
-          {submitData ? (
-            <div className="p-4 rounded-xl bg-green-50 dark:bg-green-950 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-green-700 dark:text-green-400">등록 완료!</p>
-                <p className="text-[10px] text-green-600 dark:text-green-500 font-mono mt-0.5">{submitData.url}</p>
-              </div>
-              <button onClick={reset} className="text-xs text-green-600 dark:text-green-400 hover:underline">초기화</button>
-            </div>
-          ) : (
-            <form onSubmit={e => { e.preventDefault(); submit(url); }} className="space-y-2">
-              <input
-                type="text"
-                value={url}
-                onChange={e => setUrl(e.target.value)}
-                placeholder="https://example.com"
-                className="w-full px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 text-sm text-zinc-800 dark:text-zinc-200 outline-none ring-1 ring-zinc-200 dark:ring-zinc-800 focus:ring-2 placeholder:text-zinc-400"
-                style={{ fontSize: "16px" }}
-              />
-              {error && <p className="text-xs text-red-500 px-1">{error.message}</p>}
-              <button
-                type="submit"
-                disabled={loading || !url}
-                className="w-full py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-all"
-                style={{ backgroundColor: themeColor }}
-              >
-                {loading ? "등록 중…" : "등록"}
-              </button>
-            </form>
-          )}
+          <RegisterForm themeColor={themeColor} />
         </div>
         <CodeCard title="useFormSubmit" code={`const { submit, loading, error } = useFormSubmit(\n  async (url: string) => api.post("/api/sites", { url }),\n  { onSuccess: () => router.push("/dashboard") }\n);\n\n// try/catch/finally/setLoading 전부 사라짐`} />
       </Section>

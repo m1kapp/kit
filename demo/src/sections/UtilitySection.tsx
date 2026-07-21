@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LineIcon } from "../shared";
 import { Section, SectionHeader, Tooltip, ThemeButton, ShareButton, Avatar, Badge } from "@m1kapp/kit";
 import { ComponentCard, ALL_COLORS } from "../shared";
 import { EmojiPickerDemo, ToastDemo, SkeletonDemo } from "./UIBasicDemos";
@@ -76,7 +77,7 @@ export function UtilitySection({ themeColor, dark }: { themeColor: string; dark:
                 className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
                 style={{ backgroundColor: themeColor, color: "#fff" }}
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                <LineIcon size={22}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></LineIcon>
               </div>
             </div>
           </ComponentCard>

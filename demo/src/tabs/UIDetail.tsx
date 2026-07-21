@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { HomeIcon, LineIcon } from "../shared";
 import {
   AppShell, AppShellHeader, AppShellContent, TabBar, Tab, ThemeButton,
   Section, SectionHeader, Divider, PoweredByKit,
@@ -20,9 +21,9 @@ export function UIDetail({ themeColor }: {
   const dark = true;
   const [demoTab, setDemoTab] = useState("home");
   const navItems = [
-    { key: "home", label: "Home", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
-    { key: "search", label: "Search", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg> },
-    { key: "profile", label: "Profile", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg> },
+    { key: "home", label: "Home", icon: <HomeIcon size={20} /> },
+    { key: "search", label: "Search", icon: <LineIcon size={20}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></LineIcon> },
+    { key: "profile", label: "Profile", icon: <LineIcon size={20}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></LineIcon> },
   ];
 
   return (

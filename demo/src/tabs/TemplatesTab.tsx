@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { ChevronRightIcon } from "../shared";
 import { Section, SectionHeader } from "@m1kapp/kit";
 import { BackIcon } from "../shared";
 import { BioTemplate } from "../templates/BioTemplate";
@@ -53,7 +54,7 @@ export function TemplatesTab({ themeColor }: { themeColor: string }) {
                     <p className="font-bold text-zinc-900 dark:text-zinc-100">{t.name}</p>
                     <p className="text-xs text-zinc-400 mt-0.5">{t.desc}</p>
                   </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-500 transition-colors shrink-0"><polyline points="9 18 15 12 9 6" /></svg>
+                  <ChevronRightIcon size={16} className="text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-500 transition-colors shrink-0" />
                 </button>
               ))}
             </div>

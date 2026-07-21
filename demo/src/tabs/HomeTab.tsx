@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { LineIcon } from "../shared";
 import { Section, Divider, Typewriter, formatNumber } from "@m1kapp/kit";
 import { HomeQuickStart } from "./HomeQuickStart";
 
@@ -86,28 +87,28 @@ export function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; o
           {[
             {
               icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <LineIcon size={18}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></LineIcon>
               ),
               title: "의존성 0",
               desc: "React 외엔 아무것도 없어요. node_modules 지옥 없이 그냥 씁니다.",
             },
             {
               icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                <LineIcon size={18}><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></LineIcon>
               ),
               title: "모바일 퍼스트 AppShell",
               desc: "네이티브 앱처럼 보이는 AppShell + TabBar. PWA에 최적화.",
             },
             {
               icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <LineIcon size={18}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></LineIcon>
               ),
               title: "하나로 다 됩니다",
               desc: "UI · OG · PWA · SEO · Fetch · Utils. 패키지 하나면 충분.",
             },
             {
               icon: (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
+                <LineIcon size={18}><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></LineIcon>
               ),
               title: "SSR 완벽 지원",
               desc: "Next.js App Router에서 그대로 import. 서버 컴포넌트와 충돌 없음.",

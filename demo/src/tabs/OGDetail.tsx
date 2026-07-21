@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CheckIcon } from "../shared";
 import { Section, SectionHeader, Divider } from "@m1kapp/kit";
 import { OGImage } from "@m1kapp/kit/ogimage";
 import type { OGProps } from "@m1kapp/kit/ogimage";
@@ -82,7 +83,7 @@ export function OGDetail({ themeColor }: { themeColor: string }) {
           7가지 템플릿 × 3가지 배경 스타일을 지원해요.
         </p>
         <div className="mt-3 flex items-start gap-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400 mt-0.5 flex-shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
+          <CheckIcon size={14} className="text-zinc-400 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
             <strong className="text-zinc-700 dark:text-zinc-300">Next.js 14+</strong>는 <code className="font-mono">next/og</code>가 내장돼 있어 별도 설치 불필요.
             그 외 환경은 <code className="font-mono">npm i @vercel/og</code>

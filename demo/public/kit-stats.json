@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-09T05:53:35.439Z",
-  "kitVersion": "0.0.31",
+  "generatedAt": "2026-07-21T03:11:56.527Z",
+  "kitVersion": "0.0.36",
   "source": {
     "dir": "src",
     "files": 26,
-    "totalLines": 2962,
-    "codeLines": 2673,
+    "totalLines": 2969,
+    "codeLines": 2656,
     "breakdown": {
       "frontend": {
         "files": 25,
-        "codeLines": 2590
+        "codeLines": 2573
       },
       "backend": {
         "files": 0,
@@ -22,11 +22,100 @@
     }
   },
   "quality": {
-    "engine": "ast",
-    "score": 94,
+    "engine": "ast2",
+    "score": 96,
     "grade": "A+",
+    "cognitive": {
+      "avg": 0.6,
+      "p90": 2,
+      "max": 9,
+      "over15": 0,
+      "over25": 0,
+      "worst": [
+        {
+          "name": "LibrariesTab",
+          "cog": 9,
+          "cc": 11,
+          "file": "src/tabs/LibrariesTab.tsx",
+          "line": 148
+        },
+        {
+          "name": "(anonymous)",
+          "cog": 9,
+          "cc": 9,
+          "file": "src/templates/LandingTemplate.tsx",
+          "line": 58
+        },
+        {
+          "name": "App",
+          "cog": 7,
+          "cc": 8,
+          "file": "src/App.tsx",
+          "line": 53
+        },
+        {
+          "name": "FetchDetail",
+          "cog": 7,
+          "cc": 10,
+          "file": "src/tabs/FetchDetail.tsx",
+          "line": 9
+        },
+        {
+          "name": "V030Demo",
+          "cog": 6,
+          "cc": 6,
+          "file": "src/sections/V030Demos.tsx",
+          "line": 22
+        }
+      ]
+    },
+    "duplication": {
+      "percent": 2.8,
+      "dupTokens": 364,
+      "totalTokens": 12983,
+      "blocks": 35,
+      "worstFiles": [
+        {
+          "file": "src/tabs/UIDetail.tsx",
+          "dupTokens": 144
+        },
+        {
+          "file": "src/tabs/SeoDetail.tsx",
+          "dupTokens": 58
+        },
+        {
+          "file": "src/tabs/ServerDetail.tsx",
+          "dupTokens": 58
+        }
+      ],
+      "worstBlocks": [
+        [
+          "src/sections/UIHookDemos.tsx:69",
+          "src/tabs/UtilsDetail.tsx:36"
+        ],
+        [
+          "src/sections/UIHookDemos.tsx:70",
+          "src/tabs/UtilsDetail.tsx:37"
+        ],
+        [
+          "src/sections/UIHookDemos.tsx:70",
+          "src/tabs/UtilsDetail.tsx:37"
+        ]
+      ]
+    },
+    "io": {
+      "readers": 0,
+      "uncachedReaders": 0,
+      "loopSites": 0,
+      "uncachedLoopSites": 0,
+      "worst": []
+    },
+    "renderGates": {
+      "hostages": 0,
+      "worst": []
+    },
     "cc": {
-      "functions": 193,
+      "functions": 195,
       "avg": 1.7,
       "p90": 3,
       "max": 11,
@@ -37,19 +126,13 @@
           "name": "LibrariesTab",
           "cc": 11,
           "file": "src/tabs/LibrariesTab.tsx",
-          "line": 149
+          "line": 148
         },
         {
           "name": "FetchDetail",
           "cc": 10,
           "file": "src/tabs/FetchDetail.tsx",
           "line": 9
-        },
-        {
-          "name": "UtilsDetail",
-          "cc": 10,
-          "file": "src/tabs/UtilsDetail.tsx",
-          "line": 12
         },
         {
           "name": "(anonymous)",
@@ -61,18 +144,24 @@
           "name": "App",
           "cc": 8,
           "file": "src/App.tsx",
-          "line": 52
+          "line": 53
+        },
+        {
+          "name": "getOGCode",
+          "cc": 8,
+          "file": "src/sections/ogCode.ts",
+          "line": 3
         }
       ]
     },
-    "branchDensity": 5.9,
-    "branches": 157,
-    "functions": 224,
-    "avgFileLines": 103,
+    "branchDensity": 5.8,
+    "branches": 153,
+    "functions": 228,
+    "avgFileLines": 102,
     "longFiles": 0,
     "maxFile": {
-      "path": "src/tabs/UtilsDetail.tsx",
-      "lines": 176
+      "path": "src/shared.tsx",
+      "lines": 189
     }
   },
   "kit": {
@@ -84,7 +173,7 @@
       },
       {
         "name": "Watermark",
-        "loc": 189,
+        "loc": 190,
         "category": "component"
       },
       {
@@ -94,7 +183,7 @@
       },
       {
         "name": "InAppSheet",
-        "loc": 175,
+        "loc": 177,
         "category": "component"
       },
       {
@@ -148,12 +237,12 @@
         "category": "component"
       },
       {
-        "name": "Collapsible",
-        "loc": 94,
+        "name": "Carousel",
+        "loc": 95,
         "category": "component"
       },
       {
-        "name": "Carousel",
+        "name": "Collapsible",
         "loc": 94,
         "category": "component"
       },
@@ -164,7 +253,7 @@
       },
       {
         "name": "AppShell",
-        "loc": 76,
+        "loc": 78,
         "category": "component"
       },
       {
@@ -204,12 +293,17 @@
       },
       {
         "name": "usePWAInstall",
-        "loc": 55,
+        "loc": 56,
         "category": "hook"
       },
       {
         "name": "ColorPicker",
         "loc": 54,
+        "category": "component"
+      },
+      {
+        "name": "Tooltip",
+        "loc": 53,
         "category": "component"
       },
       {
@@ -224,11 +318,6 @@
       },
       {
         "name": "ProgressRing",
-        "loc": 50,
-        "category": "component"
-      },
-      {
-        "name": "Tooltip",
         "loc": 50,
         "category": "component"
       },
@@ -248,13 +337,13 @@
         "category": "component"
       },
       {
-        "name": "TabBar",
+        "name": "IconButton",
         "loc": 45,
         "category": "component"
       },
       {
-        "name": "IconButton",
-        "loc": 45,
+        "name": "TabBar",
+        "loc": 44,
         "category": "component"
       },
       {
@@ -268,17 +357,17 @@
         "category": "component"
       },
       {
+        "name": "MediaCard",
+        "loc": 38,
+        "category": "component"
+      },
+      {
         "name": "CodeBlock",
         "loc": 37,
         "category": "component"
       },
       {
         "name": "LinkifiedText",
-        "loc": 36,
-        "category": "component"
-      },
-      {
-        "name": "MediaCard",
         "loc": 36,
         "category": "component"
       },
@@ -299,7 +388,7 @@
       },
       {
         "name": "Fab",
-        "loc": 27,
+        "loc": 29,
         "category": "component"
       },
       {
@@ -338,15 +427,15 @@
         "category": "hook"
       }
     ],
-    "savedLines": 3718,
-    "savedKB": 145,
-    "savedA4": 46,
+    "savedLines": 3731,
+    "savedKB": 146,
+    "savedA4": 47,
     "savedPercent": 58,
     "usage": {
       "component": {
         "used": 56,
-        "total": 59,
-        "percent": 95
+        "total": 60,
+        "percent": 93
       },
       "hook": {
         "used": 7,

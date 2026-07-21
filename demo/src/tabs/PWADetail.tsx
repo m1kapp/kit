@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { CheckIcon } from "../shared";
 import {
   Section, SectionHeader, Divider,
   svgIcon, usePWAInstall, PWAInstallButton, IOSInstallSheet,
@@ -120,7 +121,7 @@ export function PWADetail({ themeColor }: { themeColor: string }) {
             { label: "Safe Area Inset", desc: "viewportFit=cover — 노치 / Dynamic Island 기기 대응" },
           ].map(({ label, desc }) => (
             <div key={label} className="flex items-start gap-2 p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400 mt-0.5 flex-shrink-0"><polyline points="20 6 9 17 4 12" /></svg>
+              <CheckIcon size={14} className="text-zinc-400 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{label}</p>
                 <p className="text-[10px] text-zinc-400 mt-0.5">{desc}</p>
