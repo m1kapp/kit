@@ -60,7 +60,9 @@
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
     "demo": "npm run build && cd demo && npm run dev",
-    "demo:dev": "cd demo && npm run dev"
+    "demo:dev": "cd demo && npm run dev",
+    "stats": "node bin/stats.mjs --dir=src",
+    "stats:report": "node bin/stats.mjs --dir=src --report"
   },
   "peerDependencies": {
     "@vercel/og": ">=0.6",
@@ -77,6 +79,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vercel/og": "^0.11.1",
+    "fixearly": "^0.4.0",
     "next": "^16.2.4",
     "png-to-ico": "^3.0.1",
     "react": "^19.0.0",
