@@ -1,5 +1,5 @@
 ---
-name: m1kapp-init
+name: m1kapp-new
 description: 새로운 m1kapp 서비스 프로젝트를 스캐폴딩 — m1kkit new 로 뼈대를 만들고, 컨셉에 맞게 첫 화면을 채운다
 ---
 

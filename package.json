@@ -43,7 +43,9 @@
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "templates",
+    "!**/*.test.ts"
   ],
   "dependencies": {
     "@vercel/og": ">=0.6",
