@@ -55,6 +55,42 @@
   }
 }
 
+/* Watermark stage — the shell + credit group, scaled up on big screens.
+   A 430px phone shell keeps its width no matter how wide the display gets, so
+   on desktop it shrinks to a sliver in a field of watermark (10% of a 2560px
+   screen, measured). `zoom` scales the whole group as one, so nothing has to
+   re-layout and text stays crisp (unlike `transform: scale`).
+
+   The scale is a continuous function of viewport width, not a two-step media
+   query — a discrete jump is visible as a pop while resizing across the
+   breakpoint, and a flat factor still left big screens undersized. clamp()
+   with a vw-based middle term ramps smoothly and self-floors: below ~1024px
+   the linear term is already under 1, so the `clamp(1, …)` floor makes zoom
+   exactly 1 there with no separate "only scale above Xpx" rule needed.
+   Calibrated points: 1.0 @1024px, ~1.09 @1280px, ~1.3 @1920px, capped at 1.5
+   from ~2520px on — a 430px shell tops out at 645px, still legible as a card.
+
+   The height must be divided by the same factor: the stage is the `h-dvh`
+   box, and zoom multiplies used values — a plain `100dvh` here would render
+   `zoom × viewport` tall and push a scrollbar onto every desktop page.
+
+   Opt out per-app with <Watermark zoom={false}>, or pin a factor with a
+   number — either sets --kit-zoom inline, which (same element, higher
+   specificity than this class rule) overrides the clamp() below it. */
+.kit-stage {
+  /* `zoom` takes a unitless <number>, so the clamp() preferred value must
+     resolve to a number too — `0.66 + 0.0335vw` looks fine but is invalid:
+     you can't add a bare number to a <length> (vw), so the whole custom
+     property goes invalid at computed-value time and silently falls back to
+     `zoom`'s initial value (1) — no console error, it just never scales.
+     `1vw / 1px` divides two lengths first, which *does* strip the unit down
+     to a plain number (equal to viewport-width-in-px / 100); everything after
+     that division is ordinary number arithmetic. */
+  --kit-zoom: clamp(1, 0.66 + 0.0335 * (1vw / 1px), 1.5);
+  zoom: var(--kit-zoom);
+  height: calc(100dvh / var(--kit-zoom));
+}
+
 /* Typing indicator dots (TypingIndicator component) */
 @keyframes kit-typing-bounce {
   0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }

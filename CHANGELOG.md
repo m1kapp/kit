@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- **fix(app-shell): 컴파일 CSS가 `<head>`에 두 번 삽입돼 다크모드 텍스트가 조용히 안 보이던 버그.** `AppShell`의 `<style href precedence>`와 `inject-styles.ts`의 자동 주입이 겹쳐서 발생 — 후자의 중복 감지가 잘못된 셀렉터라 한 번도 안 걸렸다. `.dark\:*` variant는 `:where()`로 specificity를 plain과 동일하게 맞추는 표준 레시피라, 스타일시트가 두 벌이면 문서 순서가 꼬여 다크모드 색이 라이트모드 값으로 조용히 폴백한다(콘솔 에러 없음). `AppShell`은 더 이상 직접 스타일을 렌더링하지 않음 — 기존 데모 앱 포함 전부 재현·수정 확인
+- polish(template): `m1kkit new` 첫 화면에 Avatar 리드 아이콘 + 실제 온보딩 체크리스트("테마 바꾸기"/"SEED 교체"/"트래커 연결") 추가 — lead 없는 flat한 카드 + "첫 항목/두 번째 항목" 무의미 텍스트가 허접해 보인다는 피드백 반영
+- feat(watermark): 넓은 화면에서 셸을 확대 (`zoom`, 기본 켬) — 430px 폰 셸이 화면이 커져도 안 자라서 워터마크 여백만 넓어졌다. 실측으로 화면 점유율이 1440px 26% → 2560px 10%까지 떨어짐. `clamp()`로 뷰포트 폭에 연속 비례(1024px 이하 1배, ~1920px 1.3배, 2560px+ 1.5배 상한 — 미디어쿼리 두 단이 아니라 리사이즈 중 끊기지 않는 연속 곡선). 끄려면 `<Watermark zoom={false}>`, 배율 고정은 `zoom={1.2}`
 - feat(cli): `m1kkit new <name>` — 검증된 Vite + React + kit 템플릿을 복사해 새 앱 생성. 이름/컬러/한줄/배포URL 4문항만 묻고, `--url`을 주면 방문자 트래커 등록·배선까지 한 번에. 산문 스킬이 매번 코드를 다시 타이핑하며 깨뜨리던 것들(`useState(colors.blue)` 리터럴 협착, `vite-env.d.ts` 누락, TODO만 남은 빈 화면)을 실파일로 고정하고 테스트로 잠금
 - feat(cli): `m1kkit track <url> --write` — 발급받은 slug를 `<Watermark trackSlug>`와 `.env`에 직접 꽂는다. 지금까지 `track`은 slug를 `.m1k.json`에 적어두기만 하고 앱에 연결하는 단계가 아예 없어서, "트래커를 붙였다"가 사실이 아닌 경우가 많았다
 - fix(cli): `track` 성공 안내가 프로젝트 종류와 무관하게 `NEXT_PUBLIC_M1K_SLUG`를 알려주던 문제 — Vite 프로젝트에서 그대로 따르면 `process.env`가 없어 조용히 집계 0이 된다(에러도 안 남). vite/next를 감지해 각각의 방법을 안내

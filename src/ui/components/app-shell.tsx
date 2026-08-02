@@ -1,5 +1,4 @@
 import { type ReactNode, type CSSProperties } from "react";
-import { COMPILED_CSS } from "../_compiled-styles";
 
 export interface AppShellProps {
   children: ReactNode;
@@ -84,8 +83,6 @@ export function AppShell({
       className={`app-shell-root relative w-full h-full flex flex-col bg-white dark:bg-zinc-950 shadow-2xl ring-1 ring-black/10 dark:ring-zinc-700 sm:rounded-2xl overflow-hidden ${className}`}
       style={{ maxWidth, maxHeight, ...accentVar, ...style }}
     >
-      {/* React 19 hoists this to <head> and deduplicates by href — eliminates FOUC without manual <KitStyles /> */}
-      <style href="m1kapp-kit" precedence="default">{COMPILED_CSS}</style>
       {children}
     </div>
   );
