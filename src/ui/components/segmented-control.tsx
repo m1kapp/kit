@@ -34,7 +34,7 @@ export function SegmentedControl<T extends string>({
 }: SegmentedControlProps<T>) {
   return (
     <div
-      className={`flex gap-0.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 p-1 ${className}`}
+      className={`flex shrink-0 gap-0.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 p-1 ${className}`}
       role="tablist"
     >
       {options.map((opt) => {
@@ -49,7 +49,7 @@ export function SegmentedControl<T extends string>({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(opt.value)}
-            className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+            className={`flex-1 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-bold transition-all ${
               active
                 ? "bg-white dark:bg-zinc-700 shadow-sm"
                 : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
