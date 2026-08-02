@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.0.38
+- fix(segmented-control): 좁은 화면에서 라벨이 두 줄로 쪼개지던 버그 — 버튼에 `whitespace-nowrap`, 루트에 `shrink-0` 추가. 형제 엘리먼트와 flex로 공간을 나누다 찌부러들면서 "30일"이 "30"/"일" 두 줄로 줄바꿈됐다
+- fix(demo): 템플릿 갤러리(`DataDashboardTemplate`/`LandingTemplate`)의 지어낸 지표 제거 — 실측 이력 없는 `+18%`류 증감률과 `"이미 2,400+명이 사용 중"` 소셜프루프. 남은 예시 숫자엔 "예시 데이터" 라벨을 붙임
 - **fix(app-shell): 컴파일 CSS가 `<head>`에 두 번 삽입돼 다크모드 텍스트가 조용히 안 보이던 버그.** `AppShell`의 `<style href precedence>`와 `inject-styles.ts`의 자동 주입이 겹쳐서 발생 — 후자의 중복 감지가 잘못된 셀렉터라 한 번도 안 걸렸다. `.dark\:*` variant는 `:where()`로 specificity를 plain과 동일하게 맞추는 표준 레시피라, 스타일시트가 두 벌이면 문서 순서가 꼬여 다크모드 색이 라이트모드 값으로 조용히 폴백한다(콘솔 에러 없음). `AppShell`은 더 이상 직접 스타일을 렌더링하지 않음 — 기존 데모 앱 포함 전부 재현·수정 확인
 - polish(template): `m1kkit new` 첫 화면에 Avatar 리드 아이콘 + 실제 온보딩 체크리스트("테마 바꾸기"/"SEED 교체"/"트래커 연결") 추가 — lead 없는 flat한 카드 + "첫 항목/두 번째 항목" 무의미 텍스트가 허접해 보인다는 피드백 반영
 - feat(watermark): 넓은 화면에서 셸을 확대 (`zoom`, 기본 켬) — 430px 폰 셸이 화면이 커져도 안 자라서 워터마크 여백만 넓어졌다. 실측으로 화면 점유율이 1440px 26% → 2560px 10%까지 떨어짐. `clamp()`로 뷰포트 폭에 연속 비례(1024px 이하 1배, ~1920px 1.3배, 2560px+ 1.5배 상한 — 미디어쿼리 두 단이 아니라 리사이즈 중 끊기지 않는 연속 곡선). 끄려면 `<Watermark zoom={false}>`, 배율 고정은 `zoom={1.2}`
