@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   AppShell, AppShellHeader, AppShellContent, Watermark,
-  Section, SectionHeader, Divider, StatChip, ListRow, EmptyState,
+  Section, SectionHeader, Divider, StatChip, ListRow, EmptyState, Avatar, Badge,
   TabBar, Tab, Fab,
   ThemeButton, ThemeDialog,
 } from "@m1kapp/kit";
@@ -11,6 +11,14 @@ type Item = { id: number; title: string; sub: string };
 const SEED: Item[] = [
   { id: 1, title: "첫 항목", sub: "여기를 지우고 진짜 데이터를 넣으세요" },
   { id: 2, title: "두 번째 항목", sub: "ListRow는 lead/sub/trailing을 받습니다" },
+];
+
+// 아래 세 줄은 지워도 되는 온보딩 체크리스트다 — 진짜로 해야 할 일을 담고 있으니
+// UI 컴포넌트 조합 예시로도, 실제 다음 단계 안내로도 쓴다.
+const NEXT_STEPS = [
+  { title: "테마 컬러 바꿔보기", sub: "우측 상단 아이콘 → 색상 선택", badge: "UI" },
+  { title: "이 목업 데이터를 실제 데이터로", sub: "App.tsx의 SEED 배열을 교체", badge: "App.tsx" },
+  { title: "배포하고 방문자 트래커 잇기", sub: "npx m1kkit track <url> --write", badge: "CLI" },
 ];
 
 export default function App() {
@@ -30,6 +38,18 @@ export default function App() {
 
   const add = () =>
     setItems((prev) => [...prev, { id: Date.now(), title: `항목 ${prev.length + 1}`, sub: "새로 추가됨" }]);
+
+  const lastAddedId = items.length > SEED.length ? items[items.length - 1].id : null;
+
+  const renderItem = (it: Item) => (
+    <ListRow
+      key={it.id}
+      lead={<Avatar fallback={it.title.slice(0, 1)} size="sm" color={themeColor} />}
+      title={it.title}
+      sub={it.sub}
+      trailing={it.id === lastAddedId ? <Badge variant="green" size="sm">NEW</Badge> : undefined}
+    />
+  );
 
   return (
     // trackSlug — `npx m1kkit track <배포URL> --write` 가 .env 에 VITE_M1K_SLUG 를 쓴다.
@@ -57,12 +77,27 @@ export default function App() {
 
               <Divider spacing="sm" />
 
-              <Section className="pb-4">
-                <SectionHeader>최근</SectionHeader>
+              <Section>
+                <SectionHeader>시작하기</SectionHeader>
                 <div className="flex flex-col gap-2">
-                  {items.slice(0, 3).map((it) => (
-                    <ListRow key={it.id} title={it.title} sub={it.sub} />
+                  {NEXT_STEPS.map((step, i) => (
+                    <ListRow
+                      key={step.title}
+                      lead={<Avatar fallback={String(i + 1)} size="sm" color={themeColor} />}
+                      title={step.title}
+                      sub={step.sub}
+                      trailing={<Badge size="sm">{step.badge}</Badge>}
+                    />
                   ))}
+                </div>
+              </Section>
+
+              <Divider spacing="sm" />
+
+              <Section className="pb-4">
+                <SectionHeader>최근 추가</SectionHeader>
+                <div className="flex flex-col gap-2">
+                  {items.slice(-3).reverse().map(renderItem)}
                 </div>
               </Section>
             </>
@@ -70,12 +105,10 @@ export default function App() {
             <Section className="pt-4 pb-4">
               <SectionHeader>전체 목록</SectionHeader>
               {items.length === 0 ? (
-                <EmptyState message="아직 없어요" />
+                <EmptyState message="여기에 추가한 항목이 쌓여요" icon={<span className="text-3xl">🗂️</span>} />
               ) : (
                 <div className="flex flex-col gap-2">
-                  {items.map((it) => (
-                    <ListRow key={it.id} title={it.title} sub={it.sub} trailing={`#${it.id % 1000}`} />
-                  ))}
+                  {items.map(renderItem)}
                 </div>
               )}
             </Section>
