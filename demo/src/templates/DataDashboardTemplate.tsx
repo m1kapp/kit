@@ -10,26 +10,25 @@ export function DataDashboardTemplate() {
       {/* Header */}
       <div className="px-6 pt-8 pb-4 flex items-end justify-between border-b border-zinc-100">
         <div>
-          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Analytics</p>
+          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Analytics · 예시 데이터</p>
           <h1 className="text-2xl font-black text-zinc-900 mt-1 leading-none">대시보드</h1>
         </div>
         <SegmentedControl value={period} onChange={setPeriod} options={[{ value: "7d", label: "7일" }, { value: "30d", label: "30일" }]} />
       </div>
 
-      {/* KPI — 숫자 극대화, 배경 없이 */}
+      {/* KPI — 숫자 극대화, 배경 없이. 증감률은 안 붙인다 — 진짜 측정 이력이
+          없으면 "+18%" 같은 구체적 성장률은 실제 데이터인 척하는 거짓말이 된다.
+          컴포넌트가 숫자를 어떻게 보여주는지는 이 값들만으로 충분히 보인다. */}
       <div className="grid grid-cols-2 border-b border-zinc-100">
         {[
-          { label: "총 방문자", value: period === "30d" ? "12,450" : "3,210", delta: "+18%", up: true,  c: C },
-          { label: "신규 가입", value: period === "30d" ? "342"    : "89",     delta: "+34%", up: true,  c: "#22c55e" },
-          { label: "평균 체류", value: "2m 14s",                               delta: "−3%",  up: false, c: "#f59e0b" },
-          { label: "전환율",   value: "3.8%",                                  delta: "+0.4%", up: true, c: "#a855f7" },
+          { label: "총 방문자", value: period === "30d" ? "12,450" : "3,210", c: C },
+          { label: "신규 가입", value: period === "30d" ? "342"    : "89",     c: "#22c55e" },
+          { label: "평균 체류", value: "2m 14s",                               c: "#f59e0b" },
+          { label: "전환율",   value: "3.8%",                                  c: "#a855f7" },
         ].map((s, i) => (
           <div key={s.label} className={`px-6 py-5 ${i % 2 === 0 ? "border-r border-zinc-100" : ""} ${i < 2 ? "border-b border-zinc-100" : ""}`}>
             <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">{s.label}</p>
             <p className="text-3xl font-black mt-2 tabular-nums leading-none" style={{ color: s.c }}>{s.value}</p>
-            <span className={`text-[10px] font-bold mt-2 inline-block ${s.up ? "text-emerald-500" : "text-red-500"}`}>
-              {s.up ? "↑" : "↓"} {s.delta}
-            </span>
           </div>
         ))}
       </div>

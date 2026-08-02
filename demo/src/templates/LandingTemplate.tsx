@@ -25,7 +25,8 @@ export function LandingTemplate() {
             데모 보기
           </button>
         </div>
-        <p className="text-[10px] text-zinc-400 mt-4">이미 <b className="text-zinc-700">2,400+</b>명이 사용 중</p>
+        {/* 실측 없는 소셜프루프("이미 N명이 사용 중")는 넣지 않는다 — 지어낸
+            숫자다. 진짜 지표가 생기면 그때 채운다. */}
       </div>
 
       {/* Features — 구분선 기반, 카드 없이 */}
