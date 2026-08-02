@@ -1,0 +1,54 @@
+name: Publish to npm
+
+# Trusted Publishing (OIDC) — no NPM_TOKEN secret anywhere. npm exchanges this
+# workflow's GitHub-issued OIDC token for a short-lived publish token at
+# publish time, as long as this exact repo + workflow file is registered as
+# a "Trusted Publisher" for the package on npmjs.com (Settings → Trusted
+# Publisher, on the package's own settings page — a one-time manual step,
+# npm doesn't expose it over the CLI/API).
+#
+# Triggers on pushing a `v*` tag, matching this repo's existing release
+# convention (`git tag v0.0.38 && git push origin v0.0.38`).
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write # required for OIDC — the actual npm auth mechanism
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted Publishing needs npm 11.5.1+ for the OIDC token exchange —
+      # don't rely on whatever npm ships with the runner's Node image.
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+
+      # Tag vX.Y.Z must match package.json's version — catches a forgotten
+      # `npm version` bump or a stale tag before it ships the wrong build.
+      - name: Verify tag matches package.json version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME (v$TAG_VERSION) doesn't match package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      # prepublishOnly already runs `npm run build`, but running it here too
+      # means a build failure shows up as its own clearly-named CI step.
+      - run: npm run build
+
+      - run: npm publish --provenance --access public
