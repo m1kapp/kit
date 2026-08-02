@@ -11,8 +11,16 @@ const KIT_VERSION = typeof __KIT_VERSION__ !== "undefined" ? __KIT_VERSION__ : "
 
 /**
  * Site slug for the m1k.app visitor tracker. Read from `NEXT_PUBLIC_M1K_SLUG`
- * (inlined by Next at build) when no explicit `slug` prop is given. Wrapped in
- * try/catch so it's a no-op under bundlers where `process` is undefined (Vite…).
+ * when no explicit `slug` prop is given — Next's DefinePlugin inlines that into
+ * dependencies too, so reading it from inside kit works. Wrapped in try/catch
+ * so it's a no-op under bundlers where `process` is undefined (Vite…).
+ *
+ * There is deliberately **no** `import.meta.env.VITE_M1K_SLUG` counterpart
+ * here: Vite only substitutes `import.meta.env.*` in project source, not in
+ * pre-bundled deps under `node_modules/.vite/deps`, so reading it from this
+ * file would silently always be `undefined`. Vite apps pass it explicitly —
+ * `<Watermark trackSlug={import.meta.env.VITE_M1K_SLUG}>` — which does get
+ * substituted because it lives in app source. `m1kkit new` scaffolds that line.
  */
 function resolveEnvSlug(): string | undefined {
   try {
@@ -30,9 +38,11 @@ export interface PoweredByKitProps {
   /** "default" for inside AppShell, "overlay" for on top of Watermark background */
   variant?: "default" | "overlay";
   /**
-   * m1k.app visitor-tracker slug. When set (explicitly or via the
-   * `NEXT_PUBLIC_M1K_SLUG` env var) a tiny hidden beacon counts each page view.
-   * No slug → no tracking (off by default). Register one with `npx m1kkit track`.
+   * m1k.app visitor-tracker slug. When set a tiny hidden beacon counts each
+   * page view; no slug → no tracking (off by default). Next reads
+   * `NEXT_PUBLIC_M1K_SLUG` automatically; Vite apps must pass
+   * `import.meta.env.VITE_M1K_SLUG` in explicitly (see `resolveEnvSlug`).
+   * Register a slug with `npx m1kkit track <url> --write`.
    */
   slug?: string;
   /** Tracker host. Default: "www.m1k.app" (apex m1k.app는 www로 307 리다이렉트 → cross-origin fetch가 CORS로 깨지므로 www 직결) */
