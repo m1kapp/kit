@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.39
+- ci: npm Trusted Publishing(OIDC) 파이프라인으로 전환 — 이 릴리스부터 태그 푸시가 곧 publish
+
 ## 0.0.38
 - fix(segmented-control): 좁은 화면에서 라벨이 두 줄로 쪼개지던 버그 — 버튼에 `whitespace-nowrap`, 루트에 `shrink-0` 추가. 형제 엘리먼트와 flex로 공간을 나누다 찌부러들면서 "30일"이 "30"/"일" 두 줄로 줄바꿈됐다
 - fix(demo): 템플릿 갤러리(`DataDashboardTemplate`/`LandingTemplate`)의 지어낸 지표 제거 — 실측 이력 없는 `+18%`류 증감률과 `"이미 2,400+명이 사용 중"` 소셜프루프. 남은 예시 숫자엔 "예시 데이터" 라벨을 붙임
