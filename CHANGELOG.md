@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- feat(watermark): 넓은 화면에서 셸을 확대 (`zoom`, 기본 켬) — 430px 폰 셸이 화면이 커져도 안 자라서 워터마크 여백만 넓어졌다. 실측으로 화면 점유율이 1440px 26% → 2560px 10%까지 떨어짐. `clamp()`로 뷰포트 폭에 연속 비례(1024px 이하 1배, ~1920px 1.3배, 2560px+ 1.5배 상한 — 미디어쿼리 두 단이 아니라 리사이즈 중 끊기지 않는 연속 곡선). 끄려면 `<Watermark zoom={false}>`, 배율 고정은 `zoom={1.2}`
 - feat(cli): `m1kkit new <name>` — 검증된 Vite + React + kit 템플릿을 복사해 새 앱 생성. 이름/컬러/한줄/배포URL 4문항만 묻고, `--url`을 주면 방문자 트래커 등록·배선까지 한 번에. 산문 스킬이 매번 코드를 다시 타이핑하며 깨뜨리던 것들(`useState(colors.blue)` 리터럴 협착, `vite-env.d.ts` 누락, TODO만 남은 빈 화면)을 실파일로 고정하고 테스트로 잠금
 - feat(cli): `m1kkit track <url> --write` — 발급받은 slug를 `<Watermark trackSlug>`와 `.env`에 직접 꽂는다. 지금까지 `track`은 slug를 `.m1k.json`에 적어두기만 하고 앱에 연결하는 단계가 아예 없어서, "트래커를 붙였다"가 사실이 아닌 경우가 많았다
 - fix(cli): `track` 성공 안내가 프로젝트 종류와 무관하게 `NEXT_PUBLIC_M1K_SLUG`를 알려주던 문제 — Vite 프로젝트에서 그대로 따르면 `process.env`가 없어 조용히 집계 0이 된다(에러도 안 남). vite/next를 감지해 각각의 방법을 안내

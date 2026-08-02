@@ -1,4 +1,4 @@
-import { type ReactNode, useId } from "react";
+import { type CSSProperties, type ReactNode, useId } from "react";
 import { PoweredByKit } from "./powered-by";
 
 export interface WatermarkSponsor {
@@ -65,6 +65,17 @@ export interface WatermarkProps {
   claimed?: boolean;
   /** Visitor counts for the footer ({ today, total }). Omit to auto-fetch from m1k.app. */
   counts?: { today?: number; total?: number };
+  /**
+   * Scale up the shell + credit group on wide screens, so a 430px phone shell
+   * doesn't shrink to a sliver in a field of watermark (it covers ~26% of a
+   * 1440px screen but only ~10% of a 2560px one).
+   *
+   * Default: `true` — a continuous, viewport-width-driven scale: 1:1 at
+   * ≤1024px, ramping to ×1.5 by ~2520px+ (see the `clamp()` in `.kit-stage`).
+   * Pass a number to pin one fixed factor everywhere, or `false` for 1:1 always.
+   * The watermark background itself is never scaled; it always fills the viewport.
+   */
+  zoom?: boolean | number;
 }
 
 import { splitLines, injectStyle, appendUtm } from "./watermark-text";
@@ -83,8 +94,15 @@ export function Watermark({
   track,
   claimed,
   counts,
+  zoom = true,
 }: WatermarkProps) {
   injectStyle();
+
+  // `.kit-stage`'s class rule sets --kit-zoom to a clamp() by default. An
+  // inline declaration on this same element outranks it (style attribute beats
+  // any selector-based rule), so `zoom={false}`/`zoom={n}` just override the var.
+  const zoomVars =
+    zoom === true ? undefined : ({ "--kit-zoom": String(zoom === false ? 1 : zoom) } as CSSProperties);
 
   const uid = useId().replace(/:/g, "");
   const patternId = `wm-${uid}`;
@@ -251,8 +269,8 @@ export function Watermark({
           the shell, sitting just under it — it does not pin to the true
           bottom edge of the screen. */}
       <div
-        className="relative z-10 h-full flex flex-col items-center mx-auto sm:p-3 sm:gap-1"
-        style={{ maxWidth }}
+        className="kit-stage relative z-10 flex flex-col items-center mx-auto sm:p-3 sm:gap-1"
+        style={{ maxWidth, ...zoomVars }}
       >
         <div className="flex-1 min-h-0" />
         {children}
