@@ -53,7 +53,10 @@ export interface WatermarkProps {
   hidePoweredBy?: boolean;
   /**
    * m1k.app visitor-tracker slug, forwarded to the embedded PoweredByKit badge.
-   * Falls back to `NEXT_PUBLIC_M1K_SLUG`. No slug → no tracking (off by default).
+   * Falls back to `NEXT_PUBLIC_M1K_SLUG` on Next. Vite apps pass it explicitly:
+   * `trackSlug={import.meta.env.VITE_M1K_SLUG}` — Vite only substitutes
+   * `import.meta.env` in app source, never inside kit's own bundle.
+   * No slug → no tracking (off by default).
    */
   trackSlug?: string;
   /** Set false to disable the visitor beacon even when a slug is present */

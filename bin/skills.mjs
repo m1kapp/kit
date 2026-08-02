@@ -17,8 +17,12 @@ const SKILLS_SRC = path.join(__dirname, "skills");
 
 const SKILLS = [
   {
+    name: "m1kapp-new",
+    desc: "/m1kapp-new   — 새 앱 만들기 (m1kkit new 템플릿 + 컨셉에 맞춰 첫 화면 채우기)",
+  },
+  {
     name: "m1kapp-init",
-    desc: "/m1kapp-init  — Next.js 프로젝트 초기 설정 인터랙티브 스캐폴딩",
+    desc: "/m1kapp-init  — 기존 Next.js 프로젝트에 kit 초기 설정 적용",
   },
   {
     name: "m1kapp-seo",

@@ -1,8 +1,18 @@
 import { type CSSProperties, type ReactNode } from "react";
 
 export interface ListRowProps {
-  /** Left color bar + active highlight tint. Defaults to `var(--kit-accent)`. */
+  /** Active highlight tint (and the `bar` color when enabled). Defaults to `var(--kit-accent)`. */
   accent?: string;
+  /**
+   * Draw the left color bar. **Default: false.**
+   *
+   * A thick coloured stripe on one edge of a card is a well-known generated-UI
+   * tell, so it is opt-in rather than the default look — a plain row keeps the
+   * hairline border on all four sides instead. Turn it on where the color
+   * actually carries meaning: a schedule/Gantt timeline where the stripe encodes
+   * the category or calendar of each block.
+   */
+  bar?: boolean;
   /** Leading column, e.g. a time like "14:00" */
   lead?: ReactNode;
   /** Secondary leading line under `lead`, e.g. an end time */
@@ -25,16 +35,20 @@ export interface ListRowProps {
 }
 
 /**
- * Timeline / list row: left color bar, a leading column (time), a title with an
+ * Timeline / list row: an optional leading column (time), a title with an
  * optional subtitle, and trailing content. Height can scale via `heightScale` —
  * handy for schedules, to-dos, Gantt-style timelines, and time blocks.
  *
+ * The left color bar is opt-in (`bar`) — see `ListRowProps.bar`.
+ *
  * @example
- * <ListRow accent="#7fc06a" lead="14:00" title="회의" sub="👥 김상훈" heightScale={2} onClick={open} />
+ * <ListRow title="첫 항목" sub="설명" onClick={open} />
+ * <ListRow bar accent="#7fc06a" lead="14:00" title="회의" sub="👥 김상훈" heightScale={2} />
  * <ListRow lead="09:00" title="스탠드업" trailing="● 지금" active />
  */
 export function ListRow({
   accent,
+  bar = false,
   lead,
   leadSub,
   title,
@@ -71,9 +85,9 @@ export function ListRow({
       } ${onClick ? "cursor-pointer transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/70" : ""} ${className}`}
       style={style}
     >
-      <span className="w-1 shrink-0" style={{ backgroundColor: accentColor }} />
+      {bar && <span className="w-1 shrink-0" style={{ backgroundColor: accentColor }} />}
       {(lead != null || leadSub != null) && (
-        <div className="flex min-w-11 flex-col justify-between py-2.5">
+        <div className={`flex min-w-11 flex-col justify-between py-2.5 ${bar ? "" : "pl-3"}`}>
           <span className="text-[13.5px] font-extrabold tabular-nums text-zinc-900 dark:text-zinc-100">
             {lead}
           </span>
@@ -82,7 +96,12 @@ export function ListRow({
           )}
         </div>
       )}
-      <div className="flex min-w-0 flex-1 flex-col justify-center py-2.5 pr-3">
+      {/* 바도 lead도 없으면 이 열이 카드의 첫 요소 — 왼쪽 여백을 직접 챙겨야 한다. */}
+      <div
+        className={`flex min-w-0 flex-1 flex-col justify-center py-2.5 pr-3 ${
+          !bar && lead == null && leadSub == null ? "pl-3" : ""
+        }`}
+      >
         <div className="flex items-center gap-1.5">
           <span className="truncate text-[14.5px] font-bold text-zinc-900 dark:text-zinc-100">{title}</span>
           {trailing != null && (

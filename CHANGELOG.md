@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+- feat(cli): `m1kkit new <name>` — 검증된 Vite + React + kit 템플릿을 복사해 새 앱 생성. 이름/컬러/한줄/배포URL 4문항만 묻고, `--url`을 주면 방문자 트래커 등록·배선까지 한 번에. 산문 스킬이 매번 코드를 다시 타이핑하며 깨뜨리던 것들(`useState(colors.blue)` 리터럴 협착, `vite-env.d.ts` 누락, TODO만 남은 빈 화면)을 실파일로 고정하고 테스트로 잠금
+- feat(cli): `m1kkit track <url> --write` — 발급받은 slug를 `<Watermark trackSlug>`와 `.env`에 직접 꽂는다. 지금까지 `track`은 slug를 `.m1k.json`에 적어두기만 하고 앱에 연결하는 단계가 아예 없어서, "트래커를 붙였다"가 사실이 아닌 경우가 많았다
+- fix(cli): `track` 성공 안내가 프로젝트 종류와 무관하게 `NEXT_PUBLIC_M1K_SLUG`를 알려주던 문제 — Vite 프로젝트에서 그대로 따르면 `process.env`가 없어 조용히 집계 0이 된다(에러도 안 남). vite/next를 감지해 각각의 방법을 안내
+- **breaking(list-row): 왼쪽 컬러바가 opt-in으로 바뀜 (`bar`, 기본 `false`).** 한쪽 모서리의 굵은 컬러 스트라이프는 널리 알려진 생성형 UI 티라서 기본값에서 뺐다. 색이 실제로 분류를 뜻하는 일정/간트에서만 `<ListRow bar accent="...">`로 켠다. 기존 모양을 유지하려면 `bar`를 추가할 것
+- docs(skill): `m1kapp-init`을 `m1kkit new` 래퍼로 재작성 — 뼈대는 템플릿이, 첫 화면의 살은 LLM이. 새 `m1kapp-new` 스킬을 `m1kkit skills`로 배포
+
 ## 0.0.37
 - feat(cli): `m1kkit stats` 청결도에 **파일 I/O 밀도** 축 — cognitive·중복은 "코드가 얼마나 꼬였나"만 봐서 5줄짜리 흠 없는 함수가 루프에서 수백 번 불리는 N+1은 원리상 못 잡는다. 파일 읽는 함수를 호출 그래프 2홉까지 전파해(얇은 접근자가 진짜 주인공이라) for/map 안에서 무캐시로 불리는 자리를 감점(×4, 최대 20). 모듈 캐시(Map get/set) 끼면 참고로만. `quality.io`에 위치 기록
 - feat(cli): `m1kkit stats` 청결도에 **렌더 인질** 축 — `{data && <Nav a={local} b={data.x} />}`처럼 fetch 하나가 자기와 무관한 프롭까지 통째로 게이트하는 자리를 잡는다. 훅 값으로 게이트된 JSX에서 실제 의존 프롭 비율이 절반 미만이면 인질로 보고 감점(×3, 최대 10). `quality.renderGates`에 위치·의존 비율 기록

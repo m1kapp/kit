@@ -60,10 +60,11 @@ export function NewComponentsDemo({ themeColor }: { themeColor: string }) {
         </div>
       </ComponentCard>
 
-      <ComponentCard name="ListRow" desc="컬러바 + 시간 + 2줄, heightScale 비례 높이" code={`// 일정이면 분/30을 넘기세요\n<ListRow accent="#7fc06a" lead="14:00" title="회의"\n  sub="👥 김상훈" heightScale={60 / 30} onClick={open} />`}>
+      <ComponentCard name="ListRow" desc="시간 + 2줄, heightScale 비례 높이 · 컬러바는 bar로 opt-in" code={`// 기본은 바 없음 — 일반 목록\n<ListRow title="첫 항목" sub="설명" onClick={open} />\n\n// 색이 분류를 뜻하는 일정/간트에서만 bar를 켠다\n<ListRow bar accent="#7fc06a" lead="14:00" title="회의"\n  sub="👥 김상훈" heightScale={60 / 30} onClick={open} />`}>
         <div className="space-y-1.5">
-          <ListRow accent="#7fc06a" lead="09:00" title="스탠드업" sub="👥 팀 전체" trailing="● 지금" active heightScale={1} onClick={() => {}} />
-          <ListRow accent="#5b9bd5" lead="14:00" leadSub="15:00" title="디자인 리뷰" sub="🎨 피그마 링크" heightScale={2} onClick={() => {}} />
+          <ListRow title="첫 항목" sub="바 없는 기본형" onClick={() => {}} />
+          <ListRow bar accent="#7fc06a" lead="09:00" title="스탠드업" sub="👥 팀 전체" trailing="● 지금" active heightScale={1} onClick={() => {}} />
+          <ListRow bar accent="#5b9bd5" lead="14:00" leadSub="15:00" title="디자인 리뷰" sub="🎨 피그마 링크" heightScale={2} onClick={() => {}} />
         </div>
       </ComponentCard>
 
