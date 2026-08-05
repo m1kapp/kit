@@ -70,10 +70,12 @@ export interface WatermarkProps {
    * doesn't shrink to a sliver in a field of watermark (it covers ~26% of a
    * 1440px screen but only ~10% of a 2560px one).
    *
-   * Default: `true` — a continuous, viewport-width-driven scale: 1:1 at
-   * ≤1024px, ramping to ×1.5 by ~2520px+ (see the `clamp()` in `.kit-stage`).
-   * Pass a number to pin one fixed factor everywhere, or `false` for 1:1 always.
-   * The watermark background itself is never scaled; it always fills the viewport.
+   * Default: `true` — a continuous scale driven by viewport width and capped
+   * by available viewport height. Wide-but-short screens stay at a smaller
+   * factor so flex layout never squashes the shell's proportions. The factor
+   * tops out at ×1.5 (see `.kit-stage`). Pass a number to pin one fixed factor
+   * everywhere, or `false` for 1:1 always. The watermark background itself is
+   * never scaled; it always fills the viewport.
    */
   zoom?: boolean | number;
 }
@@ -98,7 +100,7 @@ export function Watermark({
 }: WatermarkProps) {
   injectStyle();
 
-  // `.kit-stage`'s class rule sets --kit-zoom to a clamp() by default. An
+  // `.kit-stage` derives --kit-zoom from width and height clamps by default. An
   // inline declaration on this same element outranks it (style attribute beats
   // any selector-based rule), so `zoom={false}`/`zoom={n}` just override the var.
   const zoomVars =
