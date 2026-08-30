@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.41
+- fix(styles): Next.js가 `<KitStyles />`로 서버 CSS를 먼저 넣은 경우 런타임 자동 주입을 생략해 FOUC 없이 스타일시트 한 벌만 유지
+
 ## 0.0.39
 - ci: npm Trusted Publishing(OIDC) 파이프라인으로 전환 — 이 릴리스부터 태그 푸시가 곧 publish
 

@@ -3,10 +3,9 @@ import { COMPILED_CSS } from "./_compiled-styles";
 let injected = false;
 
 /**
- * Insert kit's compiled stylesheet into `<head>` exactly once, the moment
- * anything is imported from `@m1kapp/kit` (see the side-effect call below —
- * this runs at module load, before React ever renders anything, so the CSS
- * is guaranteed present by the time any kit component mounts).
+ * Insert kit's compiled stylesheet into `<head>` exactly once for client-only
+ * apps. SSR apps can render `<KitStyles />` before the first paint; when that
+ * server style is already present, the client injector leaves it in place.
  *
  * `AppShell` used to *also* render its own `<style href="m1kapp-kit"
  * precedence="default">`, meaning the ~60KB stylesheet was inserted twice —
@@ -18,10 +17,12 @@ let injected = false;
  * the light-mode color. Confirmed via `CSS.getMatchedStylesForNode` against a
  * real double-injected page, and reproduced in dev/prod, with/without
  * StrictMode, and in kit's own already-shipped demo app. `AppShell` no longer
- * renders that `<style>` — this is the only injection path now.
+ * renders that `<style>`; SSR apps use `<KitStyles />`, while client-only apps
+ * use this injector.
  */
 export function injectStyles() {
   if (injected || typeof document === "undefined") return;
+  if (document.querySelector('[data-m1kapp-ui], style[data-href="m1kapp-kit"]')) return;
   injected = true;
   const el = document.createElement("style");
   el.setAttribute("data-m1kapp-ui", "");
