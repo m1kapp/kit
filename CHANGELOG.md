@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.42
+- fix(styles): 앱 CSS 가 `!important` 로 인풋 글자를 16px 아래로 눌러도 iOS 포커스 자동 줌이 안 생기게 — 터치 기기(`pointer: coarse`)에서만 킷의 16px 보호를 `!important` 로 되받아친다. nlnn 검색 인풋(13px `!important`)이 실제로 뚫렸던 구멍. 데스크톱은 앱이 정한 크기 그대로
+- fix(template): `m1kkit new` 템플릿·데모의 viewport 에 `maximum-scale=1, viewport-fit=cover` — 새 앱은 시작부터 두 겹 방어
+
 ## 0.0.41
 - fix(styles): Next.js가 `<KitStyles />`로 서버 CSS를 먼저 넣은 경우 런타임 자동 주입을 생략해 FOUC 없이 스타일시트 한 벌만 유지
 

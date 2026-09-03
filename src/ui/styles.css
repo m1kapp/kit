@@ -53,6 +53,18 @@
   textarea {
     font-size: max(16px, 1em);
   }
+
+  /* An app stylesheet can shove the rule above aside with its own !important —
+     nlnn's 13px search box did exactly that, and iOS zoomed on focus again.
+     On touch screens (the only place the auto-zoom exists) win the fight back;
+     desktop keeps whatever size the app chose. */
+  @media (pointer: coarse) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+    select,
+    textarea {
+      font-size: max(16px, 1em) !important;
+    }
+  }
 }
 
 /* Watermark stage — the shell + credit group, scaled up on big screens.
