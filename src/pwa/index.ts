@@ -154,4 +154,3 @@ export function createManifest(options: {
   return () => manifest;
 }
 
-export { ScrollRestorer, markTabNavigation } from "./scroll-restorer";

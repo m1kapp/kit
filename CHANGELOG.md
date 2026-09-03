@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.46
+- **fix: 0.0.45 가 Vite 앱을 죽이던 문제.** `ScrollRestorer` 의 `next/navigation` 런타임 임포트가 메인 배럴에 섞여 next 내부가 통째로 번들되고, ESM 에서 `Dynamic require of "react"` 로 앱이 하얗게 떴다(carboxsize 프로덕션 실사고 — 즉시 롤백했다). Next 전용 조각을 `@m1kapp/kit/next` 서브패스로 분리 — `import { ScrollRestorer } from "@m1kapp/kit/next"`
+
 ## 0.0.45
 - feat(utils): KST 달력 유틸 `kstToday/kstMidnight/kstNowParts/startOfKstWeek/kstWeekLabel/kstWeekTitle/kstWeekParam/weeksAgoFromKstWeekParam` — UTC 서버에서 한국 날짜·ISO 주차 경계를 정확히. ytcc·mysheet·claude-rank·web 이 각자 재구현하며 하이드레이션 밀림을 내던 것을 한 곳으로
 - feat(utils): 한글 초성 검색 `matchesQuery`/`toChoseong` — "ㅅㅌㅅ"→셀토스. carboxsize 에서 승격

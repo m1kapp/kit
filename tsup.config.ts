@@ -31,6 +31,13 @@ export default defineConfig([
     entry: { ogimage: "src/og/index.ts" },
     external: ["react", "react-dom", "@vercel/og", "next"],
   },
+  // Next 전용 클라이언트 조각 — next/navigation 을 쓴다. 메인 배럴과 분리
+  {
+    ...common,
+    entry: { next: "src/next/index.ts" },
+    external: ["react", "react-dom", "next"],
+    banner: { js: '"use client";' },
+  },
   // PWA utils — server-safe (no "use client"), for manifest.ts / viewport exports
   {
     ...common,

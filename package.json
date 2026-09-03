@@ -1,6 +1,6 @@
 {
   "name": "@m1kapp/kit",
-  "version": "0.0.45",
+  "version": "0.0.46",
   "description": "UI, SEO, and PWA utilities for side projects",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -25,6 +25,11 @@
       "types": "./dist/pwa.d.ts",
       "import": "./dist/pwa.mjs",
       "require": "./dist/pwa.js"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.mjs",
+      "require": "./dist/next.js"
     },
     "./utils": {
       "types": "./dist/utils.d.ts",
