@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.44
+- fix(watermark): 앱의 아이콘 리셋(`svg { width: 1em; … }`)이 워터마크 SVG 를 16px 로 접어 배경 무늬가 통째로 사라지던 버그 — nlnn 에서 실제로 일어났다. 크기·fill·stroke 를 인라인 스타일로 박아 어떤 앱 스타일시트에도 지지 않게
+
 ## 0.0.43
 - feat(utils): 한국어 조사 헬퍼 `particle`/`withParticle` — 받침·ㄹ받침·영문 소리 짐작까지. nlnn 에서 승격
 - feat(utils): 조/억 금액 표기 `formatWon`/`formatWonTight`/`formatDollarEok` — "6.0조 원" · "8,508억" · "$190억"

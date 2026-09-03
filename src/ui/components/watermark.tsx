@@ -173,6 +173,19 @@ export function Watermark({
         height="100%"
         aria-hidden="true"
         style={{
+          /*
+            Size lives in the inline style, not only in the width/height
+            attributes: app stylesheets commonly carry an icon reset like
+            `svg { width: 1em; height: 1em }`, and CSS beats presentation
+            attributes — nlnn's watermark collapsed to 16px that way.
+            Inline style beats any stylesheet. Same story for fill/stroke:
+            `svg { fill: none; stroke: currentColor }` would outline the
+            pattern text, so pin them here too.
+          */
+          width: "100%",
+          height: "100%",
+          fill: "rgba(255,255,255,0.12)",
+          stroke: "none",
           transform: "rotate(-12deg) scale(2)",
           transformOrigin: "center center",
           overflow: "visible",
