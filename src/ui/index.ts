@@ -161,3 +161,9 @@ export type { CountdownProps, CountdownLabels } from "./components/countdown";
 
 export { Carousel } from "./components/carousel";
 export type { CarouselProps } from "./components/carousel";
+
+export { EvidenceDialog } from "./components/evidence-dialog";
+export type { EvidenceDialogProps } from "./components/evidence-dialog";
+
+export { ColumnChart, DuoBar, CumulativeCurve } from "./components/charts";
+export type { ColumnChartProps, ColumnDatum, DuoBarProps, DuoBarSide, CumulativeCurveProps } from "./components/charts";

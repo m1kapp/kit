@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.45
+- feat(utils): KST 달력 유틸 `kstToday/kstMidnight/kstNowParts/startOfKstWeek/kstWeekLabel/kstWeekTitle/kstWeekParam/weeksAgoFromKstWeekParam` — UTC 서버에서 한국 날짜·ISO 주차 경계를 정확히. ytcc·mysheet·claude-rank·web 이 각자 재구현하며 하이드레이션 밀림을 내던 것을 한 곳으로
+- feat(utils): 한글 초성 검색 `matchesQuery`/`toChoseong` — "ㅅㅌㅅ"→셀토스. carboxsize 에서 승격
+- feat(pwa): `ScrollRestorer` — AppShell 내부 스크롤 컨테이너의 URL 별 뒤로가기 위치 복원(리스트→상세→뒤로). 브라우저 기본 복원이 안 먹는 kit 구조의 공백을 메움. ytcc 실전 코드 승격, Next 전용
+- feat(ui): `EvidenceDialog` — 값을 누르면 인용문·캡처 그림·원문 링크가 뜨는 근거 다이얼로그. nlnn·median-income-calc 에 반복되던 골격
+- feat(ui): 차트 프리미티브 `ColumnChart`(세로 막대+평균선+예측 구간)·`DuoBar`(2분할 비율 바+범례)·`CumulativeCurve`(누적 곡선+마일스톤 배지+목표선). 가로 `BarList` 뿐이라 앱마다 손 SVG 를 그리던 자리
+- feat(avatar): 후보 URL 배열 `candidates`(차례로 시도, 전부 실패해야 이니셜)와 그라데이션 `ring` 추가 — web 판 상위호환 흡수, 기존 API 그대로
+- fix(select): 메뉴를 fixed 로 띄우고 아래 공간이 모자라면 위로 뒤집는다 — overflow 스크롤 컨테이너 안에서 메뉴가 잘려 나가던 문제(ytcc 판 역이식). 스크롤·리사이즈 시엔 닫는다
+
 ## 0.0.44
 - fix(watermark): 앱의 아이콘 리셋(`svg { width: 1em; … }`)이 워터마크 SVG 를 16px 로 접어 배경 무늬가 통째로 사라지던 버그 — nlnn 에서 실제로 일어났다. 크기·fill·stroke 를 인라인 스타일로 박아 어떤 앱 스타일시트에도 지지 않게
 

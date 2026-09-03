@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronDownIcon } from "./_icons";
 
 export interface SelectOption<T extends string | number> {
@@ -47,6 +47,33 @@ export function Select<T extends string | number>({
   const ref = useRef<HTMLDivElement>(null);
   const accentColor = accent ?? "var(--kit-accent)";
 
+  /*
+    메뉴는 fixed 로 띄운다 — 트리거가 overflow 스크롤 컨테이너 안에 있으면
+    absolute 메뉴가 컨테이너에 잘려 나간다(ytcc 편집기에서 실측). 열 때 트리거
+    위치를 재서 화면 좌표에 그리고, 아래 공간이 모자라면 위로 뒤집는다.
+  */
+  const MENU_MAX = 220;
+  const [box, setBox] = useState<{ left: number; top: number; width: number; up: boolean } | null>(null);
+  useLayoutEffect(() => {
+    if (!open) return;
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const below = window.innerHeight - r.bottom;
+    const rows = options.length + (allowClear ? 1 : 0);
+    const up = below < Math.min(MENU_MAX, rows * 40 + 8) && r.top > below;
+    setBox({ left: r.left, top: up ? r.top : r.bottom + 4, width: r.width, up });
+    // 스크롤·리사이즈 중엔 좌표가 어긋나므로 그냥 닫는다(따라다니게 하면 더 산만하다)
+    const close = () => setOpen(false);
+    window.addEventListener("resize", close);
+    window.addEventListener("scroll", close, true);
+    return () => {
+      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", close, true);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     function onDoc(e: PointerEvent) {
@@ -86,8 +113,16 @@ export function Select<T extends string | number>({
         <ChevronDownIcon className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
-      {open && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-[220px] overflow-y-auto rounded-xl border border-zinc-200/70 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
+      {open && box && (
+        <div
+          className="fixed z-[90] overflow-y-auto rounded-xl border border-zinc-200/70 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-800"
+          style={{
+            left: box.left,
+            width: box.width,
+            maxHeight: MENU_MAX,
+            ...(box.up ? { bottom: window.innerHeight - box.top + 4 } : { top: box.top }),
+          }}
+        >
           {allowClear && (
             <button
               type="button"

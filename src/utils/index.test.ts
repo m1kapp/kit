@@ -174,3 +174,68 @@ describe("watermarkTint", () => {
     expect(watermarkTint("#ffffff")).toBe(watermarkTint("#000000"));
   });
 });
+
+// ─── KST 달력 ───────────────────────────────────────────────────────────────
+
+import {
+  isKstToday, kstMidnight, kstNowParts, kstToday, kstWeekLabel, kstWeekParam,
+  kstWeekTitle, matchesQuery, startOfKstWeek, toChoseong, weeksAgoFromKstWeekParam,
+} from "./index";
+
+describe("kst", () => {
+  // 2026-09-03(목) 12:00 KST = 03:00 UTC
+  const now = Date.UTC(2026, 8, 3, 3, 0, 0);
+
+  test("kstToday · kstNowParts", () => {
+    expect(kstToday(now)).toBe("2026-09-03");
+    expect(kstNowParts(now)).toEqual({ date: "2026-09-03", weekday: "목", hhmm: "12:00" });
+  });
+
+  test("UTC 자정 직전에도 한국 날짜가 맞다 — 서버가 UTC 라서 생기던 밀림", () => {
+    // 2026-09-02 23:00 UTC = 2026-09-03 08:00 KST
+    expect(kstToday(Date.UTC(2026, 8, 2, 23, 0, 0))).toBe("2026-09-03");
+  });
+
+  test("kstMidnight 은 그 한국 날짜의 00:00 epoch", () => {
+    expect(kstMidnight(now)).toBe(Date.UTC(2026, 8, 2, 15, 0, 0)); // 9/3 00:00 KST
+  });
+
+  test("이번주 월요일 · 주차 라벨", () => {
+    expect(startOfKstWeek(0, now)).toBe(Date.UTC(2026, 7, 30, 15, 0, 0)); // 8/31(월) 00:00 KST
+    expect(kstWeekLabel(0, now)).toBe("8.31(월) ~ 9.6(일)");
+  });
+
+  test("ISO 주차 왕복", () => {
+    const param = kstWeekParam(0, now);
+    expect(param).toMatch(/^2026-\d{2}$/);
+    expect(weeksAgoFromKstWeekParam(param, now)).toBe(0);
+    expect(weeksAgoFromKstWeekParam(kstWeekParam(3, now), now)).toBe(3);
+    expect(weeksAgoFromKstWeekParam("nope", now)).toBeNull();
+    expect(kstWeekTitle(0, now)).toBe(`2026년 ${Number(param.slice(5))}주차`);
+  });
+
+  test("isKstToday", () => {
+    expect(isKstToday(Date.UTC(2026, 8, 2, 23, 30, 0), now)).toBe(true); // 같은 한국 날짜
+    expect(isKstToday(Date.UTC(2026, 8, 2, 12, 0, 0), now)).toBe(false); // 어제(한국)
+  });
+});
+
+// ─── 초성 검색 ──────────────────────────────────────────────────────────────
+
+describe("matchesQuery", () => {
+  test("초성 질의", () => {
+    expect(toChoseong("셀토스")).toBe("ㅅㅌㅅ");
+    expect(matchesQuery("ㅅㅌㅅ", "셀토스")).toBe(true);
+    expect(matchesQuery("ㅅㅌㅅ", "쏘렌토")).toBe(false);
+  });
+
+  test("일반 부분일치 · 대소문자·공백 무시", () => {
+    expect(matchesQuery("ev", "EV6", "기아")).toBe(true);
+    expect(matchesQuery("모델 y", "모델Y 주니퍼")).toBe(true);
+    expect(matchesQuery("현대", "기아", undefined, "현대자동차")).toBe(true);
+  });
+
+  test("빈 질의는 전부 통과", () => {
+    expect(matchesQuery("", "아무거나")).toBe(true);
+  });
+});
