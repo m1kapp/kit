@@ -84,6 +84,10 @@ import { splitLines, injectStyle, appendUtm } from "./watermark-text";
 
 
 /** Estimate rendered width of a string. CJK chars ≈ 1.0×, Latin ≈ 0.62× font size. */
+/**
+ * `color` 는 액센트를 그대로 넣지 말 것 — 쨍한 색 위 워터마크 글자가 앱보다
+ * 시끄럽다. `watermarkTint(accent)`(utils)로 어두운 저채도 틴트를 만들어 쓴다.
+ */
 export function Watermark({
   children,
   color = "#0f172a",

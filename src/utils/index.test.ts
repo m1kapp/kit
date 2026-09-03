@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { formatNumber, formatPrice, relativeTime } from "./index";
+import { formatDollarEok, formatNumber, formatPrice, formatWon, formatWonTight, particle, relativeTime, watermarkTint, withParticle } from "./index";
 
 // ─── relativeTime ───────────────────────────────────────────────────────────
 
@@ -105,5 +105,72 @@ describe("formatPrice", () => {
 
   test("KRW 소수점 없음", () => {
     expect(formatPrice(1_000)).not.toContain(".");
+  });
+});
+
+// ─── particle / withParticle ────────────────────────────────────────────────
+
+describe("particle", () => {
+  test("받침 있는 한글 → 은/이/을", () => {
+    expect(withParticle("하이닉스", "은", "는")).toBe("하이닉스는");
+    expect(withParticle("밥캣", "을", "를")).toBe("밥캣을");
+    expect(withParticle("배달의민족", "이", "가")).toBe("배달의민족이");
+  });
+
+  test("ㄹ 받침 + 으로 → 로", () => {
+    expect(withParticle("서울", "으로", "로")).toBe("서울로");
+    expect(withParticle("조선", "으로", "로")).toBe("조선으로");
+  });
+
+  test("영문은 소리로 짐작", () => {
+    expect(withParticle("Anysphere", "을", "를")).toBe("Anysphere를");
+    expect(withParticle("Lucasfilm", "을", "를")).toBe("Lucasfilm을");
+    expect(withParticle("Slack", "이", "가")).toBe("Slack이");
+  });
+
+  test("숫자 끝", () => {
+    expect(withParticle("1", "이", "가")).toBe("1이");
+    expect(withParticle("2", "이", "가")).toBe("2가");
+  });
+});
+
+// ─── formatWon / formatDollarEok ────────────────────────────────────────────
+
+describe("formatWon", () => {
+  test("조 단위", () => {
+    expect(formatWon(6_000_000_000_000)).toBe("6.0조 원");
+    expect(formatWonTight(90_500_000_000_000)).toBe("90.5조");
+  });
+
+  test("천조 이상은 쉼표 정수", () => {
+    expect(formatWonTight(1_236_700_000_000_000)).toBe("1,237조");
+  });
+
+  test("1조 미만은 억", () => {
+    expect(formatWon(850_800_000_000)).toBe("8,508억 원");
+  });
+});
+
+describe("formatDollarEok", () => {
+  test("자릿수별", () => {
+    expect(formatDollarEok(19_000_000_000)).toBe("$190억");
+    expect(formatDollarEok(117_000_000_000)).toBe("$1,170억");
+    expect(formatDollarEok(350_000_000)).toBe("$3.5억");
+    expect(formatDollarEok(-4_900_000_000)).toBe("-$49억");
+  });
+});
+
+// ─── watermarkTint ──────────────────────────────────────────────────────────
+
+describe("watermarkTint", () => {
+  test("쨍한 파랑 → 어두운 남색 슬레이트", () => {
+    const tint = watermarkTint("#2563eb");
+    expect(tint).toMatch(/^#[0-9a-f]{6}$/);
+    const l = parseInt(tint.slice(1, 3), 16) + parseInt(tint.slice(3, 5), 16) + parseInt(tint.slice(5, 7), 16);
+    expect(l).toBeLessThan(200); // 충분히 어둡다
+  });
+
+  test("무채색은 어두운 회색", () => {
+    expect(watermarkTint("#ffffff")).toBe(watermarkTint("#000000"));
   });
 });

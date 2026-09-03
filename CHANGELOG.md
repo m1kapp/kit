@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.43
+- feat(utils): 한국어 조사 헬퍼 `particle`/`withParticle` — 받침·ㄹ받침·영문 소리 짐작까지. nlnn 에서 승격
+- feat(utils): 조/억 금액 표기 `formatWon`/`formatWonTight`/`formatDollarEok` — "6.0조 원" · "8,508억" · "$190억"
+- feat(utils): `watermarkTint(accentHex)` — 액센트의 색조만 남긴 어두운 저채도 배경색. 쨍한 액센트를 `<Watermark color>` 에 그대로 넣어 배경이 앱보다 시끄러워지는 것(income·carboxsize 실사례)을 막는 공식
+
 ## 0.0.42
 - fix(styles): 앱 CSS 가 `!important` 로 인풋 글자를 16px 아래로 눌러도 iOS 포커스 자동 줌이 안 생기게 — 터치 기기(`pointer: coarse`)에서만 킷의 16px 보호를 `!important` 로 되받아친다. nlnn 검색 인풋(13px `!important`)이 실제로 뚫렸던 구멍. 데스크톱은 앱이 정한 크기 그대로
 - fix(template): `m1kkit new` 템플릿·데모의 viewport 에 `maximum-scale=1, viewport-fit=cover` — 새 앱은 시작부터 두 겹 방어

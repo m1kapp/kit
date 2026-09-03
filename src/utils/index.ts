@@ -220,3 +220,113 @@ export function isoDurationToSec(duration: string): number {
   const { hours, minutes, seconds } = parseIsoDuration(duration);
   return hours * 3600 + minutes * 60 + seconds;
 }
+
+/* ─────────────────────────────────────────
+   한국어 조사
+   받침을 보고 을/를 · 이/가 · 은/는 · 으로/로를 고른다.
+   nlnn 에서 옮겨 옴 — 한국어 앱마다 다시 짜게 되는 것이라 킷에 둔다.
+───────────────────────────────────────── */
+
+/**
+ * 낱말 끝에 받침이 있나. 한글은 글자에서 읽고, 영문은 흔히 옮겨 읽는 소리로
+ * 짐작한다 — Lucasfilm(루카스필름)은 받침이 있고 Anysphere(애니스피어)는 없다.
+ * 끝이 모음이나 r·s·x·h·w·y 면 받침 없음, 나머지 자음이면 받침 있음으로 본다.
+ */
+function hasFinalConsonant(word: string): boolean {
+  const last = word.trim().slice(-1);
+  const code = last.charCodeAt(0);
+  if (code >= 0xac00 && code <= 0xd7a3) return (code - 0xac00) % 28 !== 0;
+  if (/[0-9]/.test(last)) return /[013678]/.test(last); // 일·삼·육·칠·팔·영 은 받침이 있다
+  return /[bcdfgklmnptvz]/i.test(last);
+}
+
+/** ㄹ 받침은 "으로" 가 아니라 "로" 를 받는다 — "서울로", "조선으로". */
+function endsWithRieul(word: string): boolean {
+  const code = word.trim().slice(-1).charCodeAt(0);
+  if (code < 0xac00 || code > 0xd7a3) return /l$/i.test(word.trim());
+  return (code - 0xac00) % 28 === 8;
+}
+
+/**
+ * 뒤에 오는 말에 맞는 조사를 고른다.
+ *
+ *   particle("하이브", "은", "는")   // "는"
+ *   particle("서울", "으로", "로")   // "로" (ㄹ 받침 특례)
+ */
+export function particle(word: string, withFinal: string, withoutFinal: string): string {
+  if (withFinal === "으로" && endsWithRieul(word)) return "로";
+  return hasFinalConsonant(word) ? withFinal : withoutFinal;
+}
+
+/** 낱말에 조사를 붙여 돌려준다. withParticle("Anysphere", "을", "를") → "Anysphere를" */
+export const withParticle = (word: string, withFinal: string, withoutFinal: string): string =>
+  `${word}${particle(word, withFinal, withoutFinal)}`;
+
+/* ─────────────────────────────────────────
+   조/억 금액 표기
+   "6.0조 원" · "8,508억 원" · "$190억"
+───────────────────────────────────────── */
+
+/** 원화를 조/억으로. 1조 이상은 조(소수 1자리), 천조 이상은 쉼표 정수 조, 그 아래는 억. */
+export function formatWon(n: number): string {
+  return `${formatWonTight(n)} 원`;
+}
+
+/** formatWon 에서 " 원" 을 뗀 꼴. 좁은 칸·문장 속에 쓴다 — "6.0조", "8,508억". */
+export function formatWonTight(n: number): string {
+  const jo = n / 1e12;
+  if (Math.abs(jo) >= 1000) return `${Math.round(jo).toLocaleString("ko-KR")}조`;
+  if (Math.abs(jo) >= 1) return `${jo.toFixed(1)}조`;
+  return `${Math.round(n / 1e8).toLocaleString("ko-KR")}억`;
+}
+
+/** 달러를 억 단위로 — "$190억", "$3.5억". 빼기표는 $ 앞에 둔다("-$49억"). */
+export function formatDollarEok(n: number): string {
+  const eok = n / 1e8;
+  const size = Math.abs(eok);
+  const digits =
+    size >= 1000 ? Math.round(size).toLocaleString("ko-KR") : size >= 10 ? size.toFixed(0) : size.toFixed(1);
+  return `${n < 0 ? "-" : ""}$${digits}억`;
+}
+
+/* ─────────────────────────────────────────
+   watermarkTint
+   액센트색 → 워터마크 배경으로 쓸 어두운 저채도 틴트
+───────────────────────────────────────── */
+
+/**
+ * 액센트를 그대로 <Watermark color> 에 쓰면 배경이 앱보다 시끄럽다(쨍한 파랑 위
+ * 워터마크 글자가 화면을 덮는다). 색조는 남기고 채도·명도를 눌러, nlnn 의
+ * 어두운 올리브(#3d4230)처럼 앱이 도드라지는 배경을 만든다.
+ *
+ *   <Watermark color={watermarkTint("#2563eb")} …>   // 어두운 남색 슬레이트
+ */
+export function watermarkTint(accentHex: string, { saturation = 0.22, lightness = 0.16 } = {}): string {
+  const hex = accentHex.replace("#", "");
+  const full = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;
+  const r = parseInt(full.slice(0, 2), 16) / 255;
+  const g = parseInt(full.slice(2, 4), 16) / 255;
+  const b = parseInt(full.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+  // 무채색 액센트는 색조가 없다 — 그냥 어두운 회색이 된다.
+  const s = d === 0 ? 0 : saturation;
+  const l = lightness;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h * 6) % 2) - 1));
+  const m = l - c / 2;
+  const [r2, g2, b2] =
+    h < 1 / 6 ? [c, x, 0] : h < 2 / 6 ? [x, c, 0] : h < 3 / 6 ? [0, c, x] : h < 4 / 6 ? [0, x, c] : h < 5 / 6 ? [x, 0, c] : [c, 0, x];
+  const to = (v: number) =>
+    Math.round((v + m) * 255)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${to(r2)}${to(g2)}${to(b2)}`;
+}
