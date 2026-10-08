@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.47
+- **fix(in-app-sheet): 바깥(어두운 배경)을 눌러도 시트가 안 닫히던 버그.** 시트를 아래에 붙이는 전체 크기 래퍼가 백드롭 위를 덮어 탭을 가로챘다(monthgram 실기기 제보). 래퍼는 `pointer-events-none`, 시트만 `pointer-events-auto` — 바깥 탭은 백드롭의 `onClose` 로, 시트 안 탭은 그대로
+
 ## 0.0.46
 - **fix: 0.0.45 가 Vite 앱을 죽이던 문제.** `ScrollRestorer` 의 `next/navigation` 런타임 임포트가 메인 배럴에 섞여 next 내부가 통째로 번들되고, ESM 에서 `Dynamic require of "react"` 로 앱이 하얗게 떴다(carboxsize 프로덕션 실사고 — 즉시 롤백했다). Next 전용 조각을 `@m1kapp/kit/next` 서브패스로 분리 — `import { ScrollRestorer } from "@m1kapp/kit/next"`
 

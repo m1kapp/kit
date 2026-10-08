@@ -159,14 +159,15 @@ export function InAppSheet({
                 className="absolute inset-0 cursor-pointer bg-black/40"
                 style={backdropStyle}
               />
-              {/* sheet wrapper — positions sheet at bottom, allows slide from offscreen */}
-              <div className="absolute inset-0 flex items-end">
+              {/* sheet wrapper — positions sheet at bottom, allows slide from offscreen.
+                  It covers the backdrop, so it lets taps through; only the sheet takes them. */}
+              <div className="pointer-events-none absolute inset-0 flex items-end">
                 <div
                   ref={trapRef}
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby={title ? titleId : undefined}
-                  className={`relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform ${fullHeight ? "h-full flex flex-col" : ""} ${className}`}
+                  className={`pointer-events-auto relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform ${fullHeight ? "h-full flex flex-col" : ""} ${className}`}
                   style={sheetStyle}
                   onClick={(e) => e.stopPropagation()}
                 >
