@@ -47,7 +47,7 @@ export interface PoweredByKitProps {
   slug?: string;
   /** Tracker host. Default: "www.m1k.app" (apex m1k.app는 www로 307 리다이렉트 → cross-origin fetch가 CORS로 깨지므로 www 직결) */
   trackerHost?: string;
-  /** Set false to disable the visitor beacon even when a slug is present */
+  /** Set false to disable the visitor beacon; counts and carousel still display when a slug is present */
   track?: boolean;
   /**
    * Whether the registered site has been claimed (귀속/인증) to an m1k.app account.
@@ -66,7 +66,7 @@ export interface PoweredByKitProps {
 
 /** 방문자 카운트 — 명시 prop 우선, 없으면 count 전용 공개 API에서 fetch */
 function useVisitorCounts(
-  tracking: boolean,
+  enabled: boolean,
   counts: PoweredByKitProps["counts"],
   trackerHost: string,
   trackerSlug: string | undefined,
@@ -74,14 +74,14 @@ function useVisitorCounts(
   const [fetched, setFetched] = useState<{ today: number; total: number } | null>(null);
 
   useEffect(() => {
-    if (!tracking || counts) return;
+    if (!enabled || counts) return;
     let alive = true;
     fetch(`https://${trackerHost}/api/sites/${encodeURIComponent(trackerSlug!)}?view=count`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (alive && d) setFetched({ today: Number(d.todayCount ?? d.today ?? 0), total: Number(d.total ?? 0) }); })
       .catch(() => { /* CORS/offline — counter just won't show */ });
     return () => { alive = false; };
-  }, [tracking, counts, trackerHost, trackerSlug]);
+  }, [enabled, counts, trackerHost, trackerSlug]);
 
   if (counts) return { today: counts.today ?? 0, total: counts.total ?? 0 };
   return fetched;
@@ -107,8 +107,8 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
   const moved = useRef(false);
   const go = (dir: number) => setIdx((i) => (i + dir + 2) % 2);
 
-  const visitorCounts = useVisitorCounts(tracking, counts, trackerHost, trackerSlug);
-  const hasCounter = tracking && !!visitorCounts;
+  const visitorCounts = useVisitorCounts(!!trackerSlug, counts, trackerHost, trackerSlug);
+  const hasCounter = !!trackerSlug && !!visitorCounts;
 
   // auto-advance every 10s (pause while a sheet is open)
   useEffect(() => {
@@ -159,7 +159,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
 
   return (
     <>
-      {tracking ? (
+      {trackerSlug ? (
         // Footer — carousel between the visitor counter and the powered-by
         // credit, navigable by arrows/swipe. A hidden badge img counts once.
         <div
@@ -181,7 +181,7 @@ export function PoweredByKit({ statsUrl = "/kit-stats.json", version, variant = 
           }}
         >
           {/* hidden beacon — counts each page view once */}
-          <img src={badgeUrl} alt="" aria-hidden="true" width={1} height={1} decoding="async" style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} />
+          {tracking && <img src={badgeUrl} alt="" aria-hidden="true" width={1} height={1} decoding="async" style={{ position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }} />}
           {hasCounter ? (
             <div className="relative">
               <div className="overflow-hidden mx-8">
