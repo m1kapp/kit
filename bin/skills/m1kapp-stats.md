@@ -19,9 +19,9 @@
 올바른 `--dir`/`--out`으로 한 번 돌려 데이터가 생기는지 확인한다.
 
 ```bash
-npx m1kkit stats --dir=. --out=public      # App Router(루트가 app/)
+npx --package=@m1kapp/kit m1kkit stats --dir=. --out=public      # App Router(루트가 app/)
 # 또는
-npx m1kkit stats --dir=src --out=public    # src/ 구조
+npx --package=@m1kapp/kit m1kkit stats --dir=src --out=public    # src/ 구조
 ```
 
 - 성공하면 `public/kit-stats.json`이 생기고 `컴포넌트 N/30 · 절약 X줄` 요약이 출력된다.
@@ -52,7 +52,7 @@ npx m1kkit stats --dir=src --out=public    # src/ 구조
 ## Step 3: 패널에서 확인
 
 - `PoweredByKit`(보통 `Watermark`가 자동 포함)을 열어 데이터가 뜨는지 본다.
-- **데이터가 이미 있으면** 패널 하단에 `갱신하려면 npx m1kkit stats` 안내가 보인다 — 빈 상태(명령어 실행 안내)는 더 이상 안 나온다.
+- **데이터가 이미 있으면** 패널 하단에 `갱신하려면 npx --package=@m1kapp/kit m1kkit stats` 안내가 보인다 — 빈 상태(명령어 실행 안내)는 더 이상 안 나온다.
 - 컴포넌트 사용률이 낮으면(예: 7/30) 더 쓸 만한 kit 컴포넌트를 권하고, 채택 후 stats를 **다시 돌려** 수치를 갱신한다.
 
 ---

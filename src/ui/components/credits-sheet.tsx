@@ -140,7 +140,7 @@ function StatsSetupGuide() {
       </div>
 
       <div className="rounded-lg bg-zinc-900 dark:bg-zinc-950 p-3">
-        <code className="text-xs text-emerald-400 font-mono">npx m1kkit stats</code>
+        <code className="break-all text-xs text-emerald-400 font-mono">npx --package=@m1kapp/kit m1kkit stats</code>
       </div>
 
       <div className="space-y-2">

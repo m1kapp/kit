@@ -1,4 +1,4 @@
-`npx m1kkit stats`(내부적으로 fixearly)가 낸 점수를 근거로, **동작을 바꾸지 않고** 코드를 정리한다.
+`npx --package=@m1kapp/kit m1kkit stats`(내부적으로 fixearly)가 낸 점수를 근거로, **동작을 바꾸지 않고** 코드를 정리한다.
 목적은 등급 숫자가 아니라 **다음에 이 코드를 고칠 때 드는 비용**을 줄이는 것이다.
 
 ---
@@ -60,7 +60,7 @@ cognitive = 중첩 깊이 가중(SonarSource S3776). `a && b && c`는 1, 5중 �
 ## Step 0: 진단
 
 ```bash
-npm run stats:report        # 또는 npx m1kkit stats --report
+npm run stats:report        # 또는 npx --package=@m1kapp/kit m1kkit stats --report
 ```
 
 리포트(HTML)에서 이 순서로 읽는다:

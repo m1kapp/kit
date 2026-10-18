@@ -70,7 +70,7 @@ if (!flags["no-stats"]) {
   if (typeof flags.out === "string") statsArgs.push(`--out=${flags.out}`);
   const r = spawnSync(process.execPath, statsArgs, { stdio: "inherit" });
   if (r.status !== 0) {
-    console.log("\n(분석은 건너뛰었어요 — 나중에 'npx m1kkit stats' 로 직접 실행할 수 있어요)");
+    console.log("\n(분석은 건너뛰었어요 — 나중에 'npx --package=@m1kapp/kit m1kkit stats' 로 직접 실행할 수 있어요)");
   } else {
     console.log("\n✓ 분석 결과는 kit-stats.json 에 저장됐고, 하단 'powered by' 크레딧 시트에서도 보여요.");
   }

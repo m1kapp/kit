@@ -36,9 +36,9 @@ export function KitStatsPanels({ stats }: { stats: KitStats }) {
     <>
       {/* kit 없이 만들었다면 */}
       <div className="rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4">
-        <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-1">kit 없이 직접 만들었다면</p>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-1">kit 대체 코드를 포함한 예상 줄 수</p>
         <p className="text-lg font-bold text-zinc-800 dark:text-zinc-200">
-          {totalIfNoKit.toLocaleString()}줄이 필요했을 거예요
+          {totalIfNoKit.toLocaleString()}줄 (추정)
         </p>
         <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
           {stats.source.files}개 파일 · {stats.source.dir}/
@@ -48,24 +48,26 @@ export function KitStatsPanels({ stats }: { stats: KitStats }) {
       {/* Code savings */}
       <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 p-5">
         <p className="text-sm text-emerald-600 dark:text-emerald-500">
-          그 중 <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{stats.kit.savedPercent}%</span>를 kit이 대신 처리
+          줄 수 기준 약 <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{stats.kit.savedPercent}%</span> 절약 추정
         </p>
         <div className="mt-3 space-y-1.5">
           <div className="flex justify-between text-xs">
-            <span className="text-zinc-500 dark:text-zinc-400">내가 쓴 코드</span>
+            <span className="text-zinc-500 dark:text-zinc-400">분석 대상 소스</span>
             <span className="font-mono text-zinc-700 dark:text-zinc-300">{stats.source.codeLines.toLocaleString()}줄</span>
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-emerald-600 dark:text-emerald-400">kit이 해준 코드</span>
+            <span className="text-emerald-600 dark:text-emerald-400">kit 대체 코드 (추정)</span>
             <span className="font-mono text-emerald-700 dark:text-emerald-300">{stats.kit.savedLines.toLocaleString()}줄</span>
           </div>
         </div>
         <div className="mt-3 flex items-baseline gap-3 text-xs text-emerald-500 dark:text-emerald-600">
           <span>{stats.kit.savedKB}KB</span>
           <span>·</span>
-          <span>A4 {stats.kit.savedA4}장 분량 절약</span>
+          <span>A4 {stats.kit.savedA4}장 분량 (추정)</span>
         </div>
       </div>
+
+      <p className="text-xs text-zinc-500 dark:text-zinc-400">줄 수 기반 추정이며 개발 시간·기능 활용률을 뜻하지 않습니다. 저장 데이터는 분석 시 --exclude로 제외할 수 있습니다.</p>
 
       <FeatureGroup category="component" stats={stats} />
       <FeatureGroup category="hook" stats={stats} />
@@ -76,7 +78,7 @@ export function KitStatsPanels({ stats }: { stats: KitStats }) {
         <span>분석: {new Date(stats.generatedAt).toLocaleDateString("ko-KR")}</span>
         <span aria-hidden>·</span>
         <span>갱신하려면</span>
-        <code className="rounded bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 font-mono text-zinc-500 dark:text-zinc-400">npx m1kkit stats</code>
+        <code className="break-all rounded bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 font-mono text-zinc-500 dark:text-zinc-400">npx --package=@m1kapp/kit m1kkit stats</code>
       </div>
     </>
   );
