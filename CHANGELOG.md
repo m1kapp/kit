@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.51
+- **feat(share): `<ShareButton install />` — 공유 버튼 하나로 공유와 앱 설치.** 설치할 수 있는 기기면 누를 때 "링크 보내기 · 홈 화면에 추가" 시트가 뜬다(안드로이드는 설치 창, iOS 는 안내 시트). 이미 설치했거나 지원 안 하면 지금처럼 바로 공유. `install={{ appName, iconSrc }}` 로 안내 시트의 이름·아이콘을 준다. 기본은 꺼짐 — 기존 앱 동작 그대로
+- **fix(pwa): `IOSInstallSheet` 가 헤더 안에서 찌그러지던 버그.** `backdrop-blur` 가 걸린 조상(AppShellHeader) 안에서 렌더하면 `fixed` 가 그 안에 갇혔다. body 로 포털한다 — 헤더에 둔 `PWAInstallButton` 도 같이 고쳐진다
+
 ## 0.0.50
 - **fix(in-app-sheet): 내용이 화면보다 길면 시트가 위로 넘쳐 제목·닫기 버튼이 잘리던 버그.** 시트 높이를 화면 안(위 1.5rem 여유)으로 묶고 내용만 안쪽에서 스크롤한다. 작은 폰(SE)에서 calc 화폐 목록 17칸이 실제로 넘쳤다. fullHeight 시트는 그대로
 

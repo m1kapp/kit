@@ -219,6 +219,8 @@ import { ShareButton, useShare } from "@m1kapp/kit";
 
 // 버튼 그대로 사용 — 모바일은 네이티브 공유, 데스크탑은 클립보드 복사
 <ShareButton url="https://m1k.app" title="My App" />
+// 설치할 수 있는 기기면 "링크 보내기 · 홈 화면에 추가" 시트를 띄운다(AppShell 안에서)
+<ShareButton url="https://m1k.app" title="My App" install={{ appName: "My App", iconSrc: "/icon-192.png" }} />
 
 // 커스텀 UI
 const { share, copied, canNativeShare } = useShare({ url: "https://m1k.app" });

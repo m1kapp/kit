@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useEscapeKey } from "../ui/hooks/use-escape-key";
 import { useFocusTrap } from "../ui/hooks/use-focus-trap";
 import { useScrollLock } from "../ui/hooks/use-scroll-lock";
@@ -50,7 +51,8 @@ export function IOSInstallSheet({ open, onClose, appName, iconSrc }: IOSInstallS
     },
   ];
 
-  return (
+  // body 로 띄운다 — 헤더처럼 backdrop-blur 가 걸린 조상 안에서 렌더하면 fixed 가 그 안에 갇혀 시트가 헤더 속에 찌그러진다
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -119,7 +121,7 @@ export function IOSInstallSheet({ open, onClose, appName, iconSrc }: IOSInstallS
         </div>
       </div>
     </>
-  );
+  , document.body);
 }
 
 /* ── Icons ── */
