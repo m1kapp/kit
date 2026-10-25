@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.57
+- fix(pwa): `sw.js` 가 manifest 를 저장본으로 주지 않는다 — 이름을 바꾼 뒤 첫 방문에 옛 `short_name` 으로 홈 화면에 추가됐다. 다시 만들려면 `npx m1kkit pwa`
+
 ## 0.0.56
 - feat: `ShareButton` · `PWAInstallButton` 에 `variant="ghost"` — 배경 없는 18px 아이콘만(32px 원형, label 은 aria-label). 헤더 아이콘 버튼끼리 크기·색이 맞는다(`GHOST_ICON_BUTTON`)
 - fix(pwa): 설치 시트 아이콘을 미리 받아 둔다 — 시트를 열 때 처음 받으면 폰에서 아이콘 자리가 빈 칸으로 보였다
