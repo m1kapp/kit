@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.48
+- **feat(cli): `m1kkit pwa` — 오프라인 실행 + iOS 스플래시.** `sw.js`(페이지는 네트워크 먼저·3초 넘거나 끊기면 저장본, JS·CSS·폰트는 저장본 먼저, API 는 손대지 않음)와 아이폰 13종 세로 스플래시(`splash/*.png`)를 만들고, Vite 는 `index.html` `<head>` 에 태그까지 넣는다. 첫 방문에 받은 JS·CSS·CDN 폰트 CSS 까지 담아 두 번째 실행부터 비행기 모드에서도 뜬다. calc 에서 처음 적용 — 여행지에서 데이터가 끊겨도 계산기가 열려야 해서
+- fix(deps): `@vercel/og` 를 1 미만으로 묶는다. 1.0.3 이 Node ESM 에서 `Dynamic require of "fs" is not supported` 로 `m1kkit favicon` 을 죽였다(calc 실사례)
+
 ## 0.0.47
 - **fix(in-app-sheet): 바깥(어두운 배경)을 눌러도 시트가 안 닫히던 버그.** 시트를 아래에 붙이는 전체 크기 래퍼가 백드롭 위를 덮어 탭을 가로챘다(monthgram 실기기 제보). 래퍼는 `pointer-events-none`, 시트만 `pointer-events-auto` — 바깥 탭은 백드롭의 `onClose` 로, 시트 안 탭은 그대로
 

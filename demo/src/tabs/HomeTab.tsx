@@ -147,7 +147,7 @@ export function HomeTab({ themeColor, onGoToLibraries }: { themeColor: string; o
             { icon: "🔌", label: "Server",   count: "13 헬퍼",    desc: "handler · requireEnv · fetchRetry" },
             { icon: "🌐", label: "Fetch",    count: "2 훅",       desc: "useFetch · usePolling" },
             { icon: "🖼",  label: "OG Image", count: "7 템플릿",   desc: "Next.js OG 이미지 생성기" },
-            { icon: "📱",  label: "PWA",      count: "5 유틸",     desc: "manifest · 설치 유도" },
+            { icon: "📱",  label: "PWA",      count: "6 유틸",     desc: "manifest · 설치 · 오프라인" },
             { icon: "🛠",  label: "Utils",    count: "14 훅·유틸", desc: "format · cn · groupByDay" },
             { icon: "🔍", label: "SEO",      count: "8 헬퍼",     desc: "metadata · jsonLd · sitemap" },
           ].map(({ icon, label, count, desc }) => (

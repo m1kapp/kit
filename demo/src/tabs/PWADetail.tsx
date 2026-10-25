@@ -58,6 +58,37 @@ export function PWADetail({ themeColor }: { themeColor: string }) {
 
   return (
     <>
+      {/* m1kkit pwa */}
+      <Section className="pt-4">
+        <SectionHeader>m1kkit pwa — 오프라인 + 스플래시</SectionHeader>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3 leading-relaxed">
+          홈 화면 앱이 비행기 모드에서도 열리고, 아이폰에서 흰 화면 대신 스플래시가 떠요. favicon 다음에 한 번.
+        </p>
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 mb-3">
+          <div className="w-16 h-[136px] rounded-[14px] ring-4 ring-zinc-800 bg-white flex items-center justify-center flex-shrink-0">
+            <img src={svgIcon(iconText || "App", { size: 192, bg: iconBg, radius: 0.225 })} alt="splash" className="w-[18px] h-[18px]" />
+          </div>
+          <div className="space-y-2">
+            {[
+              { label: "오프라인", desc: "페이지는 네트워크 먼저, 3초 넘거나 끊기면 저장본" },
+              { label: "iOS 스플래시", desc: "아이폰 13종 세로 화면 · 배경은 앱 첫 화면 색" },
+              { label: "API 는 그대로", desc: "fetch 요청은 서비스워커가 손대지 않아요" },
+            ].map(({ label, desc }) => (
+              <div key={label} className="flex items-start gap-2">
+                <CheckIcon size={14} className="text-zinc-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{label}</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <CodeCard title="터미널" code={`npx m1kkit favicon --color=${iconBg}\nnpx m1kkit pwa --bg=#ffffff\n# → public/sw.js · public/splash/*.png\n# → index.html <head> 에 태그 (Vite)`} />
+      </Section>
+
+      <Divider />
+
       {/* svgIcon */}
       <Section className="pt-4">
         <SectionHeader>svgIcon() — 아이콘 생성기</SectionHeader>

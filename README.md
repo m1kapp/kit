@@ -542,6 +542,19 @@ npx m1kkit favicon --appname="My App" --slogan="한 줄 소개" --color=#3b82f6 
 `manifest.json` 7개가 `public/`(자동 감지)에 한 번에 생기고, `<head>`에 붙여넣을
 태그 스니펫도 콘솔에 출력됩니다.
 
+### 오프라인 + 스플래시 (`m1kkit pwa`)
+
+favicon 다음에 한 번 돌리면 홈 화면 앱이 **비행기 모드에서도 열리고**, 아이폰에서 흰 화면 대신 스플래시가 뜹니다.
+
+```bash
+npx m1kkit pwa              # public/icon-512.png 를 흰 배경 가운데에
+npx m1kkit pwa --bg=#0f0f1a # 앱 첫 화면 색과 맞춘다(다르면 열릴 때 번쩍인다)
+```
+
+`sw.js` · `splash/<가로>x<세로>.png` 13종이 생기고, `manifest.json` 의 `background_color`(안드로이드 스플래시)를 같은 색으로 맞춥니다.
+Vite 는 `index.html` `<head>` 에 태그가 들어가고(다시 돌리면 교체), Next 는 출력된 태그를 layout 에 붙이세요.
+서비스워커는 localhost 에선 등록하지 않습니다 — 확인은 배포 뒤에.
+
 ### 폰트 & 이모지
 
 ```tsx

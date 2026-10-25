@@ -13,6 +13,7 @@ description: "PWA 설정을 점검하고 @m1kapp/kit/pwa 유틸로 자동 적용
 - 아이콘: `public/icon-192.png`, `public/icon-512.png` 여부
 - `public/favicon.ico` 여부
 - 설치 유도 버튼 (`useInstallPrompt`) 사용 여부
+- 오프라인: `public/sw.js` 와 등록 스크립트 · iOS 스플래시: `apple-touch-startup-image` 태그
 
 ---
 
@@ -44,6 +45,9 @@ manifest가 없으면:
 - Next.js면 앱 이름·테마 컬러를 물어보고 `createManifest` 적용 (아래).
 - Vite 등 App Router가 없는 프로젝트면 `npx m1kkit favicon`이 만든
   `public/manifest.json`을 그대로 쓰면 됨 — 따로 만들 필요 없음.
+
+sw.js 나 스플래시가 없으면: 아이콘이 생긴 뒤 `npx m1kkit pwa --bg="[앱 첫 화면 배경색]"`.
+배경색은 테마색이 아니라 **앱이 처음 그리는 화면색**(보통 흰색) — 다르면 스플래시에서 앱으로 넘어갈 때 번쩍인다.
 
 viewport가 없으면: `mobileViewport` 적용
 

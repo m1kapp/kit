@@ -6,6 +6,7 @@
  *   m1kkit favicon   — 파비콘 생성
  *   m1kkit skills    — Claude Code 스킬 설치
  *   m1kkit stats     — 코드 분석 & kit 사용 현황 생성
+ *   m1kkit pwa       — 오프라인 실행(sw.js) + iOS 스플래시
  */
 
 const [,, command, ...rest] = process.argv;
@@ -17,6 +18,7 @@ m1kkit — @m1kapp/kit CLI
 Commands:
   m1kkit new <name>          새 앱 생성 (Vite + React + kit 앱쉘 템플릿)
   m1kkit favicon [options]   파비콘 자동 생성
+  m1kkit pwa [options]       오프라인 실행(sw.js) + iOS 스플래시 — favicon 다음에
   m1kkit skills [options]    Claude Code 스킬 설치
   m1kkit stats [options]     코드 분석 & kit 사용 현황 생성
   m1kkit track <url>         m1k 방문자 트래커에 사이트 등록(무로그인)
@@ -29,6 +31,7 @@ Options:
 Examples:
   m1kkit new moodlog --color=#e2603f
   m1kkit favicon --text=K --color=#3B82F6
+  m1kkit pwa --bg=#ffffff
   m1kkit skills
   m1kkit skills --list
   m1kkit skills m1kapp-init
@@ -52,6 +55,9 @@ if (command === "new") {
 } else if (command === "favicon") {
   process.argv = [process.argv[0], process.argv[1], ...rest];
   await import(path.join(__dirname, "favicon.mjs"));
+} else if (command === "pwa") {
+  process.argv = [process.argv[0], process.argv[1], ...rest];
+  await import(path.join(__dirname, "pwa.mjs"));
 } else if (command === "skills") {
   process.argv = [process.argv[0], process.argv[1], ...rest];
   await import(path.join(__dirname, "skills.mjs"));
