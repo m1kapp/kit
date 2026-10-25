@@ -43,6 +43,25 @@ export default function App() {
 
 ---
 
+## 겹쳐 여는 인앱 시트
+
+`InAppSheet` 안에서 다음 `InAppSheet`를 열면 같은 AppShell의 시트가 자동으로 쌓입니다. 기존 `open` · `onClose` API 그대로 사용합니다.
+
+```tsx
+<InAppSheet open={open} onClose={() => setOpen(false)} title="AI 피팅" fullHeight>
+  <button onClick={() => setBrandOpen(true)}>브랜드 고르기</button>
+  <InAppSheet open={brandOpen && open} onClose={() => setBrandOpen(false)} title="브랜드 선택" fullHeight>
+    <button onClick={() => setBrandOpen(false)}>선택하고 돌아가기</button>
+  </InAppSheet>
+</InAppSheet>
+```
+
+뒤 시트는 축소되고 터치·스크롤·키보드 접근이 잠깁니다. 닫기·스와이프·Esc·브라우저 뒤로가기는 맨 위 시트만 닫습니다. 아래 시트는 계속 마운트되어 선택·입력·스크롤이 유지되고, 돌아오면 열었던 버튼으로 포커스가 복귀합니다. 부모를 닫을 때는 자식의 `open`도 함께 꺼 주세요.
+
+시트마다 현재 URL에 history 항목을 추가하며 기존 `history.state`는 보존합니다. 화면 자체를 바꾸는 라우터 탐색과 별개인 시트용 뒤로가기입니다. 데모: 라이브러리 → UI → InAppSheet → **2단 시트 체험하기**.
+
+---
+
 ## 모듈 구성
 
 > **하나의 import면 끝.** UI · OG · PWA · Fetch · Utils가 전부 `@m1kapp/kit` 메인 export에 들어 있습니다. `/server`만 별도 서브패스예요. 서브패스를 일일이 외울 필요 없이 `import { ... } from "@m1kapp/kit"` 하나로 다 꺼내 쓰세요.

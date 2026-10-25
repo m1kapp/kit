@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useEscapeKey } from "../hooks/use-escape-key";
+import { registerSheet } from "../hooks/sheet-stack";
 import { useFocusTrap } from "../hooks/use-focus-trap";
 import { usePortalTarget } from "../hooks/use-portal-target";
 import { useScrollLock } from "../hooks/use-scroll-lock";
@@ -106,10 +106,11 @@ function useSheetDrag(open: boolean, onClose: () => void) {
 }
 
 // 인라인 스타일 — 드래그 중엔 transition 끔
-function buildSheetStyle(dragOffset: number, entered: boolean): React.CSSProperties {
+function buildSheetStyle(dragOffset: number, entered: boolean, depth: number): React.CSSProperties {
   if (dragOffset > 0) return { transform: `translateY(${dragOffset}px)`, transition: "none" };
   return {
-    transform: entered ? "translateY(0)" : "translateY(100%)",
+    transform: entered ? `translateY(${-12 * Math.min(depth, 2)}px) scale(${1 - 0.04 * Math.min(depth, 2)})` : "translateY(100%)",
+    transformOrigin: "bottom center",
     transition: `transform ${entered ? DURATION_OPEN : DURATION_CLOSE}ms ${entered ? EASE_OPEN : EASE_CLOSE}`,
   };
 }
@@ -133,16 +134,26 @@ export function InAppSheet({
   closeLabel = "닫기",
 }: InAppSheetProps) {
   const [anchorRef, target] = usePortalTarget();
-  const trapRef = useFocusTrap<HTMLDivElement>(open);
+  const { mounted, entered } = useSheetTransition(open);
+  const active = open && mounted && !!target;
+  const trapRef = useFocusTrap<HTMLDivElement>(active);
+  const closeRef = useRef(onClose);
+  const [{ index, depth }, setLayer] = useState({ index: 0, depth: 0 });
+  useLayoutEffect(() => { closeRef.current = onClose; });
+  useLayoutEffect(() => {
+    if (!active || !target) return;
+    return registerSheet({ root: target, close: () => closeRef.current(), update: setLayer });
+  }, [active, target]);
+  const layerRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (layerRef.current) layerRef.current.inert = !open || depth > 0;
+  }, [open, depth]);
   const titleId = useId();
 
-  useScrollLock(open, anchorRef);
-  useEscapeKey(open, onClose);
-
-  const { mounted, entered } = useSheetTransition(open);
+  useScrollLock(active, anchorRef);
   const { dragOffset, onTouchStart, onTouchMove, onTouchEnd } = useSheetDrag(open, onClose);
 
-  const sheetStyle = buildSheetStyle(dragOffset, entered);
+  const sheetStyle = buildSheetStyle(dragOffset, entered, depth);
   const backdropStyle = buildBackdropStyle(dragOffset, entered);
 
   return (
@@ -151,7 +162,11 @@ export function InAppSheet({
       {target && mounted
         ? createPortal(
             <div
-              className={`absolute inset-0 z-[200] overflow-hidden ${entered ? "pointer-events-auto" : "pointer-events-none"}`}
+              className={`absolute inset-0 overflow-hidden ${open && entered && depth === 0 ? "pointer-events-auto" : "pointer-events-none"}`}
+              style={{ zIndex: 200 + index }}
+              data-sheet-depth={depth}
+              ref={layerRef}
+              aria-hidden={!open || depth > 0 ? true : undefined}
             >
               {/* backdrop */}
               <div
@@ -165,9 +180,11 @@ export function InAppSheet({
                 <div
                   ref={trapRef}
                   role="dialog"
-                  aria-modal="true"
+                  data-in-app-sheet=""
+                  aria-modal={open && depth === 0 ? true : undefined}
+                  tabIndex={-1}
                   aria-labelledby={title ? titleId : undefined}
-                  className={`pointer-events-auto relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform flex flex-col ${fullHeight ? "h-full" : "max-h-[calc(100%-1.5rem)]"} ${className}`}
+                  className={`pointer-events-auto relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform flex flex-col ${fullHeight ? (index === 0 ? "h-full" : "h-[calc(100%-1.5rem)]") : "max-h-[calc(100%-1.5rem)]"} ${className}`}
                   style={sheetStyle}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -189,6 +206,7 @@ export function InAppSheet({
                         )}
                         {!hideClose && (
                           <button
+                            type="button"
                             onClick={onClose}
                             aria-label={closeLabel}
                             className="flex-shrink-0 -m-3 p-3 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
@@ -203,7 +221,7 @@ export function InAppSheet({
                     )}
                   </div>
                   {/* 내용이 화면보다 길면 제목은 남기고 안쪽만 스크롤 — 없으면 시트가 위로 넘쳐 제목·닫기가 잘린다(작은 폰에서 calc 화폐 목록) */}
-                  <div className={`min-h-0 overflow-y-auto overscroll-contain ${fullHeight ? "flex-1" : ""}`}>{children}</div>
+                  <div data-sheet-content="" className={`min-h-0 overflow-y-auto overscroll-contain ${fullHeight ? "flex-1" : ""}`}>{children}</div>
                 </div>
               </div>
             </div>,

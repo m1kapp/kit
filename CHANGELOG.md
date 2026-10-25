@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.58
+- feat(in-app-sheet): 겹친 시트의 축소·inert·깊이와 맨 위 시트만 닫는 Esc·브라우저 뒤로가기를 공통 처리. 아래 시트 선택·스크롤과 열었던 버튼의 포커스를 유지한다.
+- fix(overlay): 겹친 스크롤 잠금을 참조 횟수로 관리하고 비활성 시트의 포커스 트랩을 건너뛴다.
+- demo: InAppSheet에 AI 피팅 → 브랜드 선택 2단 예제와 복귀 동작을 추가.
+
 ## 0.0.57
 - fix(pwa): `sw.js` 가 manifest 를 저장본으로 주지 않는다 — 이름을 바꾼 뒤 첫 방문에 옛 `short_name` 으로 홈 화면에 추가됐다. 다시 만들려면 `npx m1kkit pwa`
 

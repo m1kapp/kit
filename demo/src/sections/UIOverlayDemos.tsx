@@ -39,7 +39,10 @@ export function DialogDemo({ themeColor }: { themeColor: string }) {
 }
 
 export function InAppSheetDemo({ themeColor }: { themeColor: string }) {
-  const [openType, setOpenType] = useState<"default" | "full" | null>(null);
+  const [openType, setOpenType] = useState<"default" | "full" | "stack" | null>(null);
+
+  const [brandOpen, setBrandOpen] = useState(false);
+  const [size, setSize] = useState("110");
 
   const sheetContent = (onClose: () => void, full?: boolean) => (
     <div className={`px-5 pb-5 ${full ? "flex-1 flex flex-col" : ""}`}>
@@ -79,9 +82,12 @@ export function InAppSheetDemo({ themeColor }: { themeColor: string }) {
   return (
     <ComponentCard
       name="InAppSheet"
-      desc="AppShell 내부에 붙는 인앱 바텀 시트 — fullHeight로 높이 제어"
+      desc="앱 안에서 겹쳐 여는 바텀 시트 · 뒤로가기와 이전 선택 유지"
       code={`<InAppSheet title="안내" open={open} onClose={() => setOpen(false)}>
-  {/* fullHeight 추가하면 전체 높이 */}
+  <button onClick={() => setBrandOpen(true)}>브랜드 고르기</button>
+  <InAppSheet title="브랜드 선택" open={brandOpen} onClose={() => setBrandOpen(false)}>
+    {/* 뒤 시트는 유지되고 맨 위 시트만 닫혀요 */}
+  </InAppSheet>
 </InAppSheet>`}
     >
       <div className="space-y-2">
@@ -112,6 +118,47 @@ export function InAppSheetDemo({ themeColor }: { themeColor: string }) {
           </button>
         </div>
       </div>
+
+      <button
+        onClick={() => setOpenType("stack")}
+        className="mt-3 w-full cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-white"
+        style={{ backgroundColor: themeColor }}
+      >
+        2단 시트 체험하기
+      </button>
+      <InAppSheet title="AI 피팅" fullHeight open={openType === "stack"} onClose={() => { setOpenType(null); setBrandOpen(false); }}>
+        <div className="space-y-5 px-5 pb-5 text-zinc-900 dark:text-zinc-100">
+          <p className="text-sm text-zinc-500">선택한 사이즈와 스크롤 위치는 브랜드를 보고 돌아와도 그대로예요.</p>
+          <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+            사이즈
+            <select aria-label="피팅 사이즈" value={size} onChange={(event) => setSize(event.target.value)} className="mt-2 block w-full rounded-xl border border-zinc-200 bg-transparent p-3 dark:border-zinc-700">
+              {["100", "110", "120", "130"].map((value) => <option key={value}>{value}</option>)}
+            </select>
+          </label>
+          <button onClick={() => setBrandOpen(true)} className="w-full cursor-pointer rounded-2xl p-4 text-left text-white" style={{ backgroundColor: themeColor }}>
+            <span className="block font-semibold">브랜드 고르기 →</span>
+            <span className="mt-1 block text-xs opacity-80">첫 시트를 유지한 채 다음 시트를 열어요</span>
+          </button>
+          {Array.from({ length: 8 }, (_, index) => (
+            <div key={index} className="rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-900">
+              <p className="text-sm font-semibold">피팅 안내 {index + 1}</p>
+              <p className="mt-2 text-xs leading-relaxed text-zinc-500">아래로 스크롤한 뒤 브랜드를 열어 보세요. 돌아오면 읽던 위치가 유지돼요.</p>
+            </div>
+          ))}
+          <button onClick={() => setBrandOpen(true)} className="w-full cursor-pointer rounded-xl border border-zinc-200 p-3 text-sm dark:border-zinc-700">아래에서 브랜드 고르기</button>
+        </div>
+        <InAppSheet title="브랜드 선택" fullHeight open={brandOpen && openType === "stack"} onClose={() => setBrandOpen(false)}>
+          <div className="space-y-4 px-5 pb-5 text-zinc-900 dark:text-zinc-100">
+            <div className="rounded-2xl bg-zinc-50 p-5 dark:bg-zinc-900">
+              <p className="text-lg font-bold">Pause &amp; Play</p>
+              <p className="mt-2 text-sm text-zinc-500">티셔츠 · 가디건 · 데일리웨어</p>
+            </div>
+            <label className="block text-sm font-semibold">브랜드 검색<input placeholder="브랜드 이름" className="mt-2 block w-full rounded-xl border border-zinc-200 bg-transparent p-3 dark:border-zinc-700" /></label>
+            <button onClick={() => setBrandOpen(false)} className="w-full cursor-pointer rounded-xl p-3 text-sm font-semibold text-white" style={{ backgroundColor: themeColor }}>선택하고 돌아가기</button>
+            <p className="text-xs leading-relaxed text-zinc-500">닫기 · Esc · 브라우저 뒤로가기는 이 시트만 닫아요. 뒤 시트는 터치와 스크롤이 잠겨요.</p>
+          </div>
+        </InAppSheet>
+      </InAppSheet>
 
       <InAppSheet title="신규 기능 안내" open={openType === "default"} onClose={() => setOpenType(null)}>
         {sheetContent(() => setOpenType(null))}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -14,19 +14,21 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(active: boolea
   const containerRef = useRef<T>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
 
+  // Capture before a stacked sheet makes the previous sheet inert and the browser blurs it.
+  useLayoutEffect(() => {
+    if (active) previousFocus.current = document.activeElement as HTMLElement;
+  }, [active]);
+
   useEffect(() => {
     if (!active || !containerRef.current) return;
-
-    // Remember where focus was before trapping
-    previousFocus.current = document.activeElement as HTMLElement;
 
     // Move focus into the container
     const container = containerRef.current;
     const first = container.querySelector<HTMLElement>(FOCUSABLE);
-    first?.focus();
+    if (!container.closest("[inert]")) (first ?? container).focus({ preventScroll: true });
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key !== "Tab") return;
+      if (e.key !== "Tab" || container.closest("[inert]")) return;
 
       const focusable = container.querySelectorAll<HTMLElement>(FOCUSABLE);
       if (focusable.length === 0) return;
@@ -47,11 +49,24 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>(active: boolea
       }
     }
 
+    function handleFocusIn(event: FocusEvent) {
+      if (container.closest("[inert]") || container.contains(event.target as Node)) return;
+      const dialog = (event.target as HTMLElement).closest?.('[role="dialog"][aria-modal="true"]');
+      if (dialog && dialog !== container.closest('[role="dialog"]')) return;
+      (container.querySelector<HTMLElement>(FOCUSABLE) ?? container).focus({ preventScroll: true });
+    }
+
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("focusin", handleFocusIn);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("focusin", handleFocusIn);
       // Restore focus when trap is deactivated (only if element is still in DOM)
-      if (previousFocus.current?.isConnected) previousFocus.current.focus();
+      const previous = previousFocus.current;
+      // The lower sheet removes inert in its next commit before it can receive focus again.
+      requestAnimationFrame(() => {
+        if (previous?.isConnected && !previous.closest("[inert]")) previous.focus({ preventScroll: true });
+      });
     };
   }, [active]);
 
