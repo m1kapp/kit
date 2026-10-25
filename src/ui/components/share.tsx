@@ -72,7 +72,12 @@ export interface ShareButtonProps {
    * 이미 설치했거나 지원 안 하는 브라우저면 지금처럼 바로 공유. AppShell 안에서 쓴다(시트가 거기 뜬다).
    */
   install?: boolean | { appName?: string; iconSrc?: string };
+  /** "ghost": 배경 없는 아이콘만(헤더용, label 은 aria-label 로). 기본 "chip"(연회색 알약) */
+  variant?: "chip" | "ghost";
 }
+
+/** 헤더 아이콘 버튼 한 벌 — ShareButton · PWAInstallButton 의 ghost 가 같이 쓴다 */
+export const GHOST_ICON_BUTTON = "flex items-center justify-center size-8 rounded-full text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-100 dark:active:bg-zinc-800 active:scale-95 transition";
 
 export function ShareButton({
   url,
@@ -82,6 +87,7 @@ export function ShareButton({
   copiedLabel = "링크 복사됨",
   className = "",
   install,
+  variant = "chip",
 }: ShareButtonProps) {
   const { share, copied } = useShare({ url, title, text });
   const { state, install: promptInstall } = usePWAInstall();
@@ -98,22 +104,28 @@ export function ShareButton({
 
   return (
     <>
+    {variant === "ghost" ? (
+      <button onClick={() => (canInstall ? setPicking(true) : share())} aria-label={copied ? copiedLabel : label} className={`${GHOST_ICON_BUTTON} ${className}`}>
+        {copied ? <CheckIcon size={18} /> : <ShareIcon size={18} />}
+      </button>
+    ) : (
     <button
-      onClick={() => (canInstall ? setPicking(true) : share())}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all ${className}`}
-    >
-      {copied ? (
-        <>
-          <CheckIcon />
-          {copiedLabel}
-        </>
-      ) : (
-        <>
-          <ShareIcon />
-          {label}
-        </>
-      )}
-    </button>
+        onClick={() => (canInstall ? setPicking(true) : share())}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all ${className}`}
+      >
+        {copied ? (
+          <>
+            <CheckIcon />
+            {copiedLabel}
+          </>
+        ) : (
+          <>
+            <ShareIcon />
+            {label}
+          </>
+        )}
+      </button>
+    )}
     {canInstall && (
       <>
         <InAppSheet open={picking} onClose={() => setPicking(false)} title={label}>
@@ -156,9 +168,9 @@ function HomeIcon() {
   );
 }
 
-function ShareIcon() {
+function ShareIcon({ size = 14 }: { size?: number }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="18" cy="5" r="3" />
       <circle cx="6" cy="12" r="3" />
       <circle cx="18" cy="19" r="3" />
@@ -168,9 +180,9 @@ function ShareIcon() {
   );
 }
 
-function CheckIcon() {
+function CheckIcon({ size = 14 }: { size?: number }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );

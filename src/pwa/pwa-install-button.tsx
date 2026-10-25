@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { GHOST_ICON_BUTTON } from "../ui/components/share";
 import { useEscapeKey } from "../ui/hooks/use-escape-key";
 import { useFocusTrap } from "../ui/hooks/use-focus-trap";
 import { useScrollLock } from "../ui/hooks/use-scroll-lock";
@@ -18,8 +19,8 @@ interface PWAInstallButtonProps {
   /** Label shown when already installed. Default: undefined — button hidden */
   installedLabel?: string;
   className?: string;
-  /** "chip": 헤더용 — ShareButton 과 같은 연회색 알약. 기본 "solid"(검은 버튼) */
-  variant?: "solid" | "chip";
+  /** "chip": 헤더용 — ShareButton 과 같은 연회색 알약. "ghost": 배경 없는 아이콘만(label 은 aria-label). 기본 "solid"(검은 버튼) */
+  variant?: "solid" | "chip" | "ghost";
 }
 
 /**
@@ -43,6 +44,8 @@ export function PWAInstallButton({
 }: PWAInstallButtonProps) {
   const { state, install } = usePWAInstall();
   const [sheetOpen, setSheetOpen] = useState(false);
+  // 시트를 열 때 처음 받으면 폰에선 아이콘 자리가 한동안 빈 칸이다 — 미리 받아 둔다
+  useEffect(() => { if (iconSrc) new Image().src = iconSrc; }, [iconSrc]);
 
   if (state === "installed") {
     if (!installedLabel) return null;
@@ -63,6 +66,11 @@ export function PWAInstallButton({
 
   return (
     <>
+      {variant === "ghost" ? (
+        <button onClick={handleClick} aria-label={label} className={`${GHOST_ICON_BUTTON} ${className ?? ""}`}>
+          <DownloadIcon size={18} strokeWidth={2} />
+        </button>
+      ) : (
       <button
         onClick={handleClick}
         className={variant === "chip"
@@ -73,6 +81,7 @@ export function PWAInstallButton({
         <span>{label}</span>
         {variant === "solid" && state !== "android-ready" && <ChevronIcon />}
       </button>
+      )}
 
       {state !== "android-ready" && (
         <IOSInstallSheet
