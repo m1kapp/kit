@@ -167,7 +167,7 @@ export function InAppSheet({
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby={title ? titleId : undefined}
-                  className={`pointer-events-auto relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform ${fullHeight ? "h-full flex flex-col" : ""} ${className}`}
+                  className={`pointer-events-auto relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform flex flex-col ${fullHeight ? "h-full" : "max-h-[calc(100%-1.5rem)]"} ${className}`}
                   style={sheetStyle}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -202,11 +202,8 @@ export function InAppSheet({
                       </div>
                     )}
                   </div>
-                  {fullHeight ? (
-                    <div className="flex-1 overflow-y-auto">{children}</div>
-                  ) : (
-                    children
-                  )}
+                  {/* 내용이 화면보다 길면 제목은 남기고 안쪽만 스크롤 — 없으면 시트가 위로 넘쳐 제목·닫기가 잘린다(작은 폰에서 calc 화폐 목록) */}
+                  <div className={`min-h-0 overflow-y-auto overscroll-contain ${fullHeight ? "flex-1" : ""}`}>{children}</div>
                 </div>
               </div>
             </div>,
