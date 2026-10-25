@@ -73,7 +73,6 @@ function isIOSSafari(): boolean {
   // standard way to tell it apart from an actual Mac (which reports 0).
   const isIPadOS = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
   const isIOS = /iphone|ipad|ipod/i.test(ua) || isIPadOS;
-  // Safari on iOS doesn't have "CriOS" (Chrome) or "FxiOS" (Firefox)
-  const isSafariBrowser = isIOS && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua);
-  return isSafariBrowser;
+  // iOS 16.4+ 는 크롬·파이어폭스·엣지도 공유 메뉴에 "홈 화면에 추가"가 있다 — 사파리만 고르면 크롬 사용자에게 버튼이 사라진다
+  return isIOS;
 }

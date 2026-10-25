@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.54
+- **fix(pwa): iOS 크롬·파이어폭스·엣지에서 설치 버튼이 사라지던 문제.** 사파리만 `ios-safari` 로 잡아 나머지는 `unsupported` 였다. iOS 16.4+ 는 어느 브라우저든 공유 메뉴에 "홈 화면에 추가"가 있어 iOS 면 모두 안내 시트를 띄운다(주소창 옆 공유 문구가 크롬 배치도 덮는다)
+
 ## 0.0.53
 - **feat(pwa): 설치 안내를 따라 할 수 있게.** 시트 맨 위에 설치하면 좋은 점(홈 화면 아이콘 · 인터넷 없어도 열림 · 주소창 없는 화면, `benefits` 로 바꿀 수 있다)
 - 카카오톡·라인·안드로이드 앱 안 브라우저는 **[기본 브라우저로 열기] / [Chrome으로 열기] 한 번**으로 넘긴다(카카오 `kakaotalk://web/openExternal` · 라인 `openExternalBrowser=1` · 안드로이드 `intent://…package=com.android.chrome`)
