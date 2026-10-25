@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { detectInApp } from "./in-app";
+import { detectInApp, iosCanAddToHome } from "./in-app";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -73,6 +73,6 @@ function isIOSSafari(): boolean {
   // standard way to tell it apart from an actual Mac (which reports 0).
   const isIPadOS = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
   const isIOS = /iphone|ipad|ipod/i.test(ua) || isIPadOS;
-  // iOS 16.4+ 는 크롬·파이어폭스·엣지도 공유 메뉴에 "홈 화면에 추가"가 있다 — 사파리만 고르면 크롬 사용자에게 버튼이 사라진다
-  return isIOS;
+  // 사파리만 고르면 크롬 사용자에게 버튼이 사라진다 — 16.4+ 는 다른 브라우저도 된다(in-app.ts)
+  return isIOS && iosCanAddToHome(ua);
 }

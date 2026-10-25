@@ -23,6 +23,16 @@ export function detectInApp(ua: string): InApp | null {
 export const isAndroid = (ua: string) => /Android/i.test(ua);
 
 /**
+ * iOS 에서 "홈 화면에 추가"가 되는 브라우저인가 — Safari 는 늘, 크롬·파이어폭스·엣지는 iOS 16.4 부터(그 전엔 공유 메뉴에 없다).
+ * iPadOS 는 맥 UA 라 버전이 안 보여 된다고 본다.
+ */
+export function iosCanAddToHome(ua: string): boolean {
+  if (!/CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua)) return true;
+  const v = ua.match(/OS (\d+)_(\d+)/);
+  return !v || +v[1] > 16 || (+v[1] === 16 && +v[2] >= 4);
+}
+
+/**
  * 한 번에 바깥 브라우저로 여는 주소. 못 열면 null(손으로 메뉴를 눌러야 한다).
  * - 카카오톡: 공식 스킴 kakaotalk://web/openExternal — 기본 브라우저로 연다
  * - 라인: 주소에 openExternalBrowser=1

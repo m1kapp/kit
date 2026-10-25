@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectInApp, externalUrl, inAppSteps } from "./in-app";
+import { detectInApp, externalUrl, inAppSteps, iosCanAddToHome } from "./in-app";
 
 const IOS = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
 
@@ -33,4 +33,12 @@ describe("externalUrl", () => {
 it("단계는 마지막에 다시 설치를 누르라고 끝난다", () => {
   expect(inAppSteps("kakao", false)[1][1]).toBe("다른 브라우저로 열기");
   expect(inAppSteps("instagram", true).at(-1)?.[0]).toBe("열린 Chrome에서 ");
+});
+
+it("iOS 크롬은 16.4 부터 홈 화면에 추가", () => {
+  expect(iosCanAddToHome(`${IOS} Version/18.0 Safari/604.1`)).toBe(true);
+  expect(iosCanAddToHome(`${IOS} CriOS/130.0`)).toBe(true);
+  expect(iosCanAddToHome(IOS.replace("18_0", "16_4") + " CriOS/120.0")).toBe(true);
+  expect(iosCanAddToHome(IOS.replace("18_0", "16_3") + " CriOS/110.0")).toBe(false);
+  expect(iosCanAddToHome(IOS.replace("18_0", "15_7") + " FxiOS/100.0")).toBe(false);
 });
