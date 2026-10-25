@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.53
+- **feat(pwa): 설치 안내를 따라 할 수 있게.** 시트 맨 위에 설치하면 좋은 점(홈 화면 아이콘 · 인터넷 없어도 열림 · 주소창 없는 화면, `benefits` 로 바꿀 수 있다)
+- 카카오톡·라인·안드로이드 앱 안 브라우저는 **[기본 브라우저로 열기] / [Chrome으로 열기] 한 번**으로 넘긴다(카카오 `kakaotalk://web/openExternal` · 라인 `openExternalBrowser=1` · 안드로이드 `intent://…package=com.android.chrome`)
+- 못 넘기는 곳(iOS 인스타·스레드)은 그 앱의 메뉴 이름 그대로 단계(오른쪽 위 ··· → 외부 브라우저에서 열기) + 링크 복사
+- Safari 단계 문구를 "화면 아래(또는 주소창 옆)의 공유" 로 — 최신 Safari 배치 차이를 덮는다
+- 판별·주소·단계는 순수 함수 `src/pwa/in-app.ts` 로 빼고 테스트를 붙였다
+
 ## 0.0.52
 - **fix(pwa): 인스타·스레드·카톡 안 브라우저에서 "Safari 공유 버튼" 안내가 나가던 문제.** 앱 안 브라우저는 iOS 에서 Safari 처럼 보여(UA 에 CriOS 없음) `ios-safari` 로 잡혔다. 새 상태 `"in-app"` — `PWAInstallButton`·`ShareButton install`·`IOSInstallSheet mode="in-app"` 이 "··· → 다른 브라우저로 열기 → 홈 화면에 추가" 를 안내한다. 소셜에서 오는 방문 대부분이 여기라 실제로 닿는 설치 길이 이것
 - feat(pwa): `<PWAInstallButton variant="chip" />` — 헤더용, ShareButton 과 같은 연회색 알약. 설치됐거나 지원 안 하면 사라진다

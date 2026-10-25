@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { detectInApp } from "./in-app";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -48,7 +49,7 @@ export function usePWAInstall(): UsePWAInstallReturn {
   const state: PWAInstallState = (() => {
     if (installed) return "installed";
     if (prompt) return "android-ready";
-    if (isInAppBrowser()) return "in-app";
+    if (typeof navigator !== "undefined" && detectInApp(navigator.userAgent)) return "in-app";
     if (isIOSSafari()) return "ios-safari";
     return "unsupported";
   })();
@@ -64,13 +65,7 @@ export function usePWAInstall(): UsePWAInstallReturn {
   return { state, install };
 }
 
-// 앱 안 브라우저는 iOS 에서 Safari 처럼 보인다(UA 에 CriOS 가 없다) — 먼저 걸러야 "Safari 공유 버튼" 안내가 안 나간다.
-// 소셜에서 들어오는 방문이 대부분 여기라 설치 안내가 실제로 닿는 길은 "브라우저로 열기"다
-function isInAppBrowser(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return /Instagram|Barcelona|FBAN|FBAV|FB_IAB|KAKAOTALK|Line\/|NAVER\(inapp|DaumApps|everytimeApp|; wv\)/i.test(navigator.userAgent);
-}
-
+// 앱 안 브라우저(in-app.ts)는 iOS 에서 Safari 처럼 보인다(UA 에 CriOS 가 없다) — 먼저 걸러야 "Safari 공유 버튼" 안내가 안 나간다
 function isIOSSafari(): boolean {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent;

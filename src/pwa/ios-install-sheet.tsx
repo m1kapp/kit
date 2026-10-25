@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useEscapeKey } from "../ui/hooks/use-escape-key";
 import { useFocusTrap } from "../ui/hooks/use-focus-trap";
 import { useScrollLock } from "../ui/hooks/use-scroll-lock";
+import { detectInApp, externalUrl, inAppSteps, isAndroid, IN_APP_NAME } from "./in-app";
 
 interface IOSInstallSheetProps {
   open: boolean;
@@ -12,76 +14,58 @@ interface IOSInstallSheetProps {
   iconSrc?: string;
   /** "in-app": 인스타·카톡 안 브라우저 — 바깥 브라우저로 여는 법을 안내한다 */
   mode?: "safari" | "in-app";
+  /** 설치하면 뭐가 좋은지 — 이걸 먼저 보여 줘야 단계를 따라 한다 */
+  benefits?: string[];
 }
 
+const BENEFITS = ["홈 화면 아이콘으로 바로 열려요", "인터넷이 없어도 열려요 (비행기 모드 · 로밍 끊김)", "주소창 없이 앱처럼 꽉 찬 화면"];
+
+type Step = [string, string, string];
+const SAFARI_STEPS: Step[] = [
+  ["화면 아래(또는 주소창 옆)의 ", "공유", " 버튼을 누르세요"],
+  ["목록을 내려 ", "홈 화면에 추가", "를 누르세요"],
+  ["오른쪽 위 ", "추가", "를 누르면 끝!"],
+];
+
 /**
- * Bottom-sheet guide for iOS "Add to Home Screen".
- * Can also be used standalone if you need custom trigger UI.
+ * 홈 화면 추가 안내 시트 — iOS Safari 와 앱 안 브라우저(인스타·카톡 …) 둘 다.
+ * 앱 안이면 카카오톡·라인·안드로이드는 [브라우저로 열기] 한 번으로 넘기고, 안 되는 곳(iOS 인스타·스레드)은
+ * 그 앱 메뉴 이름 그대로 단계를 보여 주고 링크 복사를 붙인다.
  */
-export function IOSInstallSheet({ open, onClose, appName, iconSrc, mode = "safari" }: IOSInstallSheetProps) {
+export function IOSInstallSheet({ open, onClose, appName, iconSrc, mode = "safari", benefits = BENEFITS }: IOSInstallSheetProps) {
   const trapRef = useFocusTrap<HTMLDivElement>(open);
   useEscapeKey(open, onClose);
   useScrollLock(open);
+  const [copied, setCopied] = useState(false);
 
   if (!open) return null;
 
-  const steps = mode === "in-app" ? [
-    { icon: <MoreIcon />, text: <>오른쪽 위나 아래의 <strong className="text-zinc-900 dark:text-zinc-100">···</strong> 메뉴를 탭하세요</> },
-    { icon: <SafariIcon />, text: <><strong className="text-zinc-900 dark:text-zinc-100">다른 브라우저로 열기</strong>(Safari · Chrome)를 고르세요</> },
-    { icon: <AddHomeIcon />, text: <>열린 브라우저에서 다시 <strong className="text-zinc-900 dark:text-zinc-100">홈 화면에 추가</strong>하면 완료!</> },
-  ] : [
-    {
-      icon: <ShareIcon />,
-      text: (
-        <>
-          하단 툴바의 <strong className="text-zinc-900 dark:text-zinc-100">공유</strong> 버튼을 탭하세요
-        </>
-      ),
-    },
-    {
-      icon: <AddHomeIcon />,
-      text: (
-        <>
-          스크롤해서{" "}
-          <strong className="text-zinc-900 dark:text-zinc-100">홈 화면에 추가</strong>를 탭하세요
-        </>
-      ),
-    },
-    {
-      icon: <CheckSquareIcon />,
-      text: (
-        <>
-          우측 상단 <strong className="text-zinc-900 dark:text-zinc-100">추가</strong>를 탭하면 완료!
-        </>
-      ),
-    },
-  ];
+  const ua = navigator.userAgent;
+  const android = isAndroid(ua);
+  const app = mode === "in-app" ? detectInApp(ua) ?? "other" : null;
+  const jump = app ? externalUrl(app, location.href, android) : null;
+  const steps = app ? inAppSteps(app, android) : SAFARI_STEPS;
+  const icons = app ? [<MoreIcon key="m" />, <SafariIcon key="s" />, <AddHomeIcon key="a" />] : [<ShareIcon key="s" />, <AddHomeIcon key="a" />, <CheckSquareIcon key="c" />];
+  const copy = () => navigator.clipboard?.writeText(location.href).then(() => setCopied(true), () => {});
+  const strong = "text-zinc-900 dark:text-zinc-100";
 
   // body 로 띄운다 — 헤더처럼 backdrop-blur 가 걸린 조상 안에서 렌더하면 fixed 가 그 안에 갇혀 시트가 헤더 속에 찌그러진다
   return createPortal(
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Sheet */}
+      <div className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
         ref={trapRef}
         role="dialog"
         aria-modal="true"
         aria-label={`${appName} 설치하기`}
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-[430px] rounded-t-2xl bg-white dark:bg-zinc-900 shadow-2xl"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-[430px] max-h-[92dvh] overflow-y-auto rounded-t-2xl bg-white dark:bg-zinc-900 shadow-2xl"
       >
-        {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-9 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700" />
         </div>
 
         <div className="px-5 pb-8 pt-3">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-4">
             {iconSrc ? (
               <img src={iconSrc} alt={appName} className="w-12 h-12 rounded-xl shadow" />
             ) : (
@@ -90,33 +74,52 @@ export function IOSInstallSheet({ open, onClose, appName, iconSrc, mode = "safar
               </div>
             )}
             <div>
-              <p className="font-bold text-zinc-900 dark:text-white text-base">{appName} 설치하기</p>
-              <p className="text-xs text-zinc-400 mt-0.5">홈 화면에 추가하면 앱처럼 사용할 수 있어요</p>
+              <p className="font-bold text-zinc-900 dark:text-white text-base">{appName} 앱으로 설치</p>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {app ? `지금은 ${IN_APP_NAME[app]} 안이라 바로 설치가 안 돼요` : "무료 · 앱스토어 없이 30초면 끝나요"}
+              </p>
             </div>
           </div>
 
-          {/* Steps */}
+          {/* 왜 설치하나 — 이걸 먼저 봐야 단계를 따라 한다 */}
+          <ul className="mb-5 space-y-1.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 px-4 py-3">
+            {benefits.map((b) => (
+              <li key={b} className="flex items-start gap-2 text-[13px] text-zinc-700 dark:text-zinc-200">
+                <span className="mt-0.5 text-emerald-500"><CheckIcon /></span>{b}
+              </li>
+            ))}
+          </ul>
+
+          {jump && (
+            <>
+              <a href={jump}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 dark:bg-zinc-100 py-3 text-sm font-semibold text-white dark:text-zinc-900 active:scale-[0.98] transition-transform">
+                <SafariIcon /> {app === "kakao" || app === "line" ? "기본 브라우저로 열기" : "Chrome으로 열기"}
+              </a>
+              <p className="mt-2 mb-4 text-center text-xs text-zinc-400">열린 브라우저에서 설치를 한 번 더 누르면 끝 · 안 열리면 아래대로</p>
+            </>
+          )}
+
           <div className="space-y-3">
-            {steps.map((step, i) => (
+            {steps.map(([a, b, c], i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 text-zinc-500 dark:text-zinc-400">
-                  {step.icon}
+                  {icons[i]}
                 </div>
-                <div className="flex-1 pt-1">
-                  <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-zinc-200 dark:bg-zinc-700 text-[9px] font-bold text-zinc-500 dark:text-zinc-400 mr-1.5 flex-shrink-0">{i + 1}</span>
-                    {step.text}
-                  </p>
-                </div>
+                <p className="flex-1 pt-1 text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-zinc-200 dark:bg-zinc-700 text-[9px] font-bold text-zinc-500 dark:text-zinc-400 mr-1.5">{i + 1}</span>
+                  {a}<strong className={strong}>{b}</strong>{c}
+                </p>
               </div>
             ))}
           </div>
 
-          {/* Safari indicator */}
-          <div className="mt-5 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800">
-            <SafariIcon />
-            <p className="text-xs text-zinc-400">{mode === "in-app" ? "인스타그램·카카오톡 안에서는 설치가 안 돼요" : "Safari 브라우저에서만 홈 화면 추가가 가능해요"}</p>
-          </div>
+          {app && !jump && (
+            <button onClick={copy}
+              className="mt-4 w-full py-3 rounded-xl text-sm font-semibold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 active:scale-[0.98] transition-transform">
+              {copied ? "복사됨 · Safari 주소창에 붙여 넣으세요" : "링크 복사해서 Safari로 열기"}
+            </button>
+          )}
 
           <button
             onClick={onClose}
