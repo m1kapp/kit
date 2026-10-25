@@ -87,7 +87,7 @@ export function ShareButton({
   const { state, install: promptInstall } = usePWAInstall();
   const [picking, setPicking] = useState(false);
   const [iosGuide, setIosGuide] = useState(false);
-  const canInstall = !!install && (state === "android-ready" || state === "ios-safari");
+  const canInstall = !!install && (state === "android-ready" || state === "ios-safari" || state === "in-app");
   const meta = typeof install === "object" ? install : {};
 
   const addToHome = () => {
@@ -123,8 +123,9 @@ export function ShareButton({
             <SheetChoice icon={<HomeIcon />} title="홈 화면에 추가" sub="앱처럼 바로 열려요 · 인터넷이 없어도 열려요" onClick={addToHome} />
           </div>
         </InAppSheet>
-        {state === "ios-safari" && (
-          <IOSInstallSheet open={iosGuide} onClose={() => setIosGuide(false)} appName={meta.appName ?? title ?? "앱"} iconSrc={meta.iconSrc} />
+        {state !== "android-ready" && (
+          <IOSInstallSheet open={iosGuide} onClose={() => setIosGuide(false)} appName={meta.appName ?? title ?? "앱"} iconSrc={meta.iconSrc}
+            mode={state === "in-app" ? "in-app" : "safari"} />
         )}
       </>
     )}

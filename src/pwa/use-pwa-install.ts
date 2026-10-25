@@ -10,6 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 export type PWAInstallState =
   | "android-ready"   // beforeinstallprompt available — can trigger native dialog
   | "ios-safari"      // iOS Safari — must show manual instructions
+  | "in-app"          // 인스타·스레드·카톡 같은 앱 안 브라우저 — 설치 불가, 바깥 브라우저로 열라고 안내
   | "installed"       // already running in standalone mode
   | "unsupported";    // other browsers (desktop Chrome already installed, Firefox, etc.)
 
@@ -47,6 +48,7 @@ export function usePWAInstall(): UsePWAInstallReturn {
   const state: PWAInstallState = (() => {
     if (installed) return "installed";
     if (prompt) return "android-ready";
+    if (isInAppBrowser()) return "in-app";
     if (isIOSSafari()) return "ios-safari";
     return "unsupported";
   })();
@@ -60,6 +62,13 @@ export function usePWAInstall(): UsePWAInstallReturn {
   }
 
   return { state, install };
+}
+
+// 앱 안 브라우저는 iOS 에서 Safari 처럼 보인다(UA 에 CriOS 가 없다) — 먼저 걸러야 "Safari 공유 버튼" 안내가 안 나간다.
+// 소셜에서 들어오는 방문이 대부분 여기라 설치 안내가 실제로 닿는 길은 "브라우저로 열기"다
+function isInAppBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Instagram|Barcelona|FBAN|FBAV|FB_IAB|KAKAOTALK|Line\/|NAVER\(inapp|DaumApps|everytimeApp|; wv\)/i.test(navigator.userAgent);
 }
 
 function isIOSSafari(): boolean {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.52
+- **fix(pwa): 인스타·스레드·카톡 안 브라우저에서 "Safari 공유 버튼" 안내가 나가던 문제.** 앱 안 브라우저는 iOS 에서 Safari 처럼 보여(UA 에 CriOS 없음) `ios-safari` 로 잡혔다. 새 상태 `"in-app"` — `PWAInstallButton`·`ShareButton install`·`IOSInstallSheet mode="in-app"` 이 "··· → 다른 브라우저로 열기 → 홈 화면에 추가" 를 안내한다. 소셜에서 오는 방문 대부분이 여기라 실제로 닿는 설치 길이 이것
+- feat(pwa): `<PWAInstallButton variant="chip" />` — 헤더용, ShareButton 과 같은 연회색 알약. 설치됐거나 지원 안 하면 사라진다
+- `PWAInstallState` 에 `"in-app"` 이 늘었다 — `Record<PWAInstallState, …>` 로 받는 앱은 한 줄 추가
+
 ## 0.0.51
 - **feat(share): `<ShareButton install />` — 공유 버튼 하나로 공유와 앱 설치.** 설치할 수 있는 기기면 누를 때 "링크 보내기 · 홈 화면에 추가" 시트가 뜬다(안드로이드는 설치 창, iOS 는 안내 시트). 이미 설치했거나 지원 안 하면 지금처럼 바로 공유. `install={{ appName, iconSrc }}` 로 안내 시트의 이름·아이콘을 준다. 기본은 꺼짐 — 기존 앱 동작 그대로
 - **fix(pwa): `IOSInstallSheet` 가 헤더 안에서 찌그러지던 버그.** `backdrop-blur` 가 걸린 조상(AppShellHeader) 안에서 렌더하면 `fixed` 가 그 안에 갇혔다. body 로 포털한다 — 헤더에 둔 `PWAInstallButton` 도 같이 고쳐진다

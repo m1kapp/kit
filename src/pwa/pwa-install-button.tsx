@@ -18,6 +18,8 @@ interface PWAInstallButtonProps {
   /** Label shown when already installed. Default: undefined — button hidden */
   installedLabel?: string;
   className?: string;
+  /** "chip": 헤더용 — ShareButton 과 같은 연회색 알약. 기본 "solid"(검은 버튼) */
+  variant?: "solid" | "chip";
 }
 
 /**
@@ -37,6 +39,7 @@ export function PWAInstallButton({
   label = "앱으로 설치",
   installedLabel,
   className,
+  variant = "solid",
 }: PWAInstallButtonProps) {
   const { state, install } = usePWAInstall();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -55,26 +58,29 @@ export function PWAInstallButton({
 
   function handleClick() {
     if (state === "android-ready") install();
-    else if (state === "ios-safari") setSheetOpen(true);
+    else setSheetOpen(true); // ios-safari · in-app 은 안내 시트
   }
 
   return (
     <>
       <button
         onClick={handleClick}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-sm font-semibold transition-all active:scale-95 ${className ?? ""}`}
+        className={variant === "chip"
+          ? `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all ${className ?? ""}`
+          : `flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-sm font-semibold transition-all active:scale-95 ${className ?? ""}`}
       >
-        <DownloadIcon />
+        <DownloadIcon size={variant === "chip" ? 14 : undefined} />
         <span>{label}</span>
-        {state === "ios-safari" && <ChevronIcon />}
+        {variant === "solid" && state !== "android-ready" && <ChevronIcon />}
       </button>
 
-      {state === "ios-safari" && (
+      {state !== "android-ready" && (
         <IOSInstallSheet
           open={sheetOpen}
           onClose={() => setSheetOpen(false)}
           appName={appName}
           iconSrc={iconSrc}
+          mode={state === "in-app" ? "in-app" : "safari"}
         />
       )}
     </>

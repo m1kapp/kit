@@ -10,20 +10,26 @@ interface IOSInstallSheetProps {
   onClose(): void;
   appName: string;
   iconSrc?: string;
+  /** "in-app": 인스타·카톡 안 브라우저 — 바깥 브라우저로 여는 법을 안내한다 */
+  mode?: "safari" | "in-app";
 }
 
 /**
  * Bottom-sheet guide for iOS "Add to Home Screen".
  * Can also be used standalone if you need custom trigger UI.
  */
-export function IOSInstallSheet({ open, onClose, appName, iconSrc }: IOSInstallSheetProps) {
+export function IOSInstallSheet({ open, onClose, appName, iconSrc, mode = "safari" }: IOSInstallSheetProps) {
   const trapRef = useFocusTrap<HTMLDivElement>(open);
   useEscapeKey(open, onClose);
   useScrollLock(open);
 
   if (!open) return null;
 
-  const steps = [
+  const steps = mode === "in-app" ? [
+    { icon: <MoreIcon />, text: <>오른쪽 위나 아래의 <strong className="text-zinc-900 dark:text-zinc-100">···</strong> 메뉴를 탭하세요</> },
+    { icon: <SafariIcon />, text: <><strong className="text-zinc-900 dark:text-zinc-100">다른 브라우저로 열기</strong>(Safari · Chrome)를 고르세요</> },
+    { icon: <AddHomeIcon />, text: <>열린 브라우저에서 다시 <strong className="text-zinc-900 dark:text-zinc-100">홈 화면에 추가</strong>하면 완료!</> },
+  ] : [
     {
       icon: <ShareIcon />,
       text: (
@@ -109,7 +115,7 @@ export function IOSInstallSheet({ open, onClose, appName, iconSrc }: IOSInstallS
           {/* Safari indicator */}
           <div className="mt-5 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800">
             <SafariIcon />
-            <p className="text-xs text-zinc-400">Safari 브라우저에서만 홈 화면 추가가 가능해요</p>
+            <p className="text-xs text-zinc-400">{mode === "in-app" ? "인스타그램·카카오톡 안에서는 설치가 안 돼요" : "Safari 브라우저에서만 홈 화면 추가가 가능해요"}</p>
           </div>
 
           <button
@@ -185,6 +191,14 @@ function SafariIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-zinc-400 flex-shrink-0">
       <circle cx="12" cy="12" r="10" />
       <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+    </svg>
+  );
+}
+
+function MoreIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
     </svg>
   );
 }

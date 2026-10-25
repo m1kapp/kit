@@ -17,6 +17,7 @@ function InstallDemo({ iconBg, iconText, radius }: { iconBg: string; iconText: s
   const stateInfo: Record<typeof state, { badge: string; color: string; desc: string }> = {
     "android-ready": { badge: "Android 준비됨", color: "text-green-600 bg-green-50 dark:bg-green-950 dark:text-green-400", desc: "버튼을 누르면 Chrome 네이티브 설치 다이얼로그가 표시돼요." },
     "ios-safari":    { badge: "iOS Safari 감지됨", color: "text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400", desc: "버튼을 누르면 홈 화면 추가 안내 시트가 열려요." },
+    "in-app":        { badge: "앱 안 브라우저", color: "text-amber-600 bg-amber-50 dark:bg-amber-950 dark:text-amber-400", desc: "인스타·카톡 안에서는 설치가 안 돼요. 버튼을 누르면 바깥 브라우저로 여는 법을 안내해요." },
     "installed":     { badge: "이미 설치됨", color: "text-zinc-500 bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-400", desc: "현재 standalone 모드로 실행 중이에요." },
     "unsupported":   { badge: "미지원 환경", color: "text-zinc-400 bg-zinc-100 dark:bg-zinc-800", desc: "이 브라우저에서는 설치 버튼이 표시되지 않아요." },
   };
