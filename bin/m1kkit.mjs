@@ -31,7 +31,7 @@ Options:
 Examples:
   m1kkit new moodlog --color=#e2603f
   m1kkit favicon --text=K --color=#3B82F6
-  m1kkit pwa --bg=#ffffff
+  m1kkit pwa --dark=#0d0d14 --no-sw
   m1kkit skills
   m1kkit skills --list
   m1kkit skills m1kapp-init

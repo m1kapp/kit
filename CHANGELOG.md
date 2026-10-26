@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.59
+- **fix(cli): `m1kkit pwa --help` 가 도움말 대신 파일을 만들던 버그.** 이제 도움말만 찍고 끝난다(ytcc 에서 `sw.js`·manifest 를 덮었다)
+- **fix(cli): `m1kkit pwa` 가 앱이 직접 둔 `sw.js` 를 덮던 문제.** m1kkit 이 만든 파일이 아니면 건드리지 않는다 — 웹 푸시 서비스워커가 날아갈 뻔했다. 덮으려면 `--force`, 아예 끄려면 `--no-sw`(이때 등록 스크립트도 안 낸다)
+- **fix(cli): 스플래시 배경 기본값을 manifest `background_color` 로.** 예전 기본값 흰색이 다크 앱의 manifest 를 흰색으로 덮었다. manifest 는 `--bg` 를 직접 줬을 때만 고친다
+- feat(cli): `--dark=#색` — 다크 모드 스플래시(`splash/dark/`)도 만들고 `prefers-color-scheme` 로 골라 쓰게 한다. theme-color 도 라이트·다크 두 줄
+
 ## 0.0.58
 - feat(in-app-sheet): 겹친 시트의 축소·inert·깊이와 맨 위 시트만 닫는 Esc·브라우저 뒤로가기를 공통 처리. 아래 시트 선택·스크롤과 열었던 버튼의 포커스를 유지한다.
 - fix(overlay): 겹친 스크롤 잠금을 참조 횟수로 관리하고 비활성 시트의 포커스 트랩을 건너뛴다.

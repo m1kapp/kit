@@ -2,20 +2,31 @@
 /**
  * m1kkit pwa — 오프라인 실행 + iOS 스플래시
  *
- * Usage:
- *   npx m1kkit pwa                       # public/manifest.json · public/icon-512.png 를 읽는다
- *   npx m1kkit pwa --bg=#ffffff          # 스플래시 배경색(기본: 흰색 — 앱 첫 화면과 같은 색이라야 번쩍임이 없다)
- *   npx m1kkit pwa --icon=public/logo.png --out=static
+ * Usage: 아래 USAGE 참고(npx m1kkit pwa --help)
  *
- * 생성: sw.js · splash/<가로>x<세로>.png (아이폰 세로 화면별)
+ * 생성: sw.js · splash/<가로>x<세로>.png (아이폰 세로 화면별, --dark 면 splash/dark/ 도)
  * Vite 처럼 루트에 index.html 이 있으면 <head> 에 태그까지 넣는다. Next 는 출력된 태그를 layout 에 붙인다.
- * manifest.json 이 있으면 background_color 를 스플래시 배경과 맞춘다(안드로이드 스플래시가 그 색).
  */
 
 import { ImageResponse } from "@vercel/og";
 import { createElement as h } from "react";
 import fs from "fs";
 import path from "path";
+
+const USAGE = `m1kkit pwa — 오프라인 실행(sw.js) + iOS 스플래시
+
+  npx m1kkit pwa                      manifest.json 의 background_color 로 스플래시, sw.js 생성
+  npx m1kkit pwa --bg=#ffffff         스플래시 배경색(라이트). 주면 manifest background_color 도 맞춘다
+  npx m1kkit pwa --dark=#0d0d14       다크 모드 스플래시도 — 아이폰이 시스템 다크 모드면 이걸 쓴다
+  npx m1kkit pwa --no-sw              sw.js 를 안 만든다(웹 푸시 등 직접 둔 서비스워커가 있는 앱)
+  npx m1kkit pwa --icon=public/logo.png --out=static
+
+  m1kkit 이 만들지 않은 sw.js 는 덮어쓰지 않는다 — 덮으려면 --force`;
+
+if (process.argv.includes("--help") || process.argv.includes("-h")) {
+  console.log(USAGE);
+  process.exit(0);
+}
 
 const args = Object.fromEntries(
   process.argv.slice(2).filter((a) => a.startsWith("--")).map((a) => {
@@ -27,7 +38,13 @@ const args = Object.fromEntries(
 const cwd = process.cwd();
 const outDir = path.resolve(cwd, args.out ?? "public");
 const iconPath = path.resolve(cwd, args.icon ?? path.join(outDir, "icon-512.png"));
-const bg = args.bg ?? "#ffffff";
+const manifestPath = path.join(outDir, "manifest.json");
+const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, "utf8")) : null;
+// 배경은 앱 첫 화면과 같은 색이라야 번쩍임이 없다 — 따로 안 주면 manifest 가 이미 말하는 색을 따른다
+// (예전 기본값 흰색은 다크 앱의 manifest 를 흰색으로 덮어 버렸다)
+const bg = typeof args.bg === "string" ? args.bg : manifest?.background_color ?? "#ffffff";
+const dark = typeof args.dark === "string" ? args.dark : null;
+const MARK = "// m1kkit pwa 가 만든 파일";
 
 if (!fs.existsSync(iconPath)) {
   console.error(`아이콘이 없어요: ${path.relative(cwd, iconPath)} — 먼저 npx m1kkit favicon 을 돌리거나 --icon 으로 지정하세요.`);
@@ -42,7 +59,13 @@ function write(rel, data) {
 }
 
 /* ─── 서비스워커 ─── */
-write("sw.js", `// m1kkit pwa 가 만든 파일 — 오프라인에서도 앱이 열리게 한다. 다시 만들려면 npx m1kkit pwa
+const swPath = path.join(outDir, "sw.js");
+const ownSw = fs.existsSync(swPath) && !fs.readFileSync(swPath, "utf8").startsWith(MARK);
+const withSw = !args["no-sw"] && !(ownSw && !args.force);
+if (ownSw && withSw === false && !args["no-sw"]) {
+  console.log(`· ${path.relative(cwd, swPath)} 는 앱이 직접 둔 서비스워커라 건드리지 않는다(덮으려면 --force, 끄려면 --no-sw)`);
+}
+if (withSw) write("sw.js", `// m1kkit pwa 가 만든 파일 — 오프라인에서도 앱이 열리게 한다. 다시 만들려면 npx m1kkit pwa
 // 페이지: 네트워크 먼저, 3초 안에 안 오거나 끊겨 있으면 저장본(여행지 로밍처럼 느린 망에서도 바로 뜬다).
 //   그래서 새 배포는 온라인이면 다음 실행에 바로 보인다. 이 파일은 배포마다 바꿀 필요가 없다.
 // JS·CSS·폰트·이미지: 저장본을 바로 주고 뒤에서 새로 받아 둔다. API(fetch) 요청은 건드리지 않는다.
@@ -134,27 +157,28 @@ const DEVICES = [
 
 const icon = `data:image/png;base64,${fs.readFileSync(iconPath).toString("base64")}`;
 const links = [];
-for (const [w, h_, dpr] of DEVICES) {
-  const W = w * dpr, H = h_ * dpr, size = Math.round(W * 0.28); // 아이콘은 화면 폭의 28% — 홈 화면 아이콘이 커지며 열리는 느낌
-  const res = new ImageResponse(
-    h("div", { style: { width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: bg } },
-      h("img", { src: icon, width: size, height: size, style: { borderRadius: size * 0.225 } })),
-    { width: W, height: H }
-  );
-  write(`splash/${W}x${H}.png`, Buffer.from(await res.arrayBuffer()));
-  links.push(`<link rel="apple-touch-startup-image" media="(device-width: ${w}px) and (device-height: ${h_}px) and (-webkit-device-pixel-ratio: ${dpr}) and (orientation: portrait)" href="/splash/${W}x${H}.png" />`);
+// --dark 가 있으면 두 벌 — iOS 는 startup-image 의 media 에 prefers-color-scheme 를 본다
+const themes = dark ? [["", bg, "light"], ["dark/", dark, "dark"]] : [["", bg, null]];
+for (const [dir, color, scheme] of themes) {
+  for (const [w, h_, dpr] of DEVICES) {
+    const W = w * dpr, H = h_ * dpr, size = Math.round(W * 0.28); // 아이콘은 화면 폭의 28% — 홈 화면 아이콘이 커지며 열리는 느낌
+    const res = new ImageResponse(
+      h("div", { style: { width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: color } },
+        h("img", { src: icon, width: size, height: size, style: { borderRadius: size * 0.225 } })),
+      { width: W, height: H }
+    );
+    write(`splash/${dir}${W}x${H}.png`, Buffer.from(await res.arrayBuffer()));
+    const media = `(device-width: ${w}px) and (device-height: ${h_}px) and (-webkit-device-pixel-ratio: ${dpr}) and (orientation: portrait)${scheme ? ` and (prefers-color-scheme: ${scheme})` : ""}`;
+    links.push(`<link rel="apple-touch-startup-image" media="${media}" href="/splash/${dir}${W}x${H}.png" />`);
+  }
 }
 
 /* ─── manifest 배경색 ─── */
-const manifestPath = path.join(outDir, "manifest.json");
-let title;
-if (fs.existsSync(manifestPath)) {
-  const m = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  title = m.short_name ?? m.name;
-  if (m.background_color !== bg) {
-    m.background_color = bg;
-    write("manifest.json", JSON.stringify(m, null, 2) + "\n");
-  }
+// --bg 를 직접 줬을 때만 고친다(안드로이드 스플래시가 이 색). 안 줬으면 manifest 가 기준이라 그대로 둔다.
+const title = manifest?.short_name ?? manifest?.name;
+if (manifest && typeof args.bg === "string" && manifest.background_color !== bg) {
+  manifest.background_color = bg;
+  write("manifest.json", JSON.stringify(manifest, null, 2) + "\n");
 }
 
 /* ─── <head> 태그 ─── */
@@ -167,9 +191,12 @@ const head = [
   `<meta name="mobile-web-app-capable" content="yes" />`,
   `<meta name="apple-mobile-web-app-status-bar-style" content="default" />`,
   ...(title ? [`<meta name="apple-mobile-web-app-title" content="${title}" />`] : []),
-  `<meta name="theme-color" content="${bg}" />`,
+  ...(dark
+    ? [`<meta name="theme-color" media="(prefers-color-scheme: light)" content="${bg}" />`,
+       `<meta name="theme-color" media="(prefers-color-scheme: dark)" content="${dark}" />`]
+    : [`<meta name="theme-color" content="${bg}" />`]),
   ...links,
-  `<script>
+  ...(withSw ? [`<script>
     if ("serviceWorker" in navigator && !/^(localhost|127\\.|\\[::1\\])/.test(location.hostname)) {
       navigator.serviceWorker.register("/sw.js");
       // 홈 화면 앱은 닫히지 않고 며칠씩 다시 켜지기만 한다 — 돌아올 때(30분에 한 번) 새 배포가 있으면 새로고침
@@ -182,7 +209,7 @@ const head = [
           .then((html) => { if (html && mine.some((s) => !html.includes(s))) location.reload(); }, () => {});
       });
     }
-    </script>`,
+    </script>`] : []),
   `<!-- /m1kkit:pwa -->`,
 ].join("\n    ");
 
@@ -198,4 +225,4 @@ if (fs.existsSync(indexPath)) {
   console.log(`\n<head> 에 붙여넣기:\n    ${head}\n`);
 }
 
-console.log(`\n🎉 오프라인 + 스플래시 ${DEVICES.length}종 (배경 ${bg}). 배포 후 홈 화면 앱을 비행기 모드로 열어 확인하세요.`);
+console.log(`\n🎉 ${withSw ? "오프라인 + " : ""}스플래시 ${DEVICES.length * themes.length}장 (배경 ${bg}${dark ? ` · 다크 ${dark}` : ""}).${withSw ? " 배포 후 홈 화면 앱을 비행기 모드로 열어 확인하세요." : ""}`);
