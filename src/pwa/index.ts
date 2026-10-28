@@ -25,6 +25,9 @@ export type { UsePWAInstallReturn, PWAInstallState } from "./use-pwa-install";
 
 export { PWAInstallButton, IOSInstallSheet } from "./pwa-install-button";
 
+export { usePush, pushKeyBytes, samePushKey } from "./use-push";
+export type { UsePushOptions, UsePushReturn, PushState } from "./use-push";
+
 /**
  * Standard mobile viewport config for Next.js.
  * - Disables pinch zoom via maximumScale (Android, older iOS)

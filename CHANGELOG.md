@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.60
+- **feat(pwa): `usePush` — 웹 푸시 켜기·끄기 훅.** monthgram 의 구독 로직(키 교체 감지 · 켜진 기기 조용히 재저장 · AbortError 는 unsupported · 실패 이유 한국어)을 앱 무관하게 뺐다. 상태는 모듈 하나에 둬 헤더 버튼·스위치 여러 곳이 같이 바뀐다. 저장·삭제는 `save`·`remove` 로 앱이 정한다. 켜는 중·끄는 중은 `busy` 로 따로 둔다(state 를 loading 으로 돌리면 스위치가 깜빡이고, 상태로 가린 시트가 통째로 사라졌다 — ytcc 실측). `enable()` 은 켜졌는지 boolean
+
 ## 0.0.59
 - **fix(cli): `m1kkit pwa --help` 가 도움말 대신 파일을 만들던 버그.** 이제 도움말만 찍고 끝난다(ytcc 에서 `sw.js`·manifest 를 덮었다)
 - **fix(cli): `m1kkit pwa` 가 앱이 직접 둔 `sw.js` 를 덮던 문제.** m1kkit 이 만든 파일이 아니면 건드리지 않는다 — 웹 푸시 서비스워커가 날아갈 뻔했다. 덮으려면 `--force`, 아예 끄려면 `--no-sw`(이때 등록 스크립트도 안 낸다)
