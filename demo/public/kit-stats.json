@@ -1,107 +1,243 @@
 {
-  "generatedAt": "2026-07-22T13:59:43.923Z",
-  "kitVersion": "0.0.37",
+  "generatedAt": "2026-11-03T14:54:13.938Z",
+  "kitVersion": "unknown",
   "source": {
     "dir": "src",
-    "files": 26,
-    "totalLines": 2969,
-    "codeLines": 2656,
+    "files": 110,
+    "totalLines": 10950,
+    "codeLines": 8166,
     "breakdown": {
       "frontend": {
-        "files": 25,
-        "codeLines": 2573
+        "files": 68,
+        "codeLines": 6117
       },
       "backend": {
-        "files": 0,
-        "codeLines": 0
+        "files": 9,
+        "codeLines": 301
       },
       "shared": {
-        "files": 1,
-        "codeLines": 83
+        "files": 33,
+        "codeLines": 1748
       }
     }
   },
   "quality": {
     "engine": "ast2",
-    "score": 96,
-    "grade": "A+",
+    "score": 94,
+    "grade": "SS",
+    "gradeBase": "S",
+    "dead": null,
     "cognitive": {
-      "avg": 0.6,
-      "p90": 2,
-      "max": 9,
-      "over15": 0,
-      "over25": 0,
+      "avg": 1.7,
+      "p90": 5,
+      "max": 26,
+      "over15": 6,
+      "over25": 1,
+      "top10avg": 17.7,
       "worst": [
         {
-          "name": "LibrariesTab",
-          "cog": 9,
+          "name": "InAppSheet",
+          "cog": 26,
+          "cc": 20,
+          "file": "src/ui/components/in-app-sheet.tsx",
+          "line": 126
+        },
+        {
+          "name": "watermarkTint",
+          "cog": 25,
+          "cc": 12,
+          "file": "src/utils/index.ts",
+          "line": 304
+        },
+        {
+          "name": "grassColor",
+          "cog": 19,
+          "cc": 10,
+          "file": "src/ui/components/grass-map-lib.ts",
+          "line": 31
+        },
+        {
+          "name": "inAppSteps",
+          "cog": 17,
           "cc": 11,
-          "file": "src/tabs/LibrariesTab.tsx",
-          "line": 148
+          "file": "src/pwa/in-app.ts",
+          "line": 50
+        },
+        {
+          "name": "OGImage",
+          "cog": 16,
+          "cc": 8,
+          "file": "src/og/og.tsx",
+          "line": 171
+        },
+        {
+          "name": "splitLines",
+          "cog": 16,
+          "cc": 10,
+          "file": "src/ui/components/watermark-text.ts",
+          "line": 33
         },
         {
           "name": "(anonymous)",
-          "cog": 9,
-          "cc": 9,
-          "file": "src/templates/LandingTemplate.tsx",
-          "line": 58
+          "cog": 15,
+          "cc": 12,
+          "file": "src/fetch/use-fetch.ts",
+          "line": 178
         },
         {
-          "name": "App",
-          "cog": 7,
-          "cc": 8,
-          "file": "src/App.tsx",
-          "line": 53
+          "name": "PoweredByKit",
+          "cog": 15,
+          "cc": 16,
+          "file": "src/ui/components/powered-by.tsx",
+          "line": 97
         },
         {
-          "name": "FetchDetail",
-          "cog": 7,
-          "cc": 10,
-          "file": "src/tabs/FetchDetail.tsx",
-          "line": 9
+          "name": "enable",
+          "cog": 14,
+          "cc": 11,
+          "file": "src/pwa/use-push.ts",
+          "line": 96
         },
         {
-          "name": "V030Demo",
-          "cog": 6,
-          "cc": 6,
-          "file": "src/sections/V030Demos.tsx",
-          "line": 22
+          "name": "ListRow",
+          "cog": 14,
+          "cc": 17,
+          "file": "src/ui/components/list-row.tsx",
+          "line": 49
         }
       ]
     },
+    "fnLength": {
+      "avg": 9.5,
+      "p90": 26,
+      "max": 173,
+      "over40": 14,
+      "over80": 1,
+      "top10avg": 86.5,
+      "countAll": 675,
+      "count5": 338,
+      "count10": 181,
+      "worst": [
+        {
+          "name": "Watermark",
+          "lines": 173,
+          "cog": 11,
+          "file": "src/ui/components/watermark.tsx",
+          "line": 91
+        },
+        {
+          "name": "PoweredByKit",
+          "lines": 107,
+          "cog": 15,
+          "file": "src/ui/components/powered-by.tsx",
+          "line": 97
+        },
+        {
+          "name": "InAppSheet",
+          "lines": 96,
+          "cog": 26,
+          "file": "src/ui/components/in-app-sheet.tsx",
+          "line": 126
+        },
+        {
+          "name": "ActionCard",
+          "lines": 90,
+          "cog": 11,
+          "file": "src/ui/components/action-card.tsx",
+          "line": 46
+        },
+        {
+          "name": "IOSInstallSheet",
+          "lines": 73,
+          "cog": 12,
+          "file": "src/pwa/ios-install-sheet.tsx",
+          "line": 35
+        },
+        {
+          "name": "Dialog",
+          "lines": 72,
+          "cog": 9,
+          "file": "src/ui/components/dialog.tsx",
+          "line": 30
+        },
+        {
+          "name": "Shell",
+          "lines": 65,
+          "cog": 7,
+          "file": "src/og/og-shell.tsx",
+          "line": 115
+        },
+        {
+          "name": "ListRow",
+          "lines": 65,
+          "cog": 14,
+          "file": "src/ui/components/list-row.tsx",
+          "line": 49
+        },
+        {
+          "name": "GrassMap",
+          "lines": 62,
+          "cog": 4,
+          "file": "src/ui/components/grass-map.tsx",
+          "line": 42
+        },
+        {
+          "name": "Select",
+          "lines": 62,
+          "cog": 9,
+          "file": "src/ui/components/select.tsx",
+          "line": 36
+        }
+      ]
+    },
+    "scoreInputs": {
+      "over15Pct": 0.89,
+      "over25Pct": 0.15,
+      "p90Cog": 5,
+      "maxCog": 26,
+      "dupPct": 0.7,
+      "longFileSeverityPct": 0.06,
+      "avgFileLines": 74,
+      "fnOver40Pct": 2.07,
+      "fnP90": 26,
+      "fnMax": 173,
+      "fnTop10": 86.5,
+      "cogTop10": 17.7
+    },
     "duplication": {
-      "percent": 2.8,
-      "dupTokens": 364,
-      "totalTokens": 12983,
-      "blocks": 35,
+      "percent": 0.7,
+      "dupTokens": 254,
+      "totalTokens": 34131,
+      "blocks": 29,
       "worstFiles": [
         {
-          "file": "src/tabs/UIDetail.tsx",
-          "dupTokens": 144
+          "file": "src/server/handler.ts",
+          "dupTokens": 108
         },
         {
-          "file": "src/tabs/SeoDetail.tsx",
-          "dupTokens": 58
+          "file": "src/pwa/pwa-install-button.tsx",
+          "dupTokens": 73
         },
         {
-          "file": "src/tabs/ServerDetail.tsx",
-          "dupTokens": 58
+          "file": "src/ui/components/share.tsx",
+          "dupTokens": 73
         }
       ],
       "worstBlocks": [
         [
-          "src/sections/UIHookDemos.tsx:69",
-          "src/tabs/UtilsDetail.tsx:36"
+          "src/pwa/pwa-install-button.tsx:77",
+          "src/ui/components/share.tsx:114"
         ],
         [
-          "src/sections/UIHookDemos.tsx:70",
-          "src/tabs/UtilsDetail.tsx:37"
+          "src/pwa/pwa-install-button.tsx:77",
+          "src/ui/components/share.tsx:114"
         ],
         [
-          "src/sections/UIHookDemos.tsx:70",
-          "src/tabs/UtilsDetail.tsx:37"
+          "src/pwa/pwa-install-button.tsx:77",
+          "src/ui/components/share.tsx:114"
         ]
-      ]
+      ],
+      "variantSkipped": 0
     },
     "io": {
       "readers": 0,
@@ -110,342 +246,254 @@
       "uncachedLoopSites": 0,
       "worst": []
     },
+    "textbook": {
+      "awaitInForEach": {
+        "count": 0,
+        "worst": []
+      },
+      "spreadAccumulator": {
+        "count": 0,
+        "worst": []
+      },
+      "regexInLoop": {
+        "count": 0,
+        "worst": []
+      },
+      "floatingPromise": {
+        "count": 0,
+        "worst": []
+      },
+      "loopInvariantIndex": {
+        "count": 0,
+        "worst": []
+      },
+      "sharedRefFill": {
+        "count": 0,
+        "worst": []
+      },
+      "numericSortNoComparator": {
+        "count": 0,
+        "worst": []
+      },
+      "emptyCatch": {
+        "count": 5,
+        "worst": [
+          {
+            "file": "src/server/net.ts",
+            "line": 179
+          },
+          {
+            "file": "src/ui/components/share.tsx",
+            "line": 51
+          },
+          {
+            "file": "src/ui/components/theme-picker.tsx",
+            "line": 17
+          },
+          {
+            "file": "src/ui/hooks/use-local-storage.ts",
+            "line": 23
+          },
+          {
+            "file": "src/ui/hooks/use-local-storage.ts",
+            "line": 33
+          }
+        ]
+      },
+      "statefulRegex": {
+        "count": 0,
+        "worst": []
+      },
+      "forInArray": {
+        "count": 0,
+        "worst": []
+      }
+    },
+    "typeSafety": {
+      "tsFiles": 110,
+      "totalAnnots": 2470,
+      "anyType": {
+        "count": 1,
+        "pct": 0,
+        "worst": [
+          {
+            "file": "src/server/handler.ts",
+            "line": 11
+          }
+        ]
+      },
+      "asAny": {
+        "count": 0,
+        "worst": []
+      },
+      "nonNull": {
+        "count": 7,
+        "worst": [
+          {
+            "file": "src/fetch/use-fetch.ts",
+            "line": 49,
+            "text": "_cache.keys().next().value!"
+          },
+          {
+            "file": "src/og/emoji.ts",
+            "line": 18,
+            "text": "emoji.codePointAt(i)!"
+          },
+          {
+            "file": "src/ui/components/chat.tsx",
+            "line": 137,
+            "text": "m.timestamp!"
+          },
+          {
+            "file": "src/ui/components/powered-by.tsx",
+            "line": 79,
+            "text": "trackerSlug!"
+          },
+          {
+            "file": "src/ui/components/stepper.tsx",
+            "line": 81,
+            "text": "onStepClick!"
+          },
+          {
+            "file": "src/ui/hooks/sheet-stack.ts",
+            "line": 58,
+            "text": "sheets[sheets.length - 1]!"
+          }
+        ]
+      },
+      "tsIgnore": {
+        "count": 1,
+        "worst": [
+          {
+            "file": "src/ui/components/watermark.tsx",
+            "line": 206,
+            "what": "ignore"
+          }
+        ]
+      }
+    },
+    "testDensity": {
+      "files": 7,
+      "lines": 610,
+      "percent": null
+    },
+    "quadratic": {
+      "sites": 2,
+      "candidates": 0,
+      "zones": {
+        "frontend": 2
+      },
+      "worst": [
+        {
+          "file": "src/ui/components/charts.tsx",
+          "line": 236,
+          "recv": "cumulative",
+          "method": "findIndex",
+          "kind": "lookup",
+          "zone": "frontend",
+          "outer": "milestones",
+          "dynamicOuter": true,
+          "rank": 3
+        },
+        {
+          "file": "src/ui/hooks/sheet-stack.ts",
+          "line": 17,
+          "recv": "sheets",
+          "method": "filter",
+          "kind": "group",
+          "zone": "frontend",
+          "outer": "sheets",
+          "dynamicOuter": true,
+          "rank": 3
+        }
+      ],
+      "candidateList": [],
+      "files": [
+        {
+          "file": "src/ui/components/charts.tsx",
+          "n": 1
+        },
+        {
+          "file": "src/ui/hooks/sheet-stack.ts",
+          "n": 1
+        }
+      ]
+    },
     "renderGates": {
       "hostages": 0,
       "worst": []
     },
     "cc": {
-      "functions": 195,
-      "avg": 1.7,
-      "p90": 3,
-      "max": 11,
-      "over10": 1,
+      "functions": 675,
+      "avg": 2.6,
+      "p90": 6,
+      "max": 20,
+      "over10": 21,
       "over20": 0,
       "worst": [
         {
-          "name": "LibrariesTab",
-          "cc": 11,
-          "file": "src/tabs/LibrariesTab.tsx",
-          "line": 148
+          "name": "InAppSheet",
+          "cc": 20,
+          "file": "src/ui/components/in-app-sheet.tsx",
+          "line": 126
         },
         {
-          "name": "FetchDetail",
-          "cc": 10,
-          "file": "src/tabs/FetchDetail.tsx",
-          "line": 9
+          "name": "ListRow",
+          "cc": 17,
+          "file": "src/ui/components/list-row.tsx",
+          "line": 49
         },
         {
-          "name": "(anonymous)",
-          "cc": 9,
-          "file": "src/templates/LandingTemplate.tsx",
-          "line": 58
+          "name": "PoweredByKit",
+          "cc": 16,
+          "file": "src/ui/components/powered-by.tsx",
+          "line": 97
         },
         {
-          "name": "App",
-          "cc": 8,
-          "file": "src/App.tsx",
-          "line": 53
+          "name": "IOSInstallSheet",
+          "cc": 15,
+          "file": "src/pwa/ios-install-sheet.tsx",
+          "line": 35
         },
         {
-          "name": "getOGCode",
-          "cc": 8,
-          "file": "src/sections/ogCode.ts",
-          "line": 3
+          "name": "PWAInstallButton",
+          "cc": 15,
+          "file": "src/pwa/pwa-install-button.tsx",
+          "line": 37
         }
       ]
     },
-    "branchDensity": 5.8,
-    "branches": 153,
-    "functions": 228,
-    "avgFileLines": 102,
-    "longFiles": 0,
+    "branchDensity": 14.2,
+    "branches": 1159,
+    "functions": 810,
+    "avgFileLines": 74,
+    "longFiles": 1,
     "maxFile": {
-      "path": "src/shared.tsx",
-      "lines": 189
+      "path": "src/ui/components/charts.tsx",
+      "lines": 279
     }
   },
   "kit": {
-    "features": [
-      {
-        "name": "GrassMap",
-        "loc": 194,
-        "category": "component"
-      },
-      {
-        "name": "Watermark",
-        "loc": 190,
-        "category": "component"
-      },
-      {
-        "name": "ThemeButton",
-        "loc": 187,
-        "category": "component"
-      },
-      {
-        "name": "InAppSheet",
-        "loc": 177,
-        "category": "component"
-      },
-      {
-        "name": "jsonLd",
-        "loc": 168,
-        "category": "util"
-      },
-      {
-        "name": "relativeTime",
-        "loc": 167,
-        "category": "util"
-      },
-      {
-        "name": "ActionCard",
-        "loc": 114,
-        "category": "component"
-      },
-      {
-        "name": "Stepper",
-        "loc": 111,
-        "category": "component"
-      },
-      {
-        "name": "Select",
-        "loc": 109,
-        "category": "component"
-      },
-      {
-        "name": "EmojiButton",
-        "loc": 107,
-        "category": "component"
-      },
-      {
-        "name": "Countdown",
-        "loc": 104,
-        "category": "component"
-      },
-      {
-        "name": "Dialog",
-        "loc": 98,
-        "category": "component"
-      },
-      {
-        "name": "useShare",
-        "loc": 98,
-        "category": "hook"
-      },
-      {
-        "name": "Typewriter",
-        "loc": 98,
-        "category": "component"
-      },
-      {
-        "name": "Carousel",
-        "loc": 95,
-        "category": "component"
-      },
-      {
-        "name": "Collapsible",
-        "loc": 94,
-        "category": "component"
-      },
-      {
-        "name": "ToastProvider",
-        "loc": 93,
-        "category": "component"
-      },
-      {
-        "name": "AppShell",
-        "loc": 78,
-        "category": "component"
-      },
-      {
-        "name": "FetchProgress",
-        "loc": 75,
-        "category": "component"
-      },
-      {
-        "name": "ListRow",
-        "loc": 71,
-        "category": "component"
-      },
-      {
-        "name": "Field",
-        "loc": 67,
-        "category": "component"
-      },
-      {
-        "name": "Input",
-        "loc": 67,
-        "category": "component"
-      },
-      {
-        "name": "InlineEdit",
-        "loc": 62,
-        "category": "component"
-      },
-      {
-        "name": "Button",
-        "loc": 61,
-        "category": "component"
-      },
-      {
-        "name": "Avatar",
-        "loc": 57,
-        "category": "component"
-      },
-      {
-        "name": "usePWAInstall",
-        "loc": 56,
-        "category": "hook"
-      },
-      {
-        "name": "ColorPicker",
-        "loc": 54,
-        "category": "component"
-      },
-      {
-        "name": "Tooltip",
-        "loc": 53,
-        "category": "component"
-      },
-      {
-        "name": "UnderlineTabs",
-        "loc": 53,
-        "category": "component"
-      },
-      {
-        "name": "PWAInstallButton",
-        "loc": 53,
-        "category": "component"
-      },
-      {
-        "name": "ProgressRing",
-        "loc": 50,
-        "category": "component"
-      },
-      {
-        "name": "SegmentedControl",
-        "loc": 49,
-        "category": "component"
-      },
-      {
-        "name": "AsyncList",
-        "loc": 49,
-        "category": "component"
-      },
-      {
-        "name": "BarList",
-        "loc": 48,
-        "category": "component"
-      },
-      {
-        "name": "IconButton",
-        "loc": 45,
-        "category": "component"
-      },
-      {
-        "name": "TabBar",
-        "loc": 44,
-        "category": "component"
-      },
-      {
-        "name": "useFormSubmit",
-        "loc": 43,
-        "category": "hook"
-      },
-      {
-        "name": "Switch",
-        "loc": 40,
-        "category": "component"
-      },
-      {
-        "name": "MediaCard",
-        "loc": 38,
-        "category": "component"
-      },
-      {
-        "name": "CodeBlock",
-        "loc": 37,
-        "category": "component"
-      },
-      {
-        "name": "LinkifiedText",
-        "loc": 36,
-        "category": "component"
-      },
-      {
-        "name": "Badge",
-        "loc": 35,
-        "category": "component"
-      },
-      {
-        "name": "useLocalStorage",
-        "loc": 33,
-        "category": "hook"
-      },
-      {
-        "name": "useInView",
-        "loc": 33,
-        "category": "hook"
-      },
-      {
-        "name": "Fab",
-        "loc": 29,
-        "category": "component"
-      },
-      {
-        "name": "Skeleton",
-        "loc": 20,
-        "category": "component"
-      },
-      {
-        "name": "EmptyState",
-        "loc": 19,
-        "category": "component"
-      },
-      {
-        "name": "Divider",
-        "loc": 18,
-        "category": "component"
-      },
-      {
-        "name": "Section",
-        "loc": 17,
-        "category": "component"
-      },
-      {
-        "name": "StatChip",
-        "loc": 17,
-        "category": "component"
-      },
-      {
-        "name": "colors",
-        "loc": 12,
-        "category": "util"
-      },
-      {
-        "name": "useDebounce",
-        "loc": 8,
-        "category": "hook"
-      }
-    ],
-    "savedLines": 3731,
-    "savedKB": 146,
-    "savedA4": 47,
-    "savedPercent": 58,
+    "features": [],
+    "savedLines": 0,
+    "savedKB": 0,
+    "savedA4": 0,
+    "savedPercent": 0,
     "usage": {
       "component": {
-        "used": 56,
-        "total": 60,
-        "percent": 93
+        "used": 0,
+        "total": 0,
+        "percent": 0
       },
       "hook": {
-        "used": 7,
-        "total": 13,
-        "percent": 54
+        "used": 0,
+        "total": 0,
+        "percent": 0
       },
       "util": {
-        "used": 13,
-        "total": 26,
-        "percent": 50
+        "used": 0,
+        "total": 0,
+        "percent": 0
       }
     }
   }
