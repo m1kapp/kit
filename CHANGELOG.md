@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.61
+- **fix(pwa): Next 앱에서 오프라인 실행이 안 되던 버그.** `sw.js` 가 HTML 의 모든 `href` 를 담으려다 `<a href="/store">` 같은 페이지 링크에서 막혀 첫 페이지가 저장되지 않았다(m1k.app 실사례, 운영에서는 설치도 끝나지 않았다). 이제 `<script>`·`<link>` 만 담는다. 기기별 스플래시도 더는 받아 두지 않는다. 적용하려면 kit 을 올리고 `npx m1kkit pwa`
+
 ## 0.0.60
 - **feat(pwa): `usePush` — 웹 푸시 켜기·끄기 훅.** monthgram 의 구독 로직(키 교체 감지 · 켜진 기기 조용히 재저장 · AbortError 는 unsupported · 실패 이유 한국어)을 앱 무관하게 뺐다. 상태는 모듈 하나에 둬 헤더 버튼·스위치 여러 곳이 같이 바뀐다. 저장·삭제는 `save`·`remove` 로 앱이 정한다. 켜는 중·끄는 중은 `busy` 로 따로 둔다(state 를 loading 으로 돌리면 스위치가 깜빡이고, 상태로 가린 시트가 통째로 사라졌다 — ytcc 실측). `enable()` 은 켜졌는지 boolean
 
