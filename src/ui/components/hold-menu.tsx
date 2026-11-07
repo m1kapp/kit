@@ -63,20 +63,41 @@ export function HoldMenu({
     menu = useRef<HTMLDivElement>(null),
     press = useRef<{ timer: number; x: number; y: number } | null>(null);
 
-  const letGo = () => {
+  const card = useRef<HTMLDivElement>(null),
+    dim = useRef<HTMLDivElement>(null);
+  // The row sinks while the finger holds, and springs back when it lets go (snapping back, without the transition,
+  // when the menu opens: the lift is measured from the row as it really sits).
+  const sink = (on: boolean, snap = false) => {
+    const style = row.current?.style;
+    if (!style) return;
+    style.transition = snap ? "none" : `transform ${on ? delay : 180}ms ${on ? "cubic-bezier(.3,0,.6,1)" : "ease-out"}`;
+    style.transform = on ? "scale(.96)" : "";
+  };
+  const letGo = (snap = false) => {
     if (press.current) clearTimeout(press.current.timer);
+    if (press.current || snap) sink(false, snap);
     press.current = null;
   };
   const open = () => {
-    letGo();
+    letGo(true);
     if (row.current) setRect(row.current.getBoundingClientRect());
   };
   const close = useCallback(() => setRect(null), []);
   useEscapeKey(rect !== null, close);
-  useEffect(() => letGo, []);
+  useEffect(() => () => letGo(), []);
   // The keyboard lands on the first item; closing hands focus back to the ··· (when it had it).
   useEffect(() => {
     if (!rect) return;
+    // Opening pops: the card springs up from the sunk row, the menu drops in after it, the dim fades in.
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const spring = "cubic-bezier(.34,1.56,.64,1)";
+      dim.current?.animate({ opacity: [0, 1] }, { duration: 160, easing: "ease-out" });
+      card.current?.animate({ transform: ["scale(.96)", "scale(1.03)", "scale(1)"] }, { duration: 320, easing: "ease-out" });
+      menu.current?.animate(
+        { opacity: [0, 1], transform: ["translateY(-8px) scale(.94)", "none"] },
+        { duration: 240, delay: 40, easing: spring, fill: "backwards" },
+      );
+    }
     const back = document.activeElement as HTMLElement | null;
     menu.current?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus({ preventScroll: true });
     return () => {
@@ -100,6 +121,7 @@ export function HoldMenu({
           // A mouse has the right click and the ···; buttons in the row keep their own press.
           if (event.pointerType === "mouse" || (event.target as HTMLElement).closest("button,a,input,textarea")) return;
           letGo();
+          sink(true);
           press.current = {
             x: event.clientX,
             y: event.clientY,
@@ -112,8 +134,8 @@ export function HoldMenu({
         onPointerMove={(event) => {
           if (press.current && Math.hypot(event.clientX - press.current.x, event.clientY - press.current.y) > 8) letGo();
         }}
-        onPointerUp={letGo}
-        onPointerCancel={letGo}
+        onPointerUp={() => letGo()}
+        onPointerCancel={() => letGo()}
       >
         {children}
         <button
@@ -139,6 +161,7 @@ export function HoldMenu({
           // Closes on the next press, not on click: the finger lifting off a long press must not close it. A modal
           // dialog of its own, so an InAppSheet under it lets focus in and leaves Esc to it.
           <div
+            ref={dim}
             role="dialog"
             aria-modal="true"
             aria-label={label}
@@ -149,6 +172,7 @@ export function HoldMenu({
             {/* The row, lifted over the dim on a card with room around it (a copy: the real one stays put under it,
                 and the copy's content sits exactly over it). */}
             <div
+              ref={card}
               aria-hidden="true"
               className="pointer-events-none fixed rounded-2xl bg-white shadow-[0_4px_20px_#0002] dark:bg-zinc-900"
               style={{
