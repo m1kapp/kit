@@ -26,7 +26,10 @@ export interface HoldMenuProps {
 
 const ITEM = 48,
   PAD = 8,
-  GAP = 8;
+  GAP = 14, // past the lifted card's edge (LIFT_Y)
+  // The lifted row's card reaches this far past the row.
+  LIFT_X = 12,
+  LIFT_Y = 6;
 
 /** Where the menu goes: under the row, or above it when it would run past the screen's bottom. */
 export function holdMenuPlacement(row: { top: number; bottom: number }, viewport: number, items: number) {
@@ -143,13 +146,20 @@ export function HoldMenu({
             onPointerDown={close}
             onContextMenu={(event) => event.preventDefault()}
           >
-            {/* The row, lifted over the dim (a copy: the real one stays put under it). */}
+            {/* The row, lifted over the dim on a card with room around it (a copy: the real one stays put under it,
+                and the copy's content sits exactly over it). */}
             <div
               aria-hidden="true"
-              className={`pointer-events-none fixed overflow-hidden rounded-xl bg-white dark:bg-zinc-900 ${className}`}
-              style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }}
+              className="pointer-events-none fixed rounded-2xl bg-white shadow-[0_4px_20px_#0002] dark:bg-zinc-900"
+              style={{
+                top: rect.top - LIFT_Y,
+                left: rect.left - LIFT_X,
+                padding: `${LIFT_Y}px ${LIFT_X}px`,
+              }}
             >
-              {children}
+              <div className={`overflow-hidden ${className}`} style={{ width: rect.width, height: rect.height }}>
+                {children}
+              </div>
             </div>
             <div
               ref={menu}
