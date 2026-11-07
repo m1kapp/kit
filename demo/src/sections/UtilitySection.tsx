@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { LineIcon } from "../shared";
-import { Section, SectionHeader, Tooltip, ThemeButton, ShareButton, Avatar, Badge } from "@m1kapp/kit";
+import { Section, SectionHeader, Tooltip, ThemeButton, ShareButton, Avatar, Badge, HoldMenu } from "@m1kapp/kit";
 import { ComponentCard, ALL_COLORS } from "../shared";
 import { EmojiPickerDemo, ToastDemo, SkeletonDemo } from "./UIBasicDemos";
 import { DialogDemo, InAppSheetDemo } from "./UIOverlayDemos";
@@ -20,6 +20,12 @@ export function UtilitySection({ themeColor, dark }: { themeColor: string; dark:
                 </Tooltip>
               ))}
             </div>
+          </ComponentCard>
+
+          <ComponentCard name="HoldMenu" desc="폰은 길게 누르기 · 웹은 우클릭이나 hover ···" code={`<HoldMenu label="민호님의 댓글" items={[\n  { label: "답글 달기", onSelect: reply },\n  { label: "삭제", danger: true, onSelect: remove },\n]}>\n  <Comment />\n</HoldMenu>`}>
+            <HoldMenu label="민호님의 댓글" items={[{ label: "답글 달기", onSelect: () => {} }, { label: "복사", onSelect: () => {} }, { label: "삭제", danger: true, onSelect: () => {} }]}>
+              <p className="py-3 pr-10 text-sm"><strong>민호</strong> 길게 누르거나 우클릭해 보세요</p>
+            </HoldMenu>
           </ComponentCard>
 
           <ComponentCard name="EmojiButton + EmojiPicker" desc="Emoji selector bottom sheet" code={`<EmojiButton emoji={emoji} onClick={() => setOpen(true)} />\n<EmojiPicker open={open} onClose={() => setOpen(false)}\n  current={emoji} onSelect={setEmoji} />`}>
