@@ -63,6 +63,9 @@ export type { EmojiButtonProps, EmojiPickerProps, EmojiPickerLabels } from "./co
 export { Tooltip } from "./components/tooltip";
 export type { TooltipProps } from "./components/tooltip";
 
+export { HoldMenu, holdMenuPlacement } from "./components/hold-menu";
+export type { HoldMenuProps, HoldMenuItem } from "./components/hold-menu";
+
 export { GrassMap } from "./components/grass-map";
 export type { GrassMapProps, GrassMapData, GrassMapLabels } from "./components/grass-map";
 
