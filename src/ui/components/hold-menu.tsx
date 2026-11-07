@@ -80,6 +80,8 @@ export function HoldMenu({
   };
   const open = () => {
     letGo(true);
+    // The finger is still down: iOS would go on to select the text under it (the lifted copy) and show its bar.
+    getSelection()?.removeAllRanges();
     if (row.current) setRect(row.current.getBoundingClientRect());
   };
   const close = useCallback(() => setRect(null), []);
@@ -165,7 +167,7 @@ export function HoldMenu({
             role="dialog"
             aria-modal="true"
             aria-label={label}
-            className="fixed inset-0 z-[9998] bg-black/25"
+            className="fixed inset-0 z-[9998] select-none bg-black/25 [-webkit-touch-callout:none]"
             onPointerDown={close}
             onContextMenu={(event) => event.preventDefault()}
           >
