@@ -212,6 +212,21 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
                   stroke={isToday ? (isDark ? "#fff" : "#18181b") : isFirst ? accent : "none"}
                   strokeWidth={isToday || isFirst ? 1.5 : 0}
                 />
+                {isToday && (
+                  // 라이브 느낌: 오늘 셀 바깥 링이 숨 쉬듯 깜빡임
+                  <rect
+                    x={cx - 2.5}
+                    y={cy - 2.5}
+                    width={CELL_SIZE + 5}
+                    height={CELL_SIZE + 5}
+                    rx={4.5}
+                    fill="none"
+                    stroke={isDark ? "#fff" : "#18181b"}
+                    strokeWidth={1}
+                    className="animate-pulse motion-reduce:animate-none"
+                    pointerEvents="none"
+                  />
+                )}
                 {showCheck && (
                   <path
                     d={`M${cx + 3} ${cy + 6.5} l2.5 3.5 l5 -6`}
