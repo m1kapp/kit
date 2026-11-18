@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useMemo, useRef } from "react";
+import { useCallback, useState, useMemo, useRef, useLayoutEffect } from "react";
 import { useEscapeKey } from "../hooks/use-escape-key";
 import {
   formatTooltipDate, toLocalDateStr, grassColor, buildYearGrid, cellFillColor,
@@ -98,6 +98,14 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
   const svgWidth = leftPad + totalCols * STEP;
   const svgHeight = topPad + 7 * STEP;
 
+  // 1년 전체가 좁은 화면을 넘치면 1월부터 보여 빈 칸만 보인다 — 최근(오늘, 지난 해면 12월)을 오른쪽 끝에 맞춘다.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const focusCol = days.find((d) => d.date === todayStr)?.col ?? totalCols - 1;
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = leftPad + (focusCol + 1) * STEP - el.clientWidth;
+  }, [focusCol]);
+
   return (
     <div ref={outerRef} className="relative space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
@@ -123,7 +131,7 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
         )}
       </div>
 
-      <div className="overflow-x-auto">
+      <div ref={scrollRef} className="overflow-x-auto">
         <svg
           width={svgWidth}
           height={svgHeight}
