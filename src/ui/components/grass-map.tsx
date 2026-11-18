@@ -95,7 +95,7 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
 
   const leftPad = 36;
   const topPad = 22;
-  const svgWidth = leftPad + totalCols * STEP;
+  const svgWidth = totalCols * STEP;
   const svgHeight = topPad + 7 * STEP;
 
   // 1년 전체가 좁은 화면을 넘치면 1월부터 보여 빈 칸만 보인다 — 최근(오늘, 지난 해면 12월)을 오른쪽 끝에 맞춘다.
@@ -103,7 +103,7 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
   const focusCol = days.find((d) => d.date === todayStr)?.col ?? totalCols - 1;
   useLayoutEffect(() => {
     const el = scrollRef.current;
-    if (el) el.scrollLeft = leftPad + (focusCol + 1) * STEP - el.clientWidth;
+    if (el) el.scrollLeft = (focusCol + 1) * STEP - el.clientWidth;
   }, [focusCol]);
 
   return (
@@ -131,26 +131,9 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
         )}
       </div>
 
-      <div ref={scrollRef} className="overflow-x-auto">
-        <svg
-          width={svgWidth}
-          height={svgHeight}
-          className="block mx-auto"
-          onMouseLeave={() => setTooltip(null)}
-        >
-          {monthLabels.map((m, i) => (
-            <text
-              key={`${m.label}-${i}`}
-              x={leftPad + m.col * STEP}
-              y={13}
-              className="fill-zinc-400"
-              fontFamily="system-ui, sans-serif"
-              fontSize={10}
-            >
-              {m.label}
-            </text>
-          ))}
-
+      {/* 요일 라벨은 스크롤 밖에 둬서 왼쪽에 고정 */}
+      <div className="flex justify-center">
+        <svg width={leftPad} height={svgHeight} className="shrink-0">
           {DAYS_LABEL.map((label, i) =>
             label ? (
               <text
@@ -165,13 +148,33 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
               </text>
             ) : null
           )}
+        </svg>
+      <div ref={scrollRef} className="overflow-x-auto min-w-0">
+        <svg
+          width={svgWidth}
+          height={svgHeight}
+          className="block"
+          onMouseLeave={() => setTooltip(null)}
+        >
+          {monthLabels.map((m, i) => (
+            <text
+              key={`${m.label}-${i}`}
+              x={m.col * STEP}
+              y={13}
+              className="fill-zinc-400"
+              fontFamily="system-ui, sans-serif"
+              fontSize={10}
+            >
+              {m.label}
+            </text>
+          ))}
 
           {days.map((day) => {
             const isToday = day.date === todayStr;
             const isFirst = day.date === firstDay;
             const cellFill = cellFillColor(day, isFirst, { binary, isDark, accent, maxCount });
 
-            const cx = leftPad + day.col * STEP;
+            const cx = day.col * STEP;
             const cy = topPad + day.row * STEP;
 
             const showCheck = binary && !day.isOutOfRange && !day.isFuture && day.count > 0;
@@ -206,8 +209,8 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
                   height={CELL_SIZE}
                   rx={3}
                   fill={cellFill}
-                  stroke={isFirst ? accent : "none"}
-                  strokeWidth={isFirst ? 1.5 : 0}
+                  stroke={isToday ? (isDark ? "#fff" : "#18181b") : isFirst ? accent : "none"}
+                  strokeWidth={isToday || isFirst ? 1.5 : 0}
                 />
                 {showCheck && (
                   <path
@@ -223,6 +226,7 @@ export function GrassMap({ data, accent, isDark = false, unit = "", binary = fal
             );
           })}
         </svg>
+      </div>
       </div>
 
       {tooltip && <GrassTooltip tooltip={tooltip} binary={binary} unit={unit} labels={labels} />}
