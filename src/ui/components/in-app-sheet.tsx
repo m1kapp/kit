@@ -14,7 +14,7 @@ export interface InAppSheetProps {
   className?: string;
   /** 시트 상단 타이틀 — X 버튼과 나란히 정렬 */
   title?: string;
-  /** true면 시트가 AppShell 전체 높이를 채움 */
+  /** true면 시트가 AppShell 전체 높이를 모서리 없이 채움. 기본은 내용만큼, 최대 셸의 80% */
   fullHeight?: boolean;
   /** 우상단 X 버튼 숨기기. Default: false (보임) */
   hideClose?: boolean;
@@ -184,7 +184,7 @@ export function InAppSheet({
                   aria-modal={open && depth === 0 ? true : undefined}
                   tabIndex={-1}
                   aria-labelledby={title ? titleId : undefined}
-                  className={`pointer-events-auto relative z-10 w-full rounded-t-2xl bg-white dark:bg-zinc-950 border border-b-0 border-zinc-200 dark:border-zinc-800 shadow-2xl will-change-transform flex flex-col ${fullHeight ? (index === 0 ? "h-full" : "h-[calc(100%-1.5rem)]") : "max-h-[calc(100%-1.5rem)]"} ${className}`}
+                  className={`pointer-events-auto relative z-10 w-full bg-white dark:bg-zinc-950 shadow-2xl will-change-transform flex flex-col ${fullHeight && index === 0 ? `h-full transition-[border-radius] duration-300 ${depth > 0 ? "rounded-t-2xl" : ""}` : `rounded-t-2xl border border-b-0 border-zinc-200 dark:border-zinc-800 ${fullHeight ? "h-[calc(100%-1.5rem)]" : "max-h-[80%]"}`} ${className}`}
                   style={sheetStyle}
                   onClick={(e) => e.stopPropagation()}
                 >
